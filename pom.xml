@@ -12,8 +12,8 @@
 	<groupId>com.torresj</groupId>
 	<artifactId>api-sensor-server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demo</name>
-	<description>Demo project for Spring Boot</description>
+	<name>Api Sensor Server</name>
+	<description>Api Sensor Server project for connect sensor and frontend</description>
 
 	<properties>
 		<java.version>1.8</java.version>
