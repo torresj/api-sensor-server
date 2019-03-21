@@ -1,5 +1,7 @@
 package com.torresj.apisensorserver.models;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -11,5 +13,8 @@ public class Sensor {
 
     private String id;
     private String type;
-    private ConnectionData connData;
+    private String mac;
+    private String ip;
+    private List<Variable> variables;
+
 }

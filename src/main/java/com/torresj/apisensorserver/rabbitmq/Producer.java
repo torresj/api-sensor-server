@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.rabbitmq;
 
-import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ public class Producer {
     private static final Logger logger = LogManager.getLogger(Producer.class);
 
     @Autowired
-    private RabbitMessagingTemplate rabbitMessagingTemplate;
+    private RabbitTemplate template;
 
     @Value("${rabbitmq.exchange}")
     private String exchange;
@@ -23,7 +23,6 @@ public class Producer {
     private String routingKey;
 
     public void produceMsg(String msg) {
-        logger.info("[RabbitMQ - Producer] Sending message: " + msg);
-        rabbitMessagingTemplate.convertAndSend(exchange, routingKey, msg);
+        template.convertAndSend(exchange, routingKey, msg);
     }
 }

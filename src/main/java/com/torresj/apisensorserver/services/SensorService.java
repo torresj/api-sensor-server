@@ -22,11 +22,6 @@ public class SensorService {
 
     public void register(Sensor sensor) {
         logger.info("[SENSOR - REGISTER] Registering sensor on ServiceSensor");
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            producer.produceMsg(objectMapper.writeValueAsString(sensor));
-        } catch (JsonProcessingException e) {
-            logger.error("ERROR parsing json", e);
-        }
+        producer.produceMsg("Test");
     }
 }
