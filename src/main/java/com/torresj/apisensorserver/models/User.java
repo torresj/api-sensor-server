@@ -5,10 +5,9 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class Variable {
-    private int id;
-    private String name;
-    private String units;
-    private String description;
+public class User {
+    private String username;
+    private String password;
     private LocalDateTime createAt;
+    private LocalDateTime lastConnection;
 }

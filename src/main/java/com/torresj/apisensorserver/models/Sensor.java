@@ -1,5 +1,6 @@
 package com.torresj.apisensorserver.models;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.Data;
@@ -15,6 +16,8 @@ public class Sensor {
     private String type;
     private String mac;
     private String ip;
+    private LocalDateTime createAt;
+    private LocalDateTime lastConnection;
     private List<Variable> variables;
 
 }
