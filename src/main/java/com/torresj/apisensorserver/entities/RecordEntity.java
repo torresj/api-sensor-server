@@ -10,9 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.Variable;
-
 import lombok.Data;
 
 @Entity
@@ -26,10 +23,10 @@ public class RecordEntity implements Serializable {
     private Integer id;
 
     @ManyToOne
-    private Sensor sensor;
+    private SensorEntity sensor;
 
     @ManyToOne
-    private Variable variable;
+    private VariableEntity variable;
 
     @Column(nullable = false)
     private double value;

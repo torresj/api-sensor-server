@@ -1,7 +1,9 @@
 package com.torresj.apisensorserver.jpa;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.torresj.apisensorserver.entities.RecordEntity;
 
-public interface RecordRepository extends JpaRepository<RecordRepository, Long> {
+import org.springframework.data.repository.CrudRepository;
+
+public interface RecordRepository extends CrudRepository<RecordEntity, Long> {
 
 }

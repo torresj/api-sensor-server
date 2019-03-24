@@ -1,7 +1,13 @@
 package com.torresj.apisensorserver.jpa;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
-public interface SensorRepository extends JpaRepository<SensorRepository, Long> {
+import com.torresj.apisensorserver.entities.SensorEntity;
+
+import org.springframework.data.repository.CrudRepository;
+
+public interface SensorRepository extends CrudRepository<SensorEntity, Long> {
+
+    public Optional<SensorEntity> findByMac(String mac);
 
 }
