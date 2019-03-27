@@ -3,14 +3,20 @@ package com.torresj.apisensorserver.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.torresj.apisensorserver.entities.SensorEntity;
-import com.torresj.apisensorserver.jpa.SensorRepository;
 import com.torresj.apisensorserver.models.Sensor;
+import com.torresj.apisensorserver.models.Variable;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.jpa.SensorRepository;
+import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.rabbitmq.Producer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,27 +32,35 @@ public class SensorService {
     private SensorRepository sensorRepository;
 
     @Autowired
+    private VariableRepository variableRepository;
+
+    @Autowired
     private Producer producer;
 
-    public void register(Sensor sensor) {
-
-        ModelMapper mapper = new ModelMapper();
-        SensorEntity newEntity = mapper.map(sensor, SensorEntity.class);
+    public Sensor registerOrUpdate(Sensor sensor) {
 
         logger.info("[SENSOR - REGISTER] Searching sensor on DB");
-        Optional<SensorEntity> entity = sensorRepository.findByMac(sensor.getMac());
+        Optional<Sensor> entity = sensorRepository.findByMac(sensor.getMac());
 
         if (entity.isPresent()) {
             logger.info("[SENSOR - REGISTER] Sensor exists. Updating ...");
-            newEntity.setLastConnection(LocalDateTime.now());
-            newEntity.setId(entity.get().getId());
-            newEntity.setCreateAt(entity.get().getCreateAt());
-            sensorRepository.save(newEntity);
+            sensor.setLastConnection(LocalDateTime.now());
+            sensor.setId(entity.get().getId());
+            sensor.getVariables().stream().forEach(v -> {
+                Variable vAux = variableRepository.findByName(v.getName()).orElse(null);
+                if (vAux != null) {
+                    v.setId(vAux.getId());
+                }
+            });
+            sensor = sensorRepository.save(sensor);
         } else {
             logger.info("[SENSOR - REGISTER] Registering new sensor ...");
-            newEntity.setCreateAt(LocalDateTime.now());
-            newEntity.setLastConnection(LocalDateTime.now());
-            sensorRepository.save(newEntity);
+            sensor.setLastConnection(LocalDateTime.now());
+            List<Variable> variables = sensor.getVariables();
+            sensor.setVariables(new ArrayList<Variable>());
+            sensor = sensorRepository.save(sensor);
+            sensor.setVariables(variables);
+            sensor = sensorRepository.save(sensor);
         }
 
         logger.info("[SENSOR - REGISTER] Sensor registered on ServiceSensor");
@@ -55,8 +69,51 @@ public class SensorService {
 
         ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
         ampqMsg.put("type", "Sensor");
-        ampqMsg.put("data", new ObjectMapper().convertValue(newEntity, JsonNode.class));
+        ampqMsg.set("data", new ObjectMapper().convertValue(sensor, JsonNode.class));
 
         producer.produceMsg(ampqMsg.toString());
+
+        return sensor;
+    }
+
+    public Sensor register(Sensor sensor) throws EntityAlreadyExists {
+
+        logger.info("[SENSOR - REGISTER] Searching sensor on DB");
+        Optional<Sensor> entity = sensorRepository.findByMac(sensor.getMac());
+
+        if (entity.isPresent()) {
+            logger.info("[SENSOR - REGISTER] Sensor exists");
+            throw new EntityAlreadyExists();
+        } else {
+            logger.info("[SENSOR - REGISTER] Registering new sensor ...");
+            sensor.setLastConnection(LocalDateTime.now());
+            sensor = sensorRepository.save(sensor);
+        }
+
+        logger.info("[SENSOR - REGISTER] Sensor registered on ServiceSensor");
+
+        logger.info("[SENSOR - REGISTER] Sending data to frontend via AMPQ message");
+
+        ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
+        ampqMsg.put("type", "Sensor");
+        ampqMsg.set("data", new ObjectMapper().convertValue(sensor, JsonNode.class));
+
+        producer.produceMsg(ampqMsg.toString());
+
+        return sensor;
+    }
+
+    public List<Sensor> getSensors() {
+        ModelMapper mapper = new ModelMapper();
+        List<Sensor> sensors = sensorRepository.findAll().stream().map(v -> mapper.map(v, Sensor.class))
+                .collect(Collectors.toList());
+        return sensors;
+    }
+
+    public Sensor getSensor(long id) throws EntityNotFoundException {
+        logger.info("[SENSOR - GET SENSOR] Searching sensor by id: " + id);
+
+        Sensor entity = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        return entity;
     }
 }

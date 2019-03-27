@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = "com.torresj")
 @EnableJpaRepositories("com.torresj.apisensorserver.jpa")
-@EntityScan("com.torresj.apisensorserver.entities")
+@EntityScan("com.torresj.apisensorserver.models")
 public class ApiSensorApplication {
 
 	public static void main(String[] args) {

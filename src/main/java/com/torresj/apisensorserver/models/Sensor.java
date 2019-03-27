@@ -1,23 +1,47 @@
 package com.torresj.apisensorserver.models;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import lombok.Data;
 
+@Entity
 @Data
-public class Sensor {
+public class Sensor implements Serializable {
 
-    /* Sensor types */
-    public static final String WHEATHER = "WHEATHER";
-    public static final String BLIND = "BLIND";
+    private static final long serialVersionUID = -8753081269379854792L;
 
-    private String id;
-    private String type;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(nullable = false)
+    private char type;
+
+    @Column(nullable = false, unique = true)
     private String mac;
-    private String ip;
-    private LocalDateTime createAt;
-    private LocalDateTime lastConnection;
-    private List<Variable> variables;
 
+    @Column(nullable = false)
+    private String ip;
+
+    @Column(nullable = false, updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createAt;
+
+    @Column(nullable = false)
+    private LocalDateTime lastConnection;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<Variable> variables;
 }
