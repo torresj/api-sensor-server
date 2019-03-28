@@ -23,7 +23,8 @@ public class Sensor implements Serializable {
     private static final long serialVersionUID = -8753081269379854792L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
     private Long id;
 
     @Column(nullable = false)

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,20 +47,16 @@ public class SensorService {
             logger.info("[SENSOR - REGISTER] Sensor exists. Updating ...");
             sensor.setLastConnection(LocalDateTime.now());
             sensor.setId(entity.get().getId());
-            sensor.getVariables().stream().forEach(v -> {
-                Variable vAux = variableRepository.findByName(v.getName()).orElse(null);
-                if (vAux != null) {
-                    v.setId(vAux.getId());
-                }
-            });
+            sensor.setVariables(sensor.getVariables().stream()
+                    .map(variable -> variable = variableRepository.findByName(variable.getName()).orElse(variable))
+                    .collect(Collectors.toList()));
             sensor = sensorRepository.save(sensor);
         } else {
             logger.info("[SENSOR - REGISTER] Registering new sensor ...");
             sensor.setLastConnection(LocalDateTime.now());
-            List<Variable> variables = sensor.getVariables();
-            sensor.setVariables(new ArrayList<Variable>());
-            sensor = sensorRepository.save(sensor);
-            sensor.setVariables(variables);
+            sensor.setVariables(sensor.getVariables().stream()
+                    .map(variable -> variable = variableRepository.findByName(variable.getName()).orElse(variable))
+                    .collect(Collectors.toList()));
             sensor = sensorRepository.save(sensor);
         }
 
@@ -87,6 +84,9 @@ public class SensorService {
         } else {
             logger.info("[SENSOR - REGISTER] Registering new sensor ...");
             sensor.setLastConnection(LocalDateTime.now());
+            sensor.setVariables(sensor.getVariables().stream()
+                    .map(variable -> variable = variableRepository.findByName(variable.getName()).orElse(variable))
+                    .collect(Collectors.toList()));
             sensor = sensorRepository.save(sensor);
         }
 
