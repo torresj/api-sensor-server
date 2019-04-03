@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,6 +40,7 @@ public class SensorService {
     public Sensor update(Sensor sensor) throws EntityNotFoundException {
 
         logger.info("[SENSOR - REGISTER] Searching sensor on DB");
+
         Sensor entity = sensorRepository.findByMac(sensor.getMac()).orElseThrow(() -> new EntityNotFoundException());
 
         logger.info("[SENSOR - REGISTER] Sensor exists. Updating ...");
@@ -75,6 +77,7 @@ public class SensorService {
             sensor.setVariables(sensor.getVariables().stream()
                     .map(v -> v = variableRepository.findByName(v.getName()).orElse(v)).collect(Collectors.toList()));
             logger.info(sensor.getVariables());
+
             sensor = sensorRepository.save(sensor);
 
             logger.info("[SENSOR - REGISTER] Sending data to frontend via AMPQ message");

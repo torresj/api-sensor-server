@@ -17,7 +17,7 @@ import lombok.Data;
 @Data
 public class Variable implements Serializable {
 
-    private static final long serialVersionUID = 4696253582022194805L;
+    private static final long serialVersionUID = 4696253582022144805L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -105,8 +105,8 @@ public class VariableController {
 
             return new ResponseEntity<Variable>(variableRegister, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
-            logger.error("[VARIABLE - DELETE] Variable already exists", e);
-            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Sensor already exists", e);
+            logger.error("[VARIABLE - DELETE] Variable not exists", e);
+            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Variable not exists", e);
         } catch (Exception e) {
             logger.error("[VARIABLE - DELETE] Error deleting variable", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
