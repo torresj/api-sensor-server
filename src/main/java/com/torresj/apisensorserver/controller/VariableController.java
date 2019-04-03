@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
@@ -17,12 +16,12 @@ import com.torresj.apisensorserver.services.VariableService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/v1/variables")
@@ -67,11 +66,11 @@ public class VariableController {
     }
 
     @PutMapping
-    public ResponseEntity<Variable> registerOrUpdate(@RequestBody(required = true) Variable variable) {
+    public ResponseEntity<Variable> update(@RequestBody(required = true) Variable variable) {
         try {
             logger.info("[VARIABLE - REGISTER] Register variable: " + variable);
 
-            Variable variableRegister = variableService.registerOrUpdate(variable);
+            Variable variableRegister = variableService.update(variable);
 
             return new ResponseEntity<Variable>(variableRegister, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -89,10 +88,27 @@ public class VariableController {
 
             return new ResponseEntity<Variable>(variableRegister, HttpStatus.CREATED);
         } catch (EntityAlreadyExists e) {
-            logger.error("[SENSOR - GET] Sensor already exists", e);
+            logger.error("[VARIABLE - REGISTER] Variable already exists", e);
+            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Variable already exists", e);
+        } catch (Exception e) {
+            logger.error("[VARIABLE - REGISTER] Error registering variable", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Variable> delete(@PathVariable("id") long id) {
+        try {
+            logger.info("[VARIABLE - DELETE] Delete variable with id: " + id);
+
+            Variable variableRegister = variableService.deleteVariable(id);
+
+            return new ResponseEntity<Variable>(variableRegister, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            logger.error("[VARIABLE - DELETE] Variable already exists", e);
             throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Sensor already exists", e);
         } catch (Exception e) {
-            logger.error("[VARIABLE - GET] Error registering variable", e);
+            logger.error("[VARIABLE - DELETE] Error deleting variable", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
         }
     }

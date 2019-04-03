@@ -8,7 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -24,17 +23,17 @@ public class Record implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
-    private Sensor sensor;
+    @Column(nullable = false)
+    private long sensorId;
 
-    @ManyToOne
-    private Variable variable;
+    @Column(nullable = false)
+    private long variableId;
 
     @Column(nullable = false)
     private double value;
 
     @Column(nullable = false)
     @CreationTimestamp
-    private LocalDateTime date;
+    private LocalDateTime dateTime;
 
 }

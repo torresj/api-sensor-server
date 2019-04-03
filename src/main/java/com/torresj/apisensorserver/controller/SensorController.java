@@ -3,17 +3,18 @@ package com.torresj.apisensorserver.controller;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.Sensor;
+import com.torresj.apisensorserver.models.Variable;
 import com.torresj.apisensorserver.services.SensorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -65,11 +66,28 @@ public class SensorController {
         }
     }
 
+    @GetMapping(value = "/{sensorId}/variables")
+    public ResponseEntity<List<Variable>> getVariablesFromSensor(@PathVariable("sensorId") long sensorId) {
+        try {
+            logger.info("[SENSOR - GET] Get variables from sensor " + sensorId);
+
+            List<Variable> variables = sensorService.getSensor(sensorId).getVariables();
+
+            return new ResponseEntity<List<Variable>>(variables, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            logger.error("[SENSOR - GET] Sensor not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
+        } catch (Exception e) {
+            logger.error("[SENSOR - GET] Error getting sensors from DB", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
+
     @PutMapping
-    public ResponseEntity<Sensor> registerOrUpdate(@RequestBody(required = true) Sensor sensor) {
+    public ResponseEntity<Sensor> update(@RequestBody(required = true) Sensor sensor) {
         try {
             logger.info("[SENSOR - REGISTER] Registering sensor -> " + sensor);
-            Sensor sensorRegister = sensorService.registerOrUpdate(sensor);
+            Sensor sensorRegister = sensorService.update(sensor);
 
             return new ResponseEntity<Sensor>(sensorRegister, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -94,4 +112,20 @@ public class SensorController {
         }
     }
 
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Sensor> delete(@PathVariable("id") long id) {
+        try {
+            logger.info("[SENSOR - REMOVE] Remove sensor from DB with id: " + id);
+
+            Sensor sensor = sensorService.removeSensor(id);
+
+            return new ResponseEntity<Sensor>(sensor, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            logger.error("[SENSOR - REMOVE] Sensor not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
+        } catch (Exception e) {
+            logger.error("[SENSOR - REMOVE] Error removing sensors from DB", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
 }
