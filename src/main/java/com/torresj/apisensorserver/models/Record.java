@@ -20,7 +20,8 @@ public class Record implements Serializable {
     private static final long serialVersionUID = 3094710057682194602L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
     private Long id;
 
     @Column(nullable = false)
@@ -32,8 +33,8 @@ public class Record implements Serializable {
     @Column(nullable = false)
     private double value;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     @CreationTimestamp
-    private LocalDateTime dateTime;
+    private LocalDateTime createAt;
 
 }

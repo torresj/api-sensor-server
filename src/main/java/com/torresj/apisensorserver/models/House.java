@@ -11,43 +11,31 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.Data;
 
-@Entity
 @Data
-public class Sensor implements Serializable {
+@Entity
+public class House implements Serializable {
 
-    private static final long serialVersionUID = -8753081269379854792L;
+    private static final long serialVersionUID = 5385374710106449676L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private char type;
-
-    @Column(nullable = false, unique = true)
-    private String mac;
-
-    @Column(nullable = false)
-    private String ip;
+    @OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+            CascadeType.REFRESH })
+    private List<Sensor> sensores;
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createAt;
-
-    @Column(nullable = false)
-    private LocalDateTime lastConnection;
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-            CascadeType.REFRESH })
-    private List<Variable> variables;
 }

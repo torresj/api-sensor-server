@@ -1,13 +1,20 @@
 package com.torresj.apisensorserver.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+import java.time.LocalDate;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
@@ -25,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/v1/variables")
+@Api(value = "v1/variables", description = "Operations about variables")
 public class VariableController {
 
     /* Logs */
@@ -35,13 +43,15 @@ public class VariableController {
     private VariableService variableService;
 
     @GetMapping
-    public ResponseEntity<List<Variable>> getVariables() {
+    @ApiOperation(value = "Retrieve variables", notes = "Pageable data are required and de maximum records per page are 100", response = Variable.class, responseContainer = "List")
+    public ResponseEntity<Page<Variable>> getVariables(@RequestParam(value = "page") int nPage,
+            @RequestParam(value = "elements") int elements) {
         try {
-            logger.info("[VARIABLE - GET ALL] Get all variables from DB");
+            logger.info("[VARIABLE - GET ALL] Get variables from DB with page " + nPage + ", elements " + elements);
 
-            List<Variable> variables = variableService.getVariables();
+            Page<Variable> page = variableService.getVariables(nPage, elements);
 
-            return new ResponseEntity<List<Variable>>(variables, HttpStatus.OK);
+            return new ResponseEntity<Page<Variable>>(page, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("[VARIABLE - GET ALL] Error getting variables", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -49,6 +59,7 @@ public class VariableController {
     }
 
     @GetMapping(value = "/{id}")
+    @ApiOperation(value = "Retrieve variable by id", response = Variable.class)
     public ResponseEntity<Variable> getVariableById(@PathVariable("id") long id) {
         try {
             logger.info("[VARIABLE - GET] Get variable from DB with id: " + id);
@@ -66,6 +77,7 @@ public class VariableController {
     }
 
     @PutMapping
+    @ApiOperation(value = "Update variable", response = Variable.class)
     public ResponseEntity<Variable> update(@RequestBody(required = true) Variable variable) {
         try {
             logger.info("[VARIABLE - REGISTER] Register variable: " + variable);
@@ -80,6 +92,7 @@ public class VariableController {
     }
 
     @PostMapping
+    @ApiOperation(value = "Register variable", response = Variable.class)
     public ResponseEntity<Variable> register(@RequestBody(required = true) Variable variable) {
         try {
             logger.info("[VARIABLE - REGISTER] Register variable: " + variable);
@@ -97,6 +110,7 @@ public class VariableController {
     }
 
     @DeleteMapping(value = "/{id}")
+    @ApiOperation(value = "Delete variable by id", response = Variable.class)
     public ResponseEntity<Variable> delete(@PathVariable("id") long id) {
         try {
             logger.info("[VARIABLE - DELETE] Delete variable with id: " + id);

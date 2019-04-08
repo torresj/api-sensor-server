@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.time.LocalDate;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
@@ -24,6 +27,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("v1/records")
+@Api(value = "v1/records", description = "Operations about records")
 public class RecordController {
 
     /* Logs */
@@ -34,6 +38,7 @@ public class RecordController {
     private RecordService recordService;
 
     @GetMapping
+    @ApiOperation(value = "Retrieve records", notes = "Pageable data are required and de maximum records per page are 100", response = Record.class, responseContainer = "List")
     public ResponseEntity<Page<Record>> getSensors(@RequestParam(value = "page") int nPage,
             @RequestParam(value = "elements") int elements,
             @RequestParam(value = "from") @DateTimeFormat(iso = ISO.DATE) LocalDate from,
@@ -50,6 +55,7 @@ public class RecordController {
     }
 
     @GetMapping(value = "/{id}")
+    @ApiOperation(value = "Retrieve a record by id", response = Record.class)
     public ResponseEntity<Record> getSensor(@PathVariable("id") long id) {
         try {
             logger.info("[RECORD - GET] Get record from DB with id: " + id);

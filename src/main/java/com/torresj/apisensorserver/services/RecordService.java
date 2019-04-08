@@ -40,14 +40,14 @@ public class RecordService {
     private Producer producer;
 
     public Record register(Record record) throws EntityNotFoundException {
-        logger.info("[RECORD - REGISTER] Saving new record: " + record);
+        logger.debug("[RECORD - REGISTER] Saving new record: " + record);
         // Try to find variable and sensor
         sensorRepository.findById(record.getSensorId()).orElseThrow(() -> new EntityNotFoundException());
         variableRepository.findById(record.getVariableId()).orElseThrow(() -> new EntityNotFoundException());
 
         Record entity = recordRespository.save(record);
 
-        logger.info("[RECORD - REGISTER] Sending data to frontend via AMPQ message");
+        logger.debug("[RECORD - REGISTER] Sending data to frontend via AMPQ message");
 
         ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
         ampqMsg.put("type", "Create");
@@ -62,10 +62,10 @@ public class RecordService {
 
     public Page<Record> getRecords(int pageNumber, int numberOfElements, LocalDate from, LocalDate to) {
 
-        logger.info("[RECORD - GET] Getting records beetween: " + from + " and " + to);
+        logger.debug("[RECORD - GET] Getting records beetween: " + from + " and " + to);
 
-        PageRequest pageRequest = PageRequest.of(pageNumber, numberOfElements, Sort.by("dateTime").descending());
-        Page<Record> page = recordRespository.findByDateTimeBetween(from.atStartOfDay(), to.atStartOfDay(),
+        PageRequest pageRequest = PageRequest.of(pageNumber, numberOfElements, Sort.by("createAt").descending());
+        Page<Record> page = recordRespository.findByCreateAtBetween(from.atStartOfDay(), to.atStartOfDay(),
                 pageRequest);
 
         return page;
@@ -74,7 +74,7 @@ public class RecordService {
 
     public Record getRecord(long id) throws EntityNotFoundException {
 
-        logger.info("[RECORD - GET] Getting record with id: " + id);
+        logger.debug("[RECORD - GET] Getting record with id: " + id);
         return recordRespository.findById(id).orElseThrow(() -> new EntityNotFoundException());
 
     }

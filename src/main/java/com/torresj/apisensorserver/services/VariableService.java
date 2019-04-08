@@ -1,8 +1,12 @@
 package com.torresj.apisensorserver.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,7 +23,6 @@ import com.torresj.apisensorserver.rabbitmq.Producer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.modelmapper.ModelMapper;
 
 @Service
 public class VariableService {
@@ -55,14 +58,14 @@ public class VariableService {
     }
 
     public Variable register(Variable variable) throws EntityAlreadyExists {
-        logger.info("[VARIABLE - REGISTER] Registering variable: " + variable);
+        logger.debug("[VARIABLE - REGISTER] Registering variable: " + variable);
         Optional<Variable> entity = variableRepository.findByName(variable.getName());
         if (entity.isPresent())
             throw new EntityAlreadyExists();
         else {
             Variable variableSaved = variableRepository.save(variable);
 
-            logger.info("[VARIABLE - REGISTER] Sending data to frontend via AMPQ message");
+            logger.debug("[VARIABLE - REGISTER] Sending data to frontend via AMPQ message");
 
             ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
             ampqMsg.put("type", "Create");
@@ -76,27 +79,26 @@ public class VariableService {
     }
 
     public Variable getVariable(Long id) throws EntityNotFoundException {
-        logger.info("[VARIABLE - GET VARIABLE] Searching variable by id: " + id);
+        logger.debug("[VARIABLE - GET VARIABLE] Searching variable by id: " + id);
 
-        Variable entity = variableRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
-        return entity;
+        return variableRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
     }
 
-    public List<Variable> getVariables() {
-        ModelMapper mapper = new ModelMapper();
-        List<Variable> variables = variableRepository.findAll().stream().map(v -> mapper.map(v, Variable.class))
-                .collect(Collectors.toList());
-        ;
-        return variables;
+    public Page<Variable> getVariables(int pageNumber, int numberOfElements) {
+        logger.debug("[VARIABLE - GET] Getting variables beetween");
+        PageRequest pageRequest = PageRequest.of(pageNumber, numberOfElements, Sort.by("createAt").descending());
+        Page<Variable> page = variableRepository.findAll(pageRequest);
+
+        return page;
     }
 
     public Variable deleteVariable(Long id) throws EntityNotFoundException {
-        logger.info("[VARIABLE - DELETE] Searching variable by id: " + id);
+        logger.debug("[VARIABLE - DELETE] Searching variable by id: " + id);
 
         Variable variable = variableRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
         variableRepository.delete(variable);
 
-        logger.info("[VARIABLE - REGISTER] Sending data to frontend via AMPQ message");
+        logger.debug("[VARIABLE - REGISTER] Sending data to frontend via AMPQ message");
 
         ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
         ampqMsg.put("type", "Delete");

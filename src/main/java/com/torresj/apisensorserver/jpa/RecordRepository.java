@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RecordRepository extends JpaRepository<Record, Long> {
 
-    Page<Record> findByDateTimeBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
+    Page<Record> findByCreateAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
+
+    Page<Record> findBySensorIdAndVariableIdAndCreateAtBetween(long sensorId, long variableId, LocalDateTime from,
+            LocalDateTime to, Pageable pageable);
 
 }
