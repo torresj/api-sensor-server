@@ -80,7 +80,7 @@ public class SensorService {
 
         if (entity.isPresent()) {
             logger.info("[SENSOR - REGISTER] Sensor exists");
-            throw new EntityAlreadyExists();
+            return entity.get();
         } else {
             logger.info("[SENSOR - REGISTER] Registering new sensor ...");
             sensor.setLastConnection(LocalDateTime.now());

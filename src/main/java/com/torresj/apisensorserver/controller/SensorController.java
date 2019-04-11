@@ -123,9 +123,6 @@ public class SensorController {
             Sensor sensorRegister = sensorService.register(sensor);
 
             return new ResponseEntity<Sensor>(sensorRegister, HttpStatus.CREATED);
-        } catch (EntityAlreadyExists e) {
-            logger.error("[SENSOR - REGISTER] Sensor already exists", e);
-            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Sensor already exists", e);
         } catch (Exception e) {
             logger.error("[SENSOR - REGISTER] Error registering sensor", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
