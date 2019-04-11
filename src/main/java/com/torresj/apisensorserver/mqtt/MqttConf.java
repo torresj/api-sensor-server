@@ -52,7 +52,7 @@ public class MqttConf {
     @Bean
     public MessageProducerSupport mqttInbound() {
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("mqttServer",
-                mqttClientFactory(), "amq/topic");
+                mqttClientFactory(), "mqtt/topic");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
