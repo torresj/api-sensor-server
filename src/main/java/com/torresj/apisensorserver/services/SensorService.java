@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,7 +25,6 @@ import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.rabbitmq.Producer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.modelmapper.ModelMapper;
 
 @Service
 public class SensorService {
@@ -105,7 +102,7 @@ public class SensorService {
     }
 
     public Page<Sensor> getSensors(int pageNumber, int numberOfElements) {
-        logger.debug("[SENSOR - GET] Getting variables beetween");
+        logger.debug("[SENSOR - GET] Getting sensors");
         PageRequest pageRequest = PageRequest.of(pageNumber, numberOfElements, Sort.by("createAt").descending());
         Page<Sensor> page = sensorRepository.findAll(pageRequest);
 

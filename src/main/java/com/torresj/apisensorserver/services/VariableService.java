@@ -37,14 +37,14 @@ public class VariableService {
     private Producer producer;
 
     public Variable update(Variable variable) throws EntityNotFoundException {
-        logger.info("[VARIABLE - UPDATE] Updating variable: " + variable);
+        logger.debug("[VARIABLE - UPDATE] Updating variable: " + variable);
         Variable entity = variableRepository.findByName(variable.getName())
                 .orElseThrow(() -> new EntityNotFoundException());
 
-        logger.info("[VARIABLE - UPDATE] Sensor exists. Updating ...");
+        logger.debug("[VARIABLE - UPDATE] Sensor exists. Updating ...");
         variable.setId(entity.getId());
 
-        logger.info("[VARIABLE - UPDATE] Sending data to frontend via AMPQ message");
+        logger.debug("[VARIABLE - UPDATE] Sending data to frontend via AMPQ message");
 
         ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
         ampqMsg.put("type", "update");
