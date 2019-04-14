@@ -22,6 +22,9 @@ import lombok.Data;
 public class User implements Serializable {
 
     private static final long serialVersionUID = 608601372639930858L;
+    private static final String ROL_ADMIN = "admin";
+    private static final String ROL_USER = "user";
+    private static final String ROL_SENSOR = "sensor";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +36,9 @@ public class User implements Serializable {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private String rol;
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp

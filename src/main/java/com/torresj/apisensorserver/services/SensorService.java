@@ -50,7 +50,7 @@ public class SensorService {
 
         Sensor entity = sensorRepository.findByMac(sensor.getMac()).orElseThrow(() -> new EntityNotFoundException());
 
-        logger.info("[SENSOR - REGISTER] Sensor exists. Updating ...");
+        logger.debug("[SENSOR - REGISTER] Sensor exists. Updating ...");
         sensor.setLastConnection(LocalDateTime.now());
         sensor.setId(entity.getId());
         sensor.setVariables(sensor.getVariables().stream()
@@ -76,14 +76,13 @@ public class SensorService {
         Optional<Sensor> entity = sensorRepository.findByMac(sensor.getMac());
 
         if (entity.isPresent()) {
-            logger.info("[SENSOR - REGISTER] Sensor exists");
+            logger.debug("[SENSOR - REGISTER] Sensor exists");
             return entity.get();
         } else {
             logger.info("[SENSOR - REGISTER] Registering new sensor ...");
             sensor.setLastConnection(LocalDateTime.now());
             sensor.setVariables(sensor.getVariables().stream()
                     .map(v -> v = variableRepository.findByName(v.getName()).orElse(v)).collect(Collectors.toList()));
-            logger.info(sensor.getVariables());
 
             sensor = sensorRepository.save(sensor);
 

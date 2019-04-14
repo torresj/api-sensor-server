@@ -8,7 +8,6 @@ import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.jpa.HouseRepository;
-import com.torresj.apisensorserver.jpa.SensorRepository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +46,7 @@ public class HouseService {
 
         House house = houseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
 
-        return house.getSensores();
+        return house.getSensors();
     }
 
     public House update(House house) throws EntityNotFoundException {
