@@ -20,18 +20,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import static com.torresj.apisensorserver.security.SecurityConstants.*;
+
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
-    private static final String ISSUER_INFO = "jtbenavente";
-
-    private static final long TOKEN_EXPIRATION_TIME = 864_000_000;
-
-    private static final String SECRET_KEY = "onPNDioUK-DNh-T_a81Vkay-Mt35QPiFvakrvf7MkAMwEPQGFLT52_zRKsi3spqieZfHEkRfT5vTNRaznucb4A";
-
-    private static final String HEADER_AUTHORIZACION_KEY = "Authorization";
-
-    private static final String TOKEN_BEARER_PREFIX = "Bearer ";
-
     private AuthenticationManager authenticationManager;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
@@ -39,10 +30,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+    public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
             throws AuthenticationException {
         try {
-            User user = new ObjectMapper().readValue(request.getInputStream(), User.class);
+            User user = new ObjectMapper().readValue(req.getInputStream(), User.class);
 
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), new ArrayList<>()));
@@ -52,13 +43,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
+    protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
             Authentication auth) throws IOException, ServletException {
-
         String token = Jwts.builder().setIssuedAt(new Date()).setIssuer(ISSUER_INFO)
-                .setSubject(((User) auth.getPrincipal()).getUsername())
-                .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, SECRET_KEY).compact();
-        response.addHeader(HEADER_AUTHORIZACION_KEY, TOKEN_BEARER_PREFIX + " " + token);
+                .setSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS512, SECRET).compact();
+        res.addHeader(HEADER_STRING, TOKEN_PREFIX + " " + token);
     }
 }

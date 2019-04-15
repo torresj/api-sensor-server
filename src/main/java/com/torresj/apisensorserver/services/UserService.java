@@ -2,6 +2,8 @@ package com.torresj.apisensorserver.services;
 
 import static java.util.Collections.emptyList;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -47,7 +49,15 @@ public class UserService implements UserDetailsService {
     }
 
     public User register(User user) throws EntityAlreadyExists {
-        return null;
+        logger.debug("[USER - REGISTER] Registering user ");
+        Optional<User> entity = userRepository.findByUsername(user.getUsername());
+
+        if (entity.isPresent()) {
+            logger.error("[USER - REGISTER] Error registering user");
+            throw new EntityAlreadyExists();
+        }
+
+        return userRepository.save(user);
     }
 
 }

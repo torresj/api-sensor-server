@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import lombok.Data;
 
@@ -45,6 +46,7 @@ public class User implements Serializable {
     private LocalDateTime createAt;
 
     @Column(nullable = false, updatable = false)
+    @UpdateTimestamp
     private LocalDateTime lastConnection;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
