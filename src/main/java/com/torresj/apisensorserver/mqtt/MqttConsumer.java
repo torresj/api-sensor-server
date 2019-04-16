@@ -49,6 +49,7 @@ public class MqttConsumer {
             }
 
         } catch (IOException e) {
+            logger.error(e);
             logger.info("Message not processed: " + message);
         }
     }
@@ -59,6 +60,7 @@ public class MqttConsumer {
             Record record = objectMapper.readValue(message, Record.class);
             recordService.register(record);
         } catch (IOException e) {
+            logger.error(e);
             logger.info("Message not processed: " + message);
         } catch (EntityNotFoundException e) {
             logger.error("[ERROR] Entity not found: " + message);

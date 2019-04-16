@@ -27,7 +27,7 @@ public class HouseService {
     private HouseRepository houseRepository;
 
     public Page<House> getHouses(int nPage, int elements) {
-        logger.debug("[HOUSE - GET] Getting variables");
+        logger.debug("[HOUSE - GET] Getting houses");
         PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
         Page<House> page = houseRepository.findAll(pageRequest);
 

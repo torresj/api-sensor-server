@@ -2,10 +2,14 @@ package com.torresj.apisensorserver.services;
 
 import static java.util.Collections.emptyList;
 
+import java.security.Principal;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,15 +33,23 @@ public class UserService implements UserDetailsService {
     private UserRepository userRepository;
 
     public Page<User> getUsers(int nPage, int elements) {
-        return null;
+        logger.debug("[USER - GET] Getting users");
+        PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
+        Page<User> page = userRepository.findAll(pageRequest);
+
+        return page;
     }
 
     public User getUser(long id) throws EntityNotFoundException {
-        return null;
+        logger.debug("[USER - GET USER] Searching user by id: " + id);
+
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
     }
 
     public User getUser(String name) throws EntityNotFoundException {
-        return null;
+        logger.debug("[USER - GET USER] Searching user by name: " + name);
+
+        return userRepository.findByUsername(name).orElseThrow(() -> new EntityNotFoundException());
     }
 
     @Override
@@ -58,6 +70,11 @@ public class UserService implements UserDetailsService {
         }
 
         return userRepository.save(user);
+    }
+
+    public User getLogginUser() throws EntityNotFoundException {
+        Principal principal = SecurityContextHolder.getContext().getAuthentication();
+        return userRepository.findByUsername(principal.getName()).orElseThrow(() -> new EntityNotFoundException());
     }
 
 }
