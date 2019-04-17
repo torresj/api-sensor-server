@@ -102,10 +102,10 @@ public class UserController {
 
             return new ResponseEntity<User>(userRegister, HttpStatus.CREATED);
         } catch (EntityAlreadyExists e) {
-            logger.error("[HOUSE - REGISTER] House already exists", e);
+            logger.error("[USER - REGISTER] user already exists", e);
             throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "House already exists", e);
         } catch (Exception e) {
-            logger.error("[HOUSE - REGISTER] Error registering house", e);
+            logger.error("[USER - REGISTER] Error registering user", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
         }
     }
