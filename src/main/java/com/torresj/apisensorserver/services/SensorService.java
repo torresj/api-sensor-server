@@ -1,14 +1,23 @@
 package com.torresj.apisensorserver.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,6 +40,11 @@ public class SensorService {
 
     /* Logs */
     private static final Logger logger = LogManager.getLogger(SensorService.class);
+
+    private static final String RESET = "reset";
+
+    @Value("${socket.port}")
+    private int socketPort;
 
     @Autowired
     private SensorRepository sensorRepository;
@@ -145,5 +159,25 @@ public class SensorService {
         producer.produceMsg(ampqMsg.toString());
 
         return sensor;
+    }
+
+    public void reset(long id) throws EntityNotFoundException {
+        logger.debug("[SENSOR - RESET] Searching sensor by id: " + id);
+        Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            try {
+                InetAddress ip = InetAddress.getByName(sensor.getIp());
+                Socket socket = new Socket(ip, socketPort);
+                OutputStream output = socket.getOutputStream();
+                PrintWriter writer = new PrintWriter(output, true);
+                writer.println(RESET);
+                socket.close();
+            } catch (UnknownHostException e) {
+                logger.error("[SENSOR - RESET] error reseting sensor id: " + id, e);
+            } catch (IOException e) {
+                logger.error("[SENSOR - RESET] error reseting sensor id: " + id, e);
+            }
+        });
     }
 }

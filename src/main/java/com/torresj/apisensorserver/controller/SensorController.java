@@ -8,7 +8,6 @@ import io.swagger.annotations.ApiOperation;
 
 import java.time.LocalDate;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.Record;
 import com.torresj.apisensorserver.models.Sensor;
@@ -143,6 +142,24 @@ public class SensorController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
         } catch (Exception e) {
             logger.error("[SENSOR - REMOVE] Error removing sensors from DB", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
+
+    @PostMapping(value = "/{id}/reset")
+    @ApiOperation(value = "Reset sensor")
+    public ResponseEntity reset(@PathVariable("id") long id) {
+        try {
+            logger.info("[SENSOR - RESET] Reset sensor with id: " + id);
+
+            Sensor sensor = sensorService.reset(id);
+
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            logger.error("[SENSOR - RESET] Sensor not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
+        } catch (Exception e) {
+            logger.error("[SENSOR - RESET] Error reseting sensors", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
         }
     }
