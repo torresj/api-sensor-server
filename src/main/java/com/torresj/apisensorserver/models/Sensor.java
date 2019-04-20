@@ -11,7 +11,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -34,8 +36,10 @@ public class Sensor implements Serializable {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private char type;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+            CascadeType.REFRESH })
+    @JoinColumn(name = "sensor_type")
+    SensorType type;
 
     @Column(nullable = false, unique = true)
     private String mac;

@@ -152,7 +152,7 @@ public class SensorController {
         try {
             logger.info("[SENSOR - RESET] Reset sensor with id: " + id);
 
-            Sensor sensor = sensorService.reset(id);
+            sensorService.reset(id);
 
             return new ResponseEntity(HttpStatus.OK);
         } catch (EntityNotFoundException e) {
@@ -160,6 +160,24 @@ public class SensorController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
         } catch (Exception e) {
             logger.error("[SENSOR - RESET] Error reseting sensors", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
+
+    @PostMapping(value = "/{id}/actions")
+    @ApiOperation(value = "Send action to sensor")
+    public ResponseEntity sendAction(@PathVariable("id") long id, @RequestParam("action") String action) {
+        try {
+            logger.info("[SENSOR - ACTIONS] Send action " + action + " to sensor with id: " + id);
+
+            sensorService.sendAction(id, action);
+
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            logger.error("[SENSOR - RESET] Sensor not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
+        } catch (Exception e) {
+            logger.error("[SENSOR - RESET] Error seding action to sensors", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
         }
     }

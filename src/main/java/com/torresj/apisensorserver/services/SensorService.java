@@ -180,4 +180,24 @@ public class SensorService {
             }
         });
     }
+
+    public void sendAction(long id, String action) throws EntityNotFoundException {
+        logger.debug("[SENSOR - SEND ACTION] Searching sensor by id: " + id);
+        Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            try {
+                InetAddress ip = InetAddress.getByName(sensor.getIp());
+                Socket socket = new Socket(ip, socketPort);
+                OutputStream output = socket.getOutputStream();
+                PrintWriter writer = new PrintWriter(output, true);
+                writer.println(action);
+                socket.close();
+            } catch (UnknownHostException e) {
+                logger.error("[SENSOR - ACTION] error sending action " + action + " to sensor id: " + id, e);
+            } catch (IOException e) {
+                logger.error("[SENSOR - ACTION] error sending action " + action + " to sensor id: " + id, e);
+            }
+        });
+    }
 }

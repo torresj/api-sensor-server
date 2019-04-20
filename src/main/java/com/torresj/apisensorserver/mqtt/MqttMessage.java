@@ -1,4 +1,4 @@
-package com.torresj.apisensorserver.models;
+package com.torresj.apisensorserver.mqtt;
 
 import java.io.Serializable;
 
