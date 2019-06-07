@@ -6,10 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +36,7 @@ public class VariableService {
     public Variable update(Variable variable) throws EntityNotFoundException {
         logger.debug("[VARIABLE - UPDATE] Updating variable: " + variable);
         Variable entity = variableRepository.findByName(variable.getName())
-                .orElseThrow(() -> new EntityNotFoundException());
+                .orElseThrow(EntityNotFoundException::new);
 
         logger.debug("[VARIABLE - UPDATE] Sensor exists. Updating ...");
         variable.setId(entity.getId());
@@ -81,21 +78,20 @@ public class VariableService {
     public Variable getVariable(Long id) throws EntityNotFoundException {
         logger.debug("[VARIABLE - GET VARIABLE] Searching variable by id: " + id);
 
-        return variableRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        return variableRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
     public Page<Variable> getVariables(int pageNumber, int numberOfElements) {
         logger.debug("[VARIABLE - GET] Getting variables beetween");
         PageRequest pageRequest = PageRequest.of(pageNumber, numberOfElements, Sort.by("createAt").descending());
-        Page<Variable> page = variableRepository.findAll(pageRequest);
 
-        return page;
+        return variableRepository.findAll(pageRequest);
     }
 
     public Variable deleteVariable(Long id) throws EntityNotFoundException {
         logger.debug("[VARIABLE - DELETE] Searching variable by id: " + id);
 
-        Variable variable = variableRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        Variable variable = variableRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         variableRepository.delete(variable);
 
         logger.debug("[VARIABLE - REGISTER] Sending data to frontend via AMPQ message");

@@ -35,21 +35,20 @@ public class UserService implements UserDetailsService {
     public Page<User> getUsers(int nPage, int elements) {
         logger.debug("[USER - GET] Getting users");
         PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-        Page<User> page = userRepository.findAll(pageRequest);
 
-        return page;
+        return userRepository.findAll(pageRequest);
     }
 
     public User getUser(long id) throws EntityNotFoundException {
         logger.debug("[USER - GET USER] Searching user by id: " + id);
 
-        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        return userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
     public User getUser(String name) throws EntityNotFoundException {
         logger.debug("[USER - GET USER] Searching user by name: " + name);
 
-        return userRepository.findByUsername(name).orElseThrow(() -> new EntityNotFoundException());
+        return userRepository.findByUsername(name).orElseThrow(EntityNotFoundException::new);
     }
 
     @Override
@@ -74,7 +73,7 @@ public class UserService implements UserDetailsService {
 
     public User getLogginUser() throws EntityNotFoundException {
         Principal principal = SecurityContextHolder.getContext().getAuthentication();
-        return userRepository.findByUsername(principal.getName()).orElseThrow(() -> new EntityNotFoundException());
+        return userRepository.findByUsername(principal.getName()).orElseThrow(EntityNotFoundException::new);
     }
 
 }

@@ -1,9 +1,6 @@
 package com.torresj.apisensorserver.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
-import java.time.LocalDate;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
@@ -32,15 +27,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/v1/variables")
-@Api(value = "v1/variables", description = "Operations about variables")
+@Api(value = "v1/variables")
 public class VariableController {
 
     /* Logs */
     private static final Logger logger = LogManager.getLogger(VariableController.class);
 
     /* Services */
-    @Autowired
     private VariableService variableService;
+
+    public VariableController(VariableService variableService) {
+        this.variableService = variableService;
+    }
 
     @GetMapping
     @ApiOperation(value = "Retrieve variables", notes = "Pageable data are required and de maximum records per page are 100", response = Variable.class, responseContainer = "List")
@@ -51,7 +49,7 @@ public class VariableController {
 
             Page<Variable> page = variableService.getVariables(nPage, elements);
 
-            return new ResponseEntity<Page<Variable>>(page, HttpStatus.OK);
+            return new ResponseEntity<>(page, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("[VARIABLE - GET ALL] Error getting variables", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -66,7 +64,7 @@ public class VariableController {
 
             Variable variable = variableService.getVariable(id);
 
-            return new ResponseEntity<Variable>(variable, HttpStatus.OK);
+            return new ResponseEntity<>(variable, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[VARIABLE - GET] Error variable not found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Variable not found", e);
@@ -78,13 +76,13 @@ public class VariableController {
 
     @PutMapping
     @ApiOperation(value = "Update variable", response = Variable.class)
-    public ResponseEntity<Variable> update(@RequestBody(required = true) Variable variable) {
+    public ResponseEntity<Variable> update(@RequestBody() Variable variable) {
         try {
             logger.info("[VARIABLE - REGISTER] Register variable: " + variable);
 
             Variable variableRegister = variableService.update(variable);
 
-            return new ResponseEntity<Variable>(variableRegister, HttpStatus.CREATED);
+            return new ResponseEntity<>(variableRegister, HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error("[VARIABLE - GET] Error registering variable", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -93,13 +91,13 @@ public class VariableController {
 
     @PostMapping
     @ApiOperation(value = "Register variable", response = Variable.class)
-    public ResponseEntity<Variable> register(@RequestBody(required = true) Variable variable) {
+    public ResponseEntity<Variable> register(@RequestBody() Variable variable) {
         try {
             logger.info("[VARIABLE - REGISTER] Register variable: " + variable);
 
             Variable variableRegister = variableService.register(variable);
 
-            return new ResponseEntity<Variable>(variableRegister, HttpStatus.CREATED);
+            return new ResponseEntity<>(variableRegister, HttpStatus.CREATED);
         } catch (EntityAlreadyExists e) {
             logger.error("[VARIABLE - REGISTER] Variable already exists", e);
             throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Variable already exists", e);
@@ -117,7 +115,7 @@ public class VariableController {
 
             Variable variableRegister = variableService.deleteVariable(id);
 
-            return new ResponseEntity<Variable>(variableRegister, HttpStatus.OK);
+            return new ResponseEntity<>(variableRegister, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[VARIABLE - DELETE] Variable not exists", e);
             throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Variable not exists", e);

@@ -27,15 +27,18 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("v1/records")
-@Api(value = "v1/records", description = "Operations about records")
+@Api(value = "v1/records")
 public class RecordController {
 
     /* Logs */
     private static final Logger logger = LogManager.getLogger(RecordController.class);
 
     /* Services */
-    @Autowired
     private RecordService recordService;
+
+    public RecordController(RecordService recordService) {
+        this.recordService = recordService;
+    }
 
     @GetMapping
     @ApiOperation(value = "Retrieve records", notes = "Pageable data are required and de maximum records per page are 100", response = Record.class, responseContainer = "List")
@@ -47,7 +50,7 @@ public class RecordController {
             logger.info("[RECORD - GET] Get records from DB with page " + nPage + ", elements " + elements + ", from "
                     + from + " to " + to);
             Page<Record> page = recordService.getRecords(nPage, elements, from, to);
-            return new ResponseEntity<Page<Record>>(page, HttpStatus.OK);
+            return new ResponseEntity<>(page, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("[RECORD - GET] Error getting records from DB", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -60,7 +63,7 @@ public class RecordController {
         try {
             logger.info("[RECORD - GET] Get record from DB with id: " + id);
             Record record = recordService.getRecord(id);
-            return new ResponseEntity<Record>(record, HttpStatus.OK);
+            return new ResponseEntity<>(record, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[RECORD - GET] Error record not found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "record not found", e);

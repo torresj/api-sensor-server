@@ -16,8 +16,7 @@ import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 @Configuration
 public class MqttConf {
 
-    @Autowired
-    MqttConsumer mqttConsumer;
+    private MqttConsumer mqttConsumer;
 
     @Value("${spring.rabbitmq.host}")
     private String host;
@@ -30,6 +29,10 @@ public class MqttConf {
 
     @Value("${spring.rabbitmq.password}")
     private String pass;
+
+    public MqttConf(MqttConsumer mqttConsumer) {
+        this.mqttConsumer = mqttConsumer;
+    }
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
@@ -44,9 +47,8 @@ public class MqttConf {
 
     @Bean
     public IntegrationFlow mqttInFlow() {
-        IntegrationFlow flow = IntegrationFlows.from(mqttInbound()).transform(p -> p)
+        return IntegrationFlows.from(mqttInbound()).transform(p -> p)
                 .handle(mqttConsumer, "messageHandler").get();
-        return flow;
     }
 
     @Bean

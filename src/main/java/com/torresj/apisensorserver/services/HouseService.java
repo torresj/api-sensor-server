@@ -29,29 +29,28 @@ public class HouseService {
     public Page<House> getHouses(int nPage, int elements) {
         logger.debug("[HOUSE - GET] Getting houses");
         PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-        Page<House> page = houseRepository.findAll(pageRequest);
 
-        return page;
+        return houseRepository.findAll(pageRequest);
     }
 
     public House getHouse(long id) throws EntityNotFoundException {
         logger.debug("[HOUSE - GET HOUSE] Searching house by id: " + id);
 
-        return houseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        return houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
     public List<Sensor> getSensors(long id, int nPage, int elements) throws EntityNotFoundException {
         logger.debug("[HOUSE - SENSOR] Searching sensors  by house id: " + id + ", nPage " + nPage + " and elements "
                 + elements);
 
-        House house = houseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        House house = houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
         return house.getSensors();
     }
 
     public House update(House house) throws EntityNotFoundException {
         logger.debug("[HOUSE - UPDATE] Updating House " + house);
-        House entity = houseRepository.findByName(house.getName()).orElseThrow(() -> new EntityNotFoundException());
+        House entity = houseRepository.findByName(house.getName()).orElseThrow(EntityNotFoundException::new);
         house.setId(entity.getId());
         houseRepository.save(house);
         return house;
@@ -71,7 +70,7 @@ public class HouseService {
 
     public House removeHouse(long id) throws EntityNotFoundException {
         logger.debug("[HOUSE - REMOVE HOUSE] Searching house by id: " + id);
-        House house = houseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        House house = houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         houseRepository.delete(house);
         return house;
     }

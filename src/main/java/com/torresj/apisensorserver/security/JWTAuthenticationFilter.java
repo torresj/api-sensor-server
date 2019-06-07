@@ -23,7 +23,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import static com.torresj.apisensorserver.security.SecurityConstants.*;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -44,7 +44,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
-            Authentication auth) throws IOException, ServletException {
+            Authentication auth) {
         String token = Jwts.builder().setIssuedAt(new Date()).setIssuer(ISSUER_INFO)
                 .setSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))

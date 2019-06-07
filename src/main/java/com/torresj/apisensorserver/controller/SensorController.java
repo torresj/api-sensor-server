@@ -32,15 +32,18 @@ import org.apache.logging.log4j.Logger;
 
 @RestController
 @RequestMapping("v1/sensors")
-@Api(value = "v1/sensors", description = "Operations about sensors")
+@Api(value = "v1/sensors")
 public class SensorController {
 
     /* Logs */
     private static final Logger logger = LogManager.getLogger(SensorController.class);
 
     /* Services */
-    @Autowired
     private SensorService sensorService;
+
+    public SensorController(SensorService sensorService) {
+        this.sensorService = sensorService;
+    }
 
     @GetMapping
     @ApiOperation(value = "Retrieve sensors", notes = "Pageable data are required and de maximum records per page are 100", response = Sensor.class, responseContainer = "List")
@@ -51,7 +54,7 @@ public class SensorController {
 
             Page<Sensor> page = sensorService.getSensors(nPage, elements);
 
-            return new ResponseEntity<Page<Sensor>>(page, HttpStatus.OK);
+            return new ResponseEntity<>(page, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("[SENSOR - GET ALL] Error getting sensors from DB", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -66,7 +69,7 @@ public class SensorController {
 
             Sensor sensor = sensorService.getSensor(id);
 
-            return new ResponseEntity<Sensor>(sensor, HttpStatus.OK);
+            return new ResponseEntity<>(sensor, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[SENSOR - GET] Sensor not found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
@@ -90,7 +93,7 @@ public class SensorController {
 
             Page<Record> page = sensorService.getRecords(sensorId, variableId, nPage, elements, from, to);
 
-            return new ResponseEntity<Page<Record>>(page, HttpStatus.OK);
+            return new ResponseEntity<>(page, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[SENSOR - VARIABLE - RECORDS] Sensor or variable not  found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor or variable not  found", e);
@@ -102,12 +105,12 @@ public class SensorController {
 
     @PutMapping
     @ApiOperation(value = "Update sensor", response = Sensor.class)
-    public ResponseEntity<Sensor> update(@RequestBody(required = true) Sensor sensor) {
+    public ResponseEntity<Sensor> update(@RequestBody() Sensor sensor) {
         try {
             logger.info("[SENSOR - UPDDATE] Updating sensor -> " + sensor);
             Sensor sensorRegister = sensorService.update(sensor);
 
-            return new ResponseEntity<Sensor>(sensorRegister, HttpStatus.CREATED);
+            return new ResponseEntity<>(sensorRegister, HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error("[SENSOR - UPDATE] Error updating sensor", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -116,12 +119,12 @@ public class SensorController {
 
     @PostMapping
     @ApiOperation(value = "Register sensor", response = Sensor.class)
-    public ResponseEntity<Sensor> register(@RequestBody(required = true) Sensor sensor) {
+    public ResponseEntity<Sensor> register(@RequestBody() Sensor sensor) {
         try {
             logger.info("[SENSOR - REGISTER] Registering sensor -> " + sensor);
             Sensor sensorRegister = sensorService.register(sensor);
 
-            return new ResponseEntity<Sensor>(sensorRegister, HttpStatus.CREATED);
+            return new ResponseEntity<>(sensorRegister, HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error("[SENSOR - REGISTER] Error registering sensor", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -136,7 +139,7 @@ public class SensorController {
 
             Sensor sensor = sensorService.removeSensor(id);
 
-            return new ResponseEntity<Sensor>(sensor, HttpStatus.OK);
+            return new ResponseEntity<>(sensor, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[SENSOR - REMOVE] Sensor not found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);

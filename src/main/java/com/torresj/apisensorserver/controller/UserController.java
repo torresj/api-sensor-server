@@ -1,6 +1,5 @@
 package com.torresj.apisensorserver.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,18 +26,22 @@ import org.apache.logging.log4j.Logger;
 
 @RestController
 @RequestMapping("v1/users")
-@Api(value = "v1/users", description = "Operations about users")
+@Api(value = "v1/users")
 public class UserController {
 
     /* Logs */
     private static final Logger logger = LogManager.getLogger(UserController.class);
 
     /* Services */
-    @Autowired
     private UserService userService;
 
-    @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public UserController(UserService userService,
+            BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.userService = userService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
 
     @GetMapping
     @ApiOperation(value = "Retrieve Users", notes = "Pageable data are required and de maximum records per page are 100", response = User.class, responseContainer = "List")
@@ -49,7 +52,7 @@ public class UserController {
 
             Page<User> page = userService.getUsers(nPage, elements);
 
-            return new ResponseEntity<Page<User>>(page, HttpStatus.OK);
+            return new ResponseEntity<>(page, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("[USER - GET ALL] Error getting users from DB", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -64,7 +67,7 @@ public class UserController {
 
             User user = userService.getUser(id);
 
-            return new ResponseEntity<User>(user, HttpStatus.OK);
+            return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[USER - GET] User not found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found", e);
@@ -82,7 +85,7 @@ public class UserController {
 
             User user = userService.getUser(name);
 
-            return new ResponseEntity<User>(user, HttpStatus.OK);
+            return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[USER - GET] User not found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found", e);
@@ -94,13 +97,13 @@ public class UserController {
 
     @PostMapping
     @ApiOperation(value = "Register user", response = User.class)
-    public ResponseEntity<User> register(@RequestBody(required = true) User user) {
+    public ResponseEntity<User> register(@RequestBody() User user) {
         try {
             logger.info("[USER - REGISTER] Registering user");
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             User userRegister = userService.register(user);
 
-            return new ResponseEntity<User>(userRegister, HttpStatus.CREATED);
+            return new ResponseEntity<>(userRegister, HttpStatus.CREATED);
         } catch (EntityAlreadyExists e) {
             logger.error("[USER - REGISTER] user already exists", e);
             throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "House already exists", e);

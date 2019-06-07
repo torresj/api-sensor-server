@@ -34,7 +34,7 @@ public class SensorType implements Serializable {
 
     @ElementCollection
     @CollectionTable(name = "actions")
-    private List<String> tags = new ArrayList<String>();
+    private List<String> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "type")
     private List<Sensor> sensors;

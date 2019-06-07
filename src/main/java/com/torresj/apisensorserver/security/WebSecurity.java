@@ -21,8 +21,11 @@ import static com.torresj.apisensorserver.security.SecurityConstants.*;
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     /* Services */
-    @Autowired
     private UserService userService;
+
+    public WebSecurity(UserService userService) {
+        this.userService = userService;
+    }
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {

@@ -1,6 +1,5 @@
 package com.torresj.apisensorserver.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,15 +30,18 @@ import org.apache.logging.log4j.Logger;
 
 @RestController
 @RequestMapping("v1/houses")
-@Api(value = "v1/houses", description = "Operations about houses")
+@Api(value = "v1/houses")
 public class HouseController {
 
     /* Logs */
     private static final Logger logger = LogManager.getLogger(HouseController.class);
 
     /* Services */
-    @Autowired
-    private HouseService houseService;
+    private final HouseService houseService;
+
+    public HouseController(HouseService houseService) {
+        this.houseService = houseService;
+    }
 
     @GetMapping
     @ApiOperation(value = "Retrieve Houses", notes = "Pageable data are required and de maximum records per page are 100", response = House.class, responseContainer = "List")
@@ -50,7 +52,7 @@ public class HouseController {
 
             Page<House> page = houseService.getHouses(nPage, elements);
 
-            return new ResponseEntity<Page<House>>(page, HttpStatus.OK);
+            return new ResponseEntity<>(page, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("[HOUSE - GET ALL] Error getting houses from DB", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -65,7 +67,7 @@ public class HouseController {
 
             House house = houseService.getHouse(id);
 
-            return new ResponseEntity<House>(house, HttpStatus.OK);
+            return new ResponseEntity<>(house, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[HOUSE - GET] House not found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
@@ -84,7 +86,7 @@ public class HouseController {
 
             List<Sensor> sensors = houseService.getSensors(id, nPage, elements);
 
-            return new ResponseEntity<List<Sensor>>(sensors, HttpStatus.OK);
+            return new ResponseEntity<>(sensors, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[HOUSE - GET] House not found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
@@ -96,12 +98,12 @@ public class HouseController {
 
     @PutMapping
     @ApiOperation(value = "Update house", response = House.class)
-    public ResponseEntity<House> update(@RequestBody(required = true) House house) {
+    public ResponseEntity<House> update(@RequestBody House house) {
         try {
             logger.info("[HOUSE - UPDDATE] Updating house -> " + house);
             House houseRegister = houseService.update(house);
 
-            return new ResponseEntity<House>(houseRegister, HttpStatus.CREATED);
+            return new ResponseEntity<>(houseRegister, HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error("[HOUSE - UPDATE] Error updating house", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -110,12 +112,12 @@ public class HouseController {
 
     @PostMapping
     @ApiOperation(value = "Register house", response = House.class)
-    public ResponseEntity<House> register(@RequestBody(required = true) House house) {
+    public ResponseEntity<House> register(@RequestBody House house) {
         try {
             logger.info("[HOUSE - REGISTER] Registering house -> " + house);
             House houseRegister = houseService.register(house);
 
-            return new ResponseEntity<House>(houseRegister, HttpStatus.CREATED);
+            return new ResponseEntity<>(houseRegister, HttpStatus.CREATED);
         } catch (EntityAlreadyExists e) {
             logger.error("[HOUSE - REGISTER] House already exists", e);
             throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "House already exists", e);
@@ -133,7 +135,7 @@ public class HouseController {
 
             House house = houseService.removeHouse(id);
 
-            return new ResponseEntity<House>(house, HttpStatus.OK);
+            return new ResponseEntity<>(house, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             logger.error("[HOUSE - REMOVE] House not found", e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);

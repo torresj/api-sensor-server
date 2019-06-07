@@ -11,7 +11,6 @@ import com.torresj.apisensorserver.services.SensorService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,11 +23,14 @@ public class MqttConsumer {
     private static final String ERRORTYPE = "error";
     private static final String RECORDTYPE = "record";
 
-    @Autowired
     private RecordService recordService;
 
-    @Autowired
     private SensorService sensorService;
+
+    public MqttConsumer(RecordService recordService, SensorService sensorService) {
+        this.recordService = recordService;
+        this.sensorService = sensorService;
+    }
 
     public void messageHandler(String message) {
         try {

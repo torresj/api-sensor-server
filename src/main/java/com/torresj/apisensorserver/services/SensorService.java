@@ -62,7 +62,7 @@ public class SensorService {
 
         logger.debug("[SENSOR - REGISTER] Searching sensor on DB");
 
-        Sensor entity = sensorRepository.findByMac(sensor.getMac()).orElseThrow(() -> new EntityNotFoundException());
+        Sensor entity = sensorRepository.findByMac(sensor.getMac()).orElseThrow(EntityNotFoundException::new);
 
         logger.debug("[SENSOR - REGISTER] Sensor exists. Updating ...");
         sensor.setLastConnection(LocalDateTime.now());
@@ -84,7 +84,7 @@ public class SensorService {
         return sensor;
     }
 
-    public Sensor register(Sensor sensor) throws EntityAlreadyExists {
+    public Sensor register(Sensor sensor) {
 
         logger.debug("[SENSOR - REGISTER] Searching sensor on DB");
         Optional<Sensor> entity = sensorRepository.findByMac(sensor.getMac());
@@ -117,9 +117,8 @@ public class SensorService {
     public Page<Sensor> getSensors(int pageNumber, int numberOfElements) {
         logger.debug("[SENSOR - GET] Getting sensors");
         PageRequest pageRequest = PageRequest.of(pageNumber, numberOfElements, Sort.by("createAt").descending());
-        Page<Sensor> page = sensorRepository.findAll(pageRequest);
 
-        return page;
+        return sensorRepository.findAll(pageRequest);
     }
 
     public Page<Record> getRecords(long sensorId, long variableId, int pageNumber, int numberOfElements, LocalDate from,
@@ -127,25 +126,24 @@ public class SensorService {
         logger.debug("[SENSOR - VARIABLE - RECORDS] Getting records beetween: " + from + " and " + to);
 
         // Try to find variable and sensor
-        sensorRepository.findById(sensorId).orElseThrow(() -> new EntityNotFoundException());
-        variableRepository.findById(variableId).orElseThrow(() -> new EntityNotFoundException());
+        sensorRepository.findById(sensorId).orElseThrow(EntityNotFoundException::new);
+        variableRepository.findById(variableId).orElseThrow(EntityNotFoundException::new);
 
         PageRequest pageRequest = PageRequest.of(pageNumber, numberOfElements, Sort.by("createAt").descending());
-        Page<Record> page = recordRepository.findBySensorIdAndVariableIdAndCreateAtBetween(sensorId, variableId,
-                from.atStartOfDay(), to.atStartOfDay(), pageRequest);
 
-        return page;
+        return recordRepository.findBySensorIdAndVariableIdAndCreateAtBetween(sensorId, variableId,
+                from.atStartOfDay(), to.atStartOfDay(), pageRequest);
     }
 
     public Sensor getSensor(long id) throws EntityNotFoundException {
         logger.debug("[SENSOR - GET SENSOR] Searching sensor by id: " + id);
 
-        return sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        return sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
     public Sensor removeSensor(long id) throws EntityNotFoundException {
         logger.debug("[SENSOR - REMOVE SENSOR] Searching sensor by id: " + id);
-        Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        Sensor sensor = sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         sensorRepository.delete(sensor);
 
         logger.debug("[SENSOR - REGISTER] Sending data to frontend via AMPQ message");
@@ -163,7 +161,7 @@ public class SensorService {
 
     public void reset(long id) throws EntityNotFoundException {
         logger.debug("[SENSOR - RESET] Searching sensor by id: " + id);
-        Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        Sensor sensor = sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             try {
@@ -173,8 +171,6 @@ public class SensorService {
                 PrintWriter writer = new PrintWriter(output, true);
                 writer.println(RESET);
                 socket.close();
-            } catch (UnknownHostException e) {
-                logger.error("[SENSOR - RESET] error reseting sensor id: " + id, e);
             } catch (IOException e) {
                 logger.error("[SENSOR - RESET] error reseting sensor id: " + id, e);
             }
@@ -183,7 +179,7 @@ public class SensorService {
 
     public void sendAction(long id, String action) throws EntityNotFoundException {
         logger.debug("[SENSOR - SEND ACTION] Searching sensor by id: " + id);
-        Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        Sensor sensor = sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             try {
@@ -193,8 +189,6 @@ public class SensorService {
                 PrintWriter writer = new PrintWriter(output, true);
                 writer.println(action);
                 socket.close();
-            } catch (UnknownHostException e) {
-                logger.error("[SENSOR - ACTION] error sending action " + action + " to sensor id: " + id, e);
             } catch (IOException e) {
                 logger.error("[SENSOR - ACTION] error sending action " + action + " to sensor id: " + id, e);
             }

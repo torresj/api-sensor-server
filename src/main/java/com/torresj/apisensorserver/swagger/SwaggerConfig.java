@@ -22,9 +22,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String DEFAULT_INCLUDE_PATTERN = "/services/api/.*";
-
     @Bean
     public Docket api() {
         ParameterBuilder parameterBuilder = new ParameterBuilder();

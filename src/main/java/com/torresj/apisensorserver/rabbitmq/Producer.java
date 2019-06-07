@@ -13,7 +13,6 @@ public class Producer {
     /* Logs */
     private static final Logger logger = LogManager.getLogger(Producer.class);
 
-    @Autowired
     private RabbitTemplate template;
 
     @Value("${rabbitmq.exchange}")
@@ -21,6 +20,10 @@ public class Producer {
 
     @Value("${rabbitmq.routingkey}")
     private String routingKey;
+
+    public Producer(RabbitTemplate template) {
+        this.template = template;
+    }
 
     public void produceMsg(String msg) {
         template.convertAndSend(exchange, routingKey, msg);

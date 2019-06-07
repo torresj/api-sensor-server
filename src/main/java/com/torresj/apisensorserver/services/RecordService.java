@@ -42,8 +42,8 @@ public class RecordService {
     public Record register(Record record) throws EntityNotFoundException {
         logger.debug("[RECORD - REGISTER] Saving new record: " + record);
         // Try to find variable and sensor
-        sensorRepository.findById(record.getSensorId()).orElseThrow(() -> new EntityNotFoundException());
-        variableRepository.findById(record.getVariableId()).orElseThrow(() -> new EntityNotFoundException());
+        sensorRepository.findById(record.getSensorId()).orElseThrow(EntityNotFoundException::new);
+        variableRepository.findById(record.getVariableId()).orElseThrow(EntityNotFoundException::new);
 
         Record entity = recordRespository.save(record);
 
@@ -65,17 +65,16 @@ public class RecordService {
         logger.debug("[RECORD - GET] Getting records beetween: " + from + " and " + to);
 
         PageRequest pageRequest = PageRequest.of(pageNumber, numberOfElements, Sort.by("createAt").descending());
-        Page<Record> page = recordRespository.findByCreateAtBetween(from.atStartOfDay(), to.atStartOfDay(),
-                pageRequest);
 
-        return page;
+        return recordRespository.findByCreateAtBetween(from.atStartOfDay(), to.atStartOfDay(),
+                pageRequest);
 
     }
 
     public Record getRecord(long id) throws EntityNotFoundException {
 
         logger.debug("[RECORD - GET] Getting record with id: " + id);
-        return recordRespository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        return recordRespository.findById(id).orElseThrow(EntityNotFoundException::new);
 
     }
 
