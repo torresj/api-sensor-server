@@ -13,7 +13,6 @@ import com.torresj.apisensorserver.models.Record;
 import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.services.SensorService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
