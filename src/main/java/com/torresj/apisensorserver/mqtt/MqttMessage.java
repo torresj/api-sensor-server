@@ -10,10 +10,10 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MqttMessage implements Serializable {
 
-    private static final long serialVersionUID = 5723323094505819557L;
+  private static final long serialVersionUID = 5723323094505819557L;
 
-    private String type;
-    private int SensorId;
-    private String msg;
+  private String type;
+  private int SensorId;
+  private String msg;
 
 }

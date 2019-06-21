@@ -1,28 +1,26 @@
 package com.torresj.apisensorserver.services;
 
-import java.time.LocalDate;
-
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.Record;
 import com.torresj.apisensorserver.models.Sensor;
-
+import com.torresj.apisensorserver.models.Variable;
 import org.springframework.data.domain.Page;
 
 public interface SensorService {
-    Sensor update(Sensor sensor) throws EntityNotFoundException;
 
-    Sensor register(Sensor sensor);
+  Page<Sensor> getSensors(int nPage, int elements);
 
-    Page<Sensor> getSensors(int pageNumber, int numberOfElements);
+  Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId)
+      throws EntityNotFoundException;
 
-    Page<Record> getRecords(long sensorId, long variableId, int pageNumber, int numberOfElements, LocalDate from,
-            LocalDate to) throws EntityNotFoundException;
+  Sensor getSensor(long id) throws EntityNotFoundException;
 
-    Sensor getSensor(long id) throws EntityNotFoundException;
+  Page<Variable> getVariables(long id, int nPage, int elements) throws EntityNotFoundException;
 
-    Sensor removeSensor(long id) throws EntityNotFoundException;
+  Variable addVariable(long id, long variableId) throws EntityNotFoundException;
 
-    void reset(long id) throws EntityNotFoundException;
+  Sensor update(Sensor sensor) throws EntityNotFoundException;
 
-    void sendAction(long id, String action) throws EntityNotFoundException;
+  Sensor register(Sensor sensor) throws EntityNotFoundException;
+
+  Sensor removeSensor(long id) throws EntityNotFoundException;
 }

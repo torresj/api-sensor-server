@@ -8,11 +8,11 @@ import org.apache.logging.log4j.Logger;
 @Component
 public class Consumer {
 
-    /* Logs */
-    private static final Logger logger = LogManager.getLogger(Consumer.class);
+  /* Logs */
+  private static final Logger logger = LogManager.getLogger(Consumer.class);
 
-    @RabbitListener(queues = "server.queue")
-    public void onMessageFromRabbitMQ(final String messageFromRabbitMQ) {
-        logger.info("Mensaje recibido: " + messageFromRabbitMQ);
-    }
+  @RabbitListener(queues = "server.queue")
+  public void onMessageFromRabbitMQ(final String messageFromRabbitMQ) {
+    logger.info("Mensaje recibido: " + messageFromRabbitMQ);
+  }
 }

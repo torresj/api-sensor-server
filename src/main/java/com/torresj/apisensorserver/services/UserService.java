@@ -2,23 +2,26 @@ package com.torresj.apisensorserver.services;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.User;
-
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public interface UserService extends UserDetailsService {
-    Page<User> getUsers(int nPage, int elements);
 
-    User getUser(long id) throws EntityNotFoundException;
+  Page<User> getUsers(int nPage, int elements);
 
-    User getUser(String name) throws EntityNotFoundException;
+  User getUser(long id) throws EntityNotFoundException;
 
-    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+  User getUser(String name) throws EntityNotFoundException;
 
-    User register(User user) throws EntityAlreadyExists;
+  User register(User user) throws EntityAlreadyExists;
 
-    User getLogginUser() throws EntityNotFoundException;
+  User getLogginUser() throws EntityNotFoundException;
+
+  Page<House> getHouses(long id, int nPage, int elements) throws EntityNotFoundException;
+
+  House addHouse(long userId, long houseId) throws EntityNotFoundException;
+
+  User update(User user) throws EntityNotFoundException;
 }

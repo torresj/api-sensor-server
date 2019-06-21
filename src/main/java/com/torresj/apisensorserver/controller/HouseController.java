@@ -1,5 +1,14 @@
 package com.torresj.apisensorserver.controller;
 
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.models.House;
+import com.torresj.apisensorserver.models.Sensor;
+import com.torresj.apisensorserver.services.HouseService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,134 +23,121 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-import java.util.List;
-
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
-import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.House;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.services.HouseService;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 @RestController
 @RequestMapping("v1/houses")
 @Api(value = "v1/houses")
 public class HouseController {
 
-    /* Logs */
-    private static final Logger logger = LogManager.getLogger(HouseController.class);
+  /* Logs */
+  private static final Logger logger = LogManager.getLogger(HouseController.class);
 
-    /* Services */
-    private final HouseService houseService;
+  /* Services */
+  private HouseService houseService;
 
-    public HouseController(HouseService houseService) {
-        this.houseService = houseService;
+  public HouseController(HouseService houseService) {
+    this.houseService = houseService;
+  }
+
+  @GetMapping
+  @ApiOperation(value = "Retrieve Houses", notes = "Pageable data are required and de maximum records per page are 100", response = House.class, responseContainer = "List")
+  public ResponseEntity<Page<House>> getHouses(@RequestParam(value = "page") int nPage,
+      @RequestParam(value = "elements") int elements) {
+    try {
+      logger.info(
+          "[HOUSE - GET ALL] Get houses from DB with page " + nPage + ", elements " + elements);
+
+      Page<House> page = houseService.getHouses(nPage, elements);
+
+      return new ResponseEntity<>(page, HttpStatus.OK);
+    } catch (Exception e) {
+      logger.error("[HOUSE - GET ALL] Error getting houses from DB", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
+  }
 
-    @GetMapping
-    @ApiOperation(value = "Retrieve Houses", notes = "Pageable data are required and de maximum records per page are 100", response = House.class, responseContainer = "List")
-    public ResponseEntity<Page<House>> getHouses(@RequestParam(value = "page") int nPage,
-            @RequestParam(value = "elements") int elements) {
-        try {
-            logger.info("[HOUSE - GET ALL] Get houses from DB with page " + nPage + ", elements " + elements);
+  @GetMapping(value = "/{id}")
+  @ApiOperation(value = "Retrieve house by id", response = House.class)
+  public ResponseEntity<House> getHouseByID(@PathVariable("id") long id) {
+    try {
+      logger.info("[HOUSE - GET] Get houses from DB with id: " + id);
 
-            Page<House> page = houseService.getHouses(nPage, elements);
+      House house = houseService.getHouse(id);
 
-            return new ResponseEntity<>(page, HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error("[HOUSE - GET ALL] Error getting houses from DB", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
-        }
+      return new ResponseEntity<>(house, HttpStatus.OK);
+    } catch (EntityNotFoundException e) {
+      logger.error("[HOUSE - GET] House not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
+    } catch (Exception e) {
+      logger.error("[HOUSE - GET] Error getting houses from DB", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
+  }
 
-    @GetMapping(value = "/{id}")
-    @ApiOperation(value = "Retrieve house by id", response = House.class)
-    public ResponseEntity<House> getHouseByID(@PathVariable("id") long id) {
-        try {
-            logger.info("[HOUSE - GET] Get houses from DB with id: " + id);
+  @GetMapping(value = "/{houseId}/sensors")
+  @ApiOperation(value = "Retrieve Sensors from house", notes = "Pageable data are required and de maximum records per page are 100", response = Sensor.class, responseContainer = "List")
+  public ResponseEntity<Page<Sensor>> getSensorsByHouseID(@PathVariable("houseId") long id,
+      @RequestParam(value = "page") int nPage, @RequestParam(value = "elements") int elements) {
+    try {
+      logger.info("[HOUSE - SENSORS] Get sensors from DB with house id: " + id);
 
-            House house = houseService.getHouse(id);
+      Page<Sensor> sensors = houseService.getSensors(id, nPage, elements);
 
-            return new ResponseEntity<>(house, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
-            logger.error("[HOUSE - GET] House not found", e);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
-        } catch (Exception e) {
-            logger.error("[HOUSE - GET] Error getting houses from DB", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
-        }
+      return new ResponseEntity<>(sensors, HttpStatus.OK);
+    } catch (EntityNotFoundException e) {
+      logger.error("[HOUSE - GET] House not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
+    } catch (Exception e) {
+      logger.error("[HOUSE - GET] Error getting sensors from DB", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
+  }
 
-    @GetMapping(value = "/{houseId}/sensors")
-    @ApiOperation(value = "Retrieve Sensors from house", notes = "Pageable data are required and de maximum records per page are 100", response = Sensor.class, responseContainer = "List")
-    public ResponseEntity<List<Sensor>> getSensorsByHouseID(@PathVariable("houseId") long id,
-            @RequestParam(value = "page") int nPage, @RequestParam(value = "elements") int elements) {
-        try {
-            logger.info("[HOUSE - SENSORS] Get sensors from DB with house id: " + id);
+  @PutMapping
+  @ApiOperation(value = "Update house", response = House.class)
+  public ResponseEntity<House> update(@RequestBody House house) {
+    try {
+      logger.info("[HOUSE - UPDATE] Updating house -> " + house);
+      House houseRegister = houseService.update(house);
 
-            List<Sensor> sensors = houseService.getSensors(id, nPage, elements);
-
-            return new ResponseEntity<>(sensors, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
-            logger.error("[HOUSE - GET] House not found", e);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
-        } catch (Exception e) {
-            logger.error("[HOUSE - GET] Error getting houses from DB", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
-        }
+      return new ResponseEntity<>(houseRegister, HttpStatus.CREATED);
+    } catch (Exception e) {
+      logger.error("[HOUSE - UPDATE] Error updating house", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
+  }
 
-    @PutMapping
-    @ApiOperation(value = "Update house", response = House.class)
-    public ResponseEntity<House> update(@RequestBody House house) {
-        try {
-            logger.info("[HOUSE - UPDDATE] Updating house -> " + house);
-            House houseRegister = houseService.update(house);
+  @PostMapping
+  @ApiOperation(value = "Register house", response = House.class)
+  public ResponseEntity<House> register(@RequestBody House house) {
+    try {
+      logger.info("[HOUSE - REGISTER] Registering house -> " + house);
+      House houseRegister = houseService.register(house);
 
-            return new ResponseEntity<>(houseRegister, HttpStatus.CREATED);
-        } catch (Exception e) {
-            logger.error("[HOUSE - UPDATE] Error updating house", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
-        }
+      return new ResponseEntity<>(houseRegister, HttpStatus.CREATED);
+    } catch (EntityAlreadyExists e) {
+      logger.error("[HOUSE - REGISTER] House already exists", e);
+      throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "House already exists", e);
+    } catch (Exception e) {
+      logger.error("[HOUSE - REGISTER] Error registering house", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
+  }
 
-    @PostMapping
-    @ApiOperation(value = "Register house", response = House.class)
-    public ResponseEntity<House> register(@RequestBody House house) {
-        try {
-            logger.info("[HOUSE - REGISTER] Registering house -> " + house);
-            House houseRegister = houseService.register(house);
+  @DeleteMapping(value = "/{id}")
+  @ApiOperation(value = "Delete house", response = House.class)
+  public ResponseEntity<House> delete(@PathVariable("id") long id) {
+    try {
+      logger.info("[HOUSE - REMOVE] Remove house from DB with id: " + id);
 
-            return new ResponseEntity<>(houseRegister, HttpStatus.CREATED);
-        } catch (EntityAlreadyExists e) {
-            logger.error("[HOUSE - REGISTER] House already exists", e);
-            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "House already exists", e);
-        } catch (Exception e) {
-            logger.error("[HOUSE - REGISTER] Error registering house", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
-        }
+      House house = houseService.removeHouse(id);
+
+      return new ResponseEntity<>(house, HttpStatus.OK);
+    } catch (EntityNotFoundException e) {
+      logger.error("[HOUSE - REMOVE] House not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
+    } catch (Exception e) {
+      logger.error("[HOUSE - REMOVE] Error removing houses from DB", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
-
-    @DeleteMapping(value = "/{id}")
-    @ApiOperation(value = "Delete house", response = House.class)
-    public ResponseEntity<House> delete(@PathVariable("id") long id) {
-        try {
-            logger.info("[HOUSE - REMOVE] Remove house from DB with id: " + id);
-
-            House house = houseService.removeHouse(id);
-
-            return new ResponseEntity<>(house, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
-            logger.error("[HOUSE - REMOVE] House not found", e);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
-        } catch (Exception e) {
-            logger.error("[HOUSE - REMOVE] Error removing houses from DB", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
-        }
-    }
+  }
 }

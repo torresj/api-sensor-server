@@ -1,5 +1,6 @@
 package com.torresj.apisensorserver.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,24 +9,22 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import lombok.Data;
 
-@Data
 @Entity
-public class SensorType implements Serializable {
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class VariableSensorRelation implements Serializable {
 
-  private static final long serialVersionUID = -3992426688582455846L;
+  private static final long serialVersionUID = -8753081719379854792L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(updatable = false)
   private Long id;
 
-  @Column(nullable = false, unique = true)
-  private String name;
+  @Column(updatable = false, nullable = false)
+  private Long sensorId;
 
-  @Column
-  private String description;
-
-  @Column
-  private String actions;
+  @Column(updatable = false, nullable = false)
+  private Long variableId;
 
 }

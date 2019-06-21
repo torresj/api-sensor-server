@@ -12,34 +12,35 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class RabbitMQConf {
-    private static final boolean IS_DURABLE_QUEUE = false;
 
-    @Value("${rabbitmq.exchange}")
-    private String exchange;
+  private static final boolean IS_DURABLE_QUEUE = false;
 
-    @Value("${rabbitmq.routingkey}")
-    private String routingKey;
+  @Value("${rabbitmq.exchange}")
+  private String exchange;
 
-    @Value("${rabbitmq.queue}")
-    private String queue;
+  @Value("${rabbitmq.routingkey}")
+  private String routingKey;
 
-    @Bean
-    Queue queue() {
-        return new Queue(queue, IS_DURABLE_QUEUE);
-    }
+  @Value("${rabbitmq.queue}")
+  private String queue;
 
-    @Bean
-    DirectExchange exchange() {
-        return new DirectExchange(exchange);
-    }
+  @Bean
+  Queue queue() {
+    return new Queue(queue, IS_DURABLE_QUEUE);
+  }
 
-    @Bean
-    Binding binding(Queue bqueue, DirectExchange bexchange) {
-        return BindingBuilder.bind(bqueue).to(bexchange).with(routingKey);
-    }
+  @Bean
+  DirectExchange exchange() {
+    return new DirectExchange(exchange);
+  }
 
-    @Bean
-    public MessageConverter jsonMessageCnverter() {
-        return new Jackson2JsonMessageConverter();
-    }
+  @Bean
+  Binding binding(Queue bqueue, DirectExchange bexchange) {
+    return BindingBuilder.bind(bqueue).to(bexchange).with(routingKey);
+  }
+
+  @Bean
+  public MessageConverter jsonMessageCnverter() {
+    return new Jackson2JsonMessageConverter();
+  }
 }
