@@ -1,5 +1,6 @@
 package com.torresj.apisensorserver.services;
 
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.SensorType;
@@ -11,7 +12,7 @@ public interface SensorTypeService {
 
   SensorType getSensorType(long id) throws EntityNotFoundException;
 
-  SensorType register(SensorType type);
+  SensorType register(SensorType type) throws EntityAlreadyExists;
 
   SensorType update(SensorType type) throws EntityNotFoundException;
 

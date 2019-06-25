@@ -1,5 +1,6 @@
 package com.torresj.apisensorserver.controller;
 
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.SensorType;
@@ -80,6 +81,9 @@ public class SensorTypeController {
       SensorType sensorType = service.register(type);
 
       return new ResponseEntity<>(sensorType, HttpStatus.CREATED);
+    } catch (EntityAlreadyExists e) {
+      logger.error("[SENSOR TYPE - REGISTER] Sensor type already exists", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     } catch (Exception e) {
       logger.error("[SENSOR TYPE - REGISTER] Error registering sensor type from DB", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -117,7 +121,8 @@ public class SensorTypeController {
       logger.error(
           "[SENSOR TYPE - REMOVE] Sensor type has relation with existing sensors. You need to change each sensor with sensor type "
               + id + " before remove sensor type", e);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor type not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Sensor type has relation with existing sensors", e);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR TYPE - REMOVE] Sensor type not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor type not found", e);

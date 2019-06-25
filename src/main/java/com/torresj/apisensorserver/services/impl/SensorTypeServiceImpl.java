@@ -1,11 +1,13 @@
 package com.torresj.apisensorserver.services.impl;
 
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.SensorRepository;
 import com.torresj.apisensorserver.jpa.SensorTypeRepository;
 import com.torresj.apisensorserver.models.SensorType;
 import com.torresj.apisensorserver.services.SensorTypeService;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -44,9 +46,14 @@ public class SensorTypeServiceImpl implements SensorTypeService {
   }
 
   @Override
-  public SensorType register(SensorType type) {
+  public SensorType register(SensorType type) throws EntityAlreadyExists {
     logger.debug("[SENSOR TYPES - REGISTER] Register new sensor type " + type);
-    return sensorTypeRepository.findByName(type.getName()).orElse(sensorTypeRepository.save(type));
+    Optional<SensorType> sensorType = sensorTypeRepository.findByName(type.getName());
+    if (sensorType.isPresent()) {
+      throw new EntityAlreadyExists();
+    } else {
+      return sensorTypeRepository.save(type);
+    }
   }
 
   @Override
@@ -65,7 +72,8 @@ public class SensorTypeServiceImpl implements SensorTypeService {
         .orElseThrow(EntityNotFoundException::new);
     logger.debug("[SENSOR TYPES - REMOVE] Searching if exists sensors with this sensor type");
     PageRequest pageRequest = PageRequest.of(0, 1);
-    if (!sensorRepository.findBySensorTypeId(id, pageRequest).getContent().isEmpty()) {
+    Page response = sensorRepository.findBySensorTypeId(id, pageRequest);
+    if (response != null && !response.getContent().isEmpty()) {
       throw new EntityHasRelationsException();
     } else {
       sensorTypeRepository.delete(sensorTypeEntity);
