@@ -1,12 +1,14 @@
 package com.torresj.apisensorserver.models;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Data
 @Entity
@@ -27,5 +29,9 @@ public class SensorType implements Serializable {
 
   @Column
   private String actions;
+
+  @Column(nullable = false, updatable = false)
+  @CreationTimestamp
+  private LocalDateTime createAt;
 
 }

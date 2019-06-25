@@ -14,4 +14,6 @@ public interface VariableSensorRelationRepository extends
   List<VariableSensorRelation> findByVariableId(Long variableId);
 
   List<VariableSensorRelation> findBySensorId(Long sensorId);
+
+  void deleteBySensorIdAndVariableId(long sensorId, long variableId);
 }

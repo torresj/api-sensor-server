@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -164,6 +165,23 @@ public class UserController {
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "User or house not found", e);
     } catch (Exception e) {
       logger.error("[USER HOUSE - ADD] Error adding house", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+    }
+  }
+
+  @DeleteMapping("/{id}/houses")
+  @ApiOperation(value = "Delete relation house-user", response = House.class, notes = "House must exist")
+  public ResponseEntity<House> removeUserHouseById(@PathVariable("id") long id,
+      @RequestBody() long houseId) {
+    try {
+      logger.info("[USER HOUSE - REMOVE] Remove house to user");
+      House house = userService.removeHouse(id, houseId);
+      return new ResponseEntity<>(house, HttpStatus.OK);
+    } catch (EntityNotFoundException e) {
+      logger.error("[USER HOUSE - REMOVE] User not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "User or house not found", e);
+    } catch (Exception e) {
+      logger.error("[USER HOUSE - REMOVE] Error removing house", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }

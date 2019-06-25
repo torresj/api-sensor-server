@@ -23,4 +23,6 @@ public interface SensorService {
   Sensor register(Sensor sensor) throws EntityNotFoundException;
 
   Sensor removeSensor(long id) throws EntityNotFoundException;
+
+  Variable removeVariable(long id, long variableId) throws EntityNotFoundException;
 }

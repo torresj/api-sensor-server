@@ -121,6 +121,28 @@ public class SensorController {
     }
   }
 
+  @DeleteMapping(value = "/{id}/variables")
+  @ApiOperation(value = "Delete variable from sensor variables list", response = Variable.class, notes = "Variable must exist")
+  public ResponseEntity<Variable> deleteVariablesSensorByID(@PathVariable("id") long id,
+      @RequestBody() long variableId) {
+    try {
+      logger.info(
+          "[SENSOR VARIABLES - REMOVE] Remove variable " + variableId + " from variables sensor "
+              + id
+              + " list");
+
+      Variable variable = sensorService.removeVariable(id, variableId);
+
+      return new ResponseEntity<>(variable, HttpStatus.OK);
+    } catch (EntityNotFoundException e) {
+      logger.error("[SENSOR VARIABLES - REMOVE] Sensor or variable not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor or variable not found", e);
+    } catch (Exception e) {
+      logger.error("[SENSOR VARIABLES - REMOVE] Error removing variable from DB", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+    }
+  }
+
   @PutMapping
   @ApiOperation(value = "Update sensor", response = Sensor.class, notes = "SensorType and House must exist. House can be null")
   public ResponseEntity<Sensor> update(@RequestBody() Sensor sensor) {

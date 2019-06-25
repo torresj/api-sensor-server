@@ -87,7 +87,7 @@ public class SensorTypeController {
   }
 
   @PutMapping()
-  @ApiOperation(value = "Save new sensor type", response = SensorType.class)
+  @ApiOperation(value = "Update new sensor type", response = SensorType.class)
   public ResponseEntity<SensorType> update(@RequestBody() SensorType type) {
     try {
       logger.info("[SENSOR TYPE - UPDATE] Update sensor type: " + type);

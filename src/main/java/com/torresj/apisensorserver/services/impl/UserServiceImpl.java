@@ -112,6 +112,17 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public House removeHouse(long userId, long houseId) throws EntityNotFoundException {
+    logger.debug(
+        "[USER HOUSE - REM|OVE] Remove house " + houseId + " from User houses " + userId + " list");
+    userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+    House house = houseRepository.findById(houseId)
+        .orElseThrow(EntityNotFoundException::new);
+    userHouseRelationRepository.deleteByHouseIdAndUserId(houseId, userId);
+    return house;
+  }
+
+  @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException(username));

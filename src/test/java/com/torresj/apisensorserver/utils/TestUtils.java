@@ -1,4 +1,4 @@
-package utils;
+package com.torresj.apisensorserver.utils;
 
 import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.Record;
@@ -6,6 +6,7 @@ import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.models.SensorType;
 import com.torresj.apisensorserver.models.User;
 import com.torresj.apisensorserver.models.Variable;
+import com.torresj.apisensorserver.models.VariableSensorRelation;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ public class TestUtils {
 
   private static final Random random = new Random();
 
-  public static Sensor getExampleSensor(long id) {
+  public static Sensor getExampleSensor(long id, long houseId, long sensorType) {
     Sensor sensor = new Sensor();
     sensor.setCreateAt(LocalDateTime.now());
     sensor.setId(id);
@@ -23,14 +24,25 @@ public class TestUtils {
     sensor.setLastConnection(LocalDateTime.now());
     sensor.setMac("mac" + id);
     sensor.setName("Sensor" + id);
+    sensor.setHouseId(houseId);
+    sensor.setSensorTypeId(sensorType);
     return sensor;
   }
 
-  private static SensorType getExampleSensorType(String name) {
+  public static SensorType getExampleSensorType(String name) {
     SensorType type = new SensorType();
     type.setName(name);
     type.setId(random.nextLong());
     type.setDescription(name);
+    type.setActions("Action1;Action2;Action3");
+    return type;
+  }
+
+  public static SensorType getExampleSensorType(long id) {
+    SensorType type = new SensorType();
+    type.setName("Type" + id);
+    type.setId(id);
+    type.setDescription("Type" + id);
     type.setActions("Action1;Action2;Action3");
     return type;
   }
@@ -82,14 +94,6 @@ public class TestUtils {
     return testList;
   }
 
-  public static List<Sensor> getExampleSensors(int n) {
-    List<Sensor> testList = new ArrayList();
-    for (int i = 0; i < n; i++) {
-      testList.add(getExampleSensor((long) i));
-    }
-    return testList;
-  }
-
   public static List<House> getExampleHouses(int n) {
     List<House> testList = new ArrayList();
     for (int i = 0; i < n; i++) {
@@ -106,5 +110,11 @@ public class TestUtils {
     return testList;
   }
 
-
+  public static VariableSensorRelation getExampleVariableRelation(long variableId, long sensorId) {
+    VariableSensorRelation relation = new VariableSensorRelation();
+    relation.setId(random.nextLong());
+    relation.setVariableId(variableId);
+    relation.setSensorId(sensorId);
+    return relation;
+  }
 }

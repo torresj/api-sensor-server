@@ -191,4 +191,17 @@ public class SensorServiceImpl implements SensorService {
 
     return sensor;
   }
+
+  @Override
+  public Variable removeVariable(long sensorId, long variableId) throws EntityNotFoundException {
+    logger.debug(
+        "[SENSOR VARIABLES - REMOVE] Remove variable " + variableId + " from variables sensor "
+            + sensorId
+            + " list");
+    sensorRepository.findById(sensorId).orElseThrow(EntityNotFoundException::new);
+    Variable variable = variableRepository.findById(variableId)
+        .orElseThrow(EntityNotFoundException::new);
+    variableSensorRelationRepository.deleteBySensorIdAndVariableId(sensorId, variableId);
+    return variable;
+  }
 }

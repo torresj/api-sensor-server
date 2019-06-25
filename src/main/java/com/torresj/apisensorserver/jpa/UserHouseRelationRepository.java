@@ -9,4 +9,6 @@ public interface UserHouseRelationRepository extends JpaRepository<UserHouseRela
   List<UserHouseRelation> findByUserId(long userId);
 
   List<UserHouseRelation> findByHouseId(long houseId);
+
+  void deleteByHouseIdAndUserId(long houseId, long userId);
 }
