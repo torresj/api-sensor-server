@@ -172,7 +172,7 @@ public class SensorServiceImpl implements SensorService {
   @Override
   public Sensor removeSensor(long id) throws EntityNotFoundException {
     logger.debug("[SENSOR - REMOVE SENSOR] Searching sensor by id: " + id);
-    Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+    Sensor sensor = sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     sensorRepository.delete(sensor);
 
     logger.debug("[SENSOR - REGISTER] Remove relations variable - sensor");

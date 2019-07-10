@@ -29,15 +29,6 @@ public class TestUtils {
     return sensor;
   }
 
-  public static SensorType getExampleSensorType(String name) {
-    SensorType type = new SensorType();
-    type.setName(name);
-    type.setId(random.nextLong());
-    type.setDescription(name);
-    type.setActions("Action1;Action2;Action3");
-    return type;
-  }
-
   public static SensorType getExampleSensorType(long id) {
     SensorType type = new SensorType();
     type.setName("Type" + id);
@@ -88,7 +79,7 @@ public class TestUtils {
 
   public static List<Variable> getExampleVariables(int n) {
     List<Variable> testList = new ArrayList();
-    for (int i = 0; i < n; i++) {
+    for (int i = 1; i <= n; i++) {
       testList.add(getExampleVariable((long) i));
     }
     return testList;
