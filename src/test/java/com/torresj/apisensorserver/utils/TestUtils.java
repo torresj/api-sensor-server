@@ -5,6 +5,7 @@ import com.torresj.apisensorserver.models.Record;
 import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.models.SensorType;
 import com.torresj.apisensorserver.models.User;
+import com.torresj.apisensorserver.models.UserHouseRelation;
 import com.torresj.apisensorserver.models.Variable;
 import com.torresj.apisensorserver.models.VariableSensorRelation;
 import java.time.LocalDateTime;
@@ -56,7 +57,7 @@ public class TestUtils {
     return record;
   }
 
-  public static User getExampleUser(String name, String password, String rol) {
+  public static User getExampleUser(String name, String password, User.Rol rol) {
     User user = new User();
     user.setCreateAt(LocalDateTime.now());
     user.setLastConnection(LocalDateTime.now());
@@ -106,6 +107,14 @@ public class TestUtils {
     relation.setId(random.nextLong());
     relation.setVariableId(variableId);
     relation.setSensorId(sensorId);
+    return relation;
+  }
+
+  public static UserHouseRelation getExampleUserHouseRelation(long userId, long houseId) {
+    UserHouseRelation relation = new UserHouseRelation();
+    relation.setId(random.nextLong());
+    relation.setHouseId(houseId);
+    relation.setUserId(userId);
     return relation;
   }
 }

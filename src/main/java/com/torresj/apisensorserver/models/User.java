@@ -22,6 +22,11 @@ public class User implements Serializable {
   private static final String ROL_USER = "user";
   private static final String ROL_SENSOR = "sensor";
 
+  public enum Rol {
+    USER,
+    ADMIN
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(updatable = false)
@@ -34,7 +39,7 @@ public class User implements Serializable {
   private String password;
 
   @Column(nullable = false)
-  private String rol;
+  private Rol rol;
 
   @Column(nullable = false, updatable = false)
   @CreationTimestamp

@@ -156,7 +156,6 @@ public class SensorServiceTest {
     Sensor sensor = TestUtils.getExampleSensor(1, 1, 1);
     Variable variable = TestUtils.getExampleVariable(1);
     Variable variableExpected = TestUtils.getExampleVariable(1);
-    VariableSensorRelation relation = TestUtils.getExampleVariableRelation(1, 1);
 
     //When
     when(sensorRepository.findById(anyLong())).thenReturn(Optional.of(sensor));
