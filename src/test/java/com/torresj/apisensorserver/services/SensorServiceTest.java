@@ -16,7 +16,6 @@ import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.models.SensorType;
 import com.torresj.apisensorserver.models.Variable;
 import com.torresj.apisensorserver.models.VariableSensorRelation;
-import com.torresj.apisensorserver.rabbitmq.Producer;
 import com.torresj.apisensorserver.services.impl.SensorServiceImpl;
 import com.torresj.apisensorserver.utils.TestUtils;
 import java.util.ArrayList;
@@ -46,8 +45,6 @@ public class SensorServiceTest {
   private SensorTypeRepository sensorTypeRepository;
   @Mock
   private HouseRepository houseRepository;
-  @Mock
-  private Producer producer;
 
   private static final int nPage = 0;
   private static final int elements = 20;
@@ -56,7 +53,7 @@ public class SensorServiceTest {
 
   @InjectMocks
   private SensorService sensorService = new SensorServiceImpl(sensorRepository, variableRepository,
-      variableSensorRelationRepository, sensorTypeRepository, houseRepository, producer);
+      variableSensorRelationRepository, sensorTypeRepository, houseRepository);
 
   @Test
   public void getSensors() {

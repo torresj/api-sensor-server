@@ -1,15 +1,10 @@
 package com.torresj.apisensorserver.services.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.RecordRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
 import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.models.Record;
-import com.torresj.apisensorserver.rabbitmq.Producer;
 import com.torresj.apisensorserver.services.RecordService;
 import java.time.LocalDate;
 import org.apache.logging.log4j.LogManager;
@@ -32,15 +27,11 @@ public class RecordServiceImpl implements RecordService {
 
   private SensorRepository sensorRepository;
 
-  private Producer producer;
-
   public RecordServiceImpl(RecordRepository recordRespository,
-      VariableRepository variableRepository, SensorRepository sensorRepository,
-      Producer producer) {
+      VariableRepository variableRepository, SensorRepository sensorRepository) {
     this.recordRespository = recordRespository;
     this.variableRepository = variableRepository;
     this.sensorRepository = sensorRepository;
-    this.producer = producer;
   }
 
   @Override
@@ -51,17 +42,6 @@ public class RecordServiceImpl implements RecordService {
     variableRepository.findById(record.getVariableId()).orElseThrow(EntityNotFoundException::new);
 
     Record entity = recordRespository.save(record);
-
-    logger.debug("[RECORD - REGISTER] Sending data to frontend via AMPQ message");
-
-    ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
-    ampqMsg.put("type", "Create");
-    ampqMsg.put("model", "Record");
-    ampqMsg.set("data",
-        new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(entity, JsonNode.class));
-
-    producer.produceMsg(ampqMsg.toString());
 
     return entity;
   }

@@ -1,9 +1,5 @@
 package com.torresj.apisensorserver.services.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
@@ -13,7 +9,6 @@ import com.torresj.apisensorserver.jpa.VariableSensorRelationRepository;
 import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.models.Variable;
 import com.torresj.apisensorserver.models.VariableSensorRelation;
-import com.torresj.apisensorserver.rabbitmq.Producer;
 import com.torresj.apisensorserver.services.SensorService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,19 +37,16 @@ public class SensorServiceImpl implements SensorService {
 
   private HouseRepository houseRepository;
 
-  private Producer producer;
-
   public SensorServiceImpl(SensorRepository sensorRepository,
       VariableRepository variableRepository,
       VariableSensorRelationRepository variableSensorRelationRepository,
       SensorTypeRepository sensorTypeRepository,
-      HouseRepository houseRepository, Producer producer) {
+      HouseRepository houseRepository) {
     this.sensorRepository = sensorRepository;
     this.variableRepository = variableRepository;
     this.variableSensorRelationRepository = variableSensorRelationRepository;
     this.sensorTypeRepository = sensorTypeRepository;
     this.houseRepository = houseRepository;
-    this.producer = producer;
   }
 
   @Override
@@ -123,17 +115,6 @@ public class SensorServiceImpl implements SensorService {
         .orElseThrow(EntityNotFoundException::new);
     sensor = sensorRepository.save(sensor);
 
-    logger.debug("[SENSOR - REGISTER] Sending data to frontend via AMPQ message");
-
-    ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
-    ampqMsg.put("type", "Update");
-    ampqMsg.put("model", "Sensor");
-    ampqMsg.set("data",
-        new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(sensor, JsonNode.class));
-
-    producer.produceMsg(ampqMsg.toString());
-
     return sensor;
   }
 
@@ -154,17 +135,6 @@ public class SensorServiceImpl implements SensorService {
       sensor.setLastConnection(LocalDateTime.now());
       sensor = sensorRepository.save(sensor);
 
-      logger.debug("[SENSOR - REGISTER] Sending data to frontend via AMPQ message");
-
-      ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
-      ampqMsg.put("type", "Create");
-      ampqMsg.put("model", "Sensor");
-      ampqMsg.set("data",
-          new ObjectMapper().registerModule(new JavaTimeModule())
-              .convertValue(sensor, JsonNode.class));
-
-      producer.produceMsg(ampqMsg.toString());
-
       return sensor;
     }
   }
@@ -177,17 +147,6 @@ public class SensorServiceImpl implements SensorService {
 
     logger.debug("[SENSOR - REGISTER] Remove relations variable - sensor");
     variableSensorRelationRepository.deleteBySensorId(id);
-
-    logger.debug("[SENSOR - REGISTER] Sending data to frontend via AMPQ message");
-
-    ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
-    ampqMsg.put("type", "Delete");
-    ampqMsg.put("model", "Sensor");
-    ampqMsg.set("data",
-        new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(sensor, JsonNode.class));
-
-    producer.produceMsg(ampqMsg.toString());
 
     return sensor;
   }

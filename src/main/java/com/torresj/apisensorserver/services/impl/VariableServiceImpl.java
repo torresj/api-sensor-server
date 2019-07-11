@@ -1,9 +1,5 @@
 package com.torresj.apisensorserver.services.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.SensorRepository;
@@ -12,7 +8,6 @@ import com.torresj.apisensorserver.jpa.VariableSensorRelationRepository;
 import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.models.Variable;
 import com.torresj.apisensorserver.models.VariableSensorRelation;
-import com.torresj.apisensorserver.rabbitmq.Producer;
 import com.torresj.apisensorserver.services.VariableService;
 import java.util.List;
 import java.util.Optional;
@@ -36,16 +31,12 @@ public class VariableServiceImpl implements VariableService {
 
   private VariableSensorRelationRepository variableSensorRelationRepository;
 
-  private Producer producer;
-
   public VariableServiceImpl(VariableRepository variableRepository,
       SensorRepository sensorRepository,
-      VariableSensorRelationRepository variableSensorRelationRepository,
-      Producer producer) {
+      VariableSensorRelationRepository variableSensorRelationRepository) {
     this.variableRepository = variableRepository;
     this.sensorRepository = sensorRepository;
     this.variableSensorRelationRepository = variableSensorRelationRepository;
-    this.producer = producer;
   }
 
   @Override
@@ -72,18 +63,6 @@ public class VariableServiceImpl implements VariableService {
     logger.debug("[VARIABLE - UPDATE] Variable exists. Updating ...");
     variable.setId(entity.getId());
     variableRepository.save(variable);
-
-    logger.debug("[VARIABLE - UPDATE] Sending data to frontend via AMPQ message");
-
-    ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
-    ampqMsg.put("type", "update");
-    ampqMsg.put("model", "Variable");
-    ampqMsg.set("data",
-        new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(variable, JsonNode.class));
-
-    producer.produceMsg(ampqMsg.toString());
-
     return variable;
   }
 
@@ -95,17 +74,6 @@ public class VariableServiceImpl implements VariableService {
       throw new EntityAlreadyExists();
     } else {
       Variable variableSaved = variableRepository.save(variable);
-
-      logger.debug("[VARIABLE - REGISTER] Sending data to frontend via AMPQ message");
-
-      ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
-      ampqMsg.put("type", "Create");
-      ampqMsg.put("model", "Variable");
-      ampqMsg.set("data",
-          new ObjectMapper().registerModule(new JavaTimeModule()).convertValue(variableSaved,
-              JsonNode.class));
-
-      producer.produceMsg(ampqMsg.toString());
       return variableSaved;
     }
   }
@@ -119,17 +87,6 @@ public class VariableServiceImpl implements VariableService {
 
     logger.debug("[VARIABLE - DELETE] Delete sensor - variable relation");
     variableSensorRelationRepository.deleteByVariableId(id);
-
-    logger.debug("[VARIABLE - DELETE] Sending data to frontend via AMPQ message");
-
-    ObjectNode ampqMsg = new ObjectMapper().createObjectNode();
-    ampqMsg.put("type", "Delete");
-    ampqMsg.put("model", "Variable");
-    ampqMsg.set("data",
-        new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(variable, JsonNode.class));
-
-    producer.produceMsg(ampqMsg.toString());
 
     return variable;
   }

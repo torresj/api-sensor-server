@@ -12,7 +12,6 @@ import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.models.Record;
 import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.models.Variable;
-import com.torresj.apisensorserver.rabbitmq.Producer;
 import com.torresj.apisensorserver.services.impl.RecordServiceImpl;
 import com.torresj.apisensorserver.utils.TestUtils;
 import java.time.LocalDate;
@@ -37,12 +36,10 @@ public class RecordServiceTest {
   private SensorRepository sensorRepository;
   @Mock
   private VariableRepository variableRepository;
-  @Mock
-  private Producer producer;
 
   @InjectMocks
   private RecordService recordService = new RecordServiceImpl(recordRepository, variableRepository,
-      sensorRepository, producer);
+      sensorRepository);
 
 
   private static final int nPage = 0;
