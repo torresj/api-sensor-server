@@ -12,7 +12,7 @@ import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
 import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.User;
-import com.torresj.apisensorserver.models.User.Rol;
+import com.torresj.apisensorserver.models.User.Role;
 import com.torresj.apisensorserver.models.UserHouseRelation;
 import com.torresj.apisensorserver.services.impl.UserServiceImpl;
 import com.torresj.apisensorserver.utils.TestUtils;
@@ -52,9 +52,9 @@ public class UserServiceTest {
   public void getUsers() {
     //Given
     List<User> users = new ArrayList<>();
-    users.add(TestUtils.getExampleUser("test1", "test1", Rol.USER));
-    users.add(TestUtils.getExampleUser("test2", "test1", Rol.USER));
-    users.add(TestUtils.getExampleUser("test2", "test1", Rol.USER));
+    users.add(TestUtils.getExampleUser("test1", "test1", Role.USER));
+    users.add(TestUtils.getExampleUser("test2", "test1", Role.USER));
+    users.add(TestUtils.getExampleUser("test2", "test1", Role.USER));
 
     //When
     when(userRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(users));
@@ -67,7 +67,7 @@ public class UserServiceTest {
   @Test
   public void getUser() throws EntityNotFoundException {
     //Given
-    User user = TestUtils.getExampleUser("test1", "test1", Rol.USER);
+    User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
 
     //When
     when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
@@ -80,7 +80,7 @@ public class UserServiceTest {
   @Test
   public void getUserByName() throws EntityNotFoundException {
     //Given
-    User user = TestUtils.getExampleUser("test1", "test1", Rol.USER);
+    User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
 
     //When
     when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
@@ -93,7 +93,7 @@ public class UserServiceTest {
   @Test
   public void register() throws EntityAlreadyExists {
     //Given
-    User user = TestUtils.getExampleUser("test1", "test1", Rol.USER);
+    User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
 
     //Given
     when(userRepository.save(user)).thenReturn(user);
@@ -106,7 +106,7 @@ public class UserServiceTest {
   @Test(expected = EntityAlreadyExists.class)
   public void registerEntityAlreadyExists() throws EntityAlreadyExists {
     //Given
-    User user = TestUtils.getExampleUser("test1", "test1", Rol.USER);
+    User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
 
     //Given
     when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
@@ -116,7 +116,7 @@ public class UserServiceTest {
   @Test
   public void getHouses() throws EntityNotFoundException {
     //Given
-    User user = TestUtils.getExampleUser("test1", "test1", Rol.USER);
+    User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
     List<House> houses = TestUtils.getExampleHouses(3);
     List<Long> ids = Arrays.asList(1L, 2L, 3L);
     List<UserHouseRelation> relations = new ArrayList<>();
@@ -137,7 +137,7 @@ public class UserServiceTest {
   @Test
   public void addHouse() throws EntityNotFoundException {
     //Given
-    User user = TestUtils.getExampleUser("test1", "test1", Rol.USER);
+    User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
     House house = TestUtils.getExampleHouse(1);
 
     //When
@@ -153,7 +153,7 @@ public class UserServiceTest {
   @Test
   public void update() throws EntityNotFoundException {
     //Given
-    User user = TestUtils.getExampleUser("test1", "test1", Rol.USER);
+    User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
 
     //Given
     when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));

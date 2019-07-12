@@ -22,7 +22,7 @@ public class User implements Serializable {
   private static final String ROL_USER = "user";
   private static final String ROL_SENSOR = "sensor";
 
-  public enum Rol {
+  public enum Role {
     USER,
     ADMIN
   }
@@ -39,7 +39,7 @@ public class User implements Serializable {
   private String password;
 
   @Column(nullable = false)
-  private Rol rol;
+  private Role role;
 
   @Column(nullable = false, updatable = false)
   @CreationTimestamp

@@ -1,12 +1,10 @@
 package com.torresj.apisensorserver.security;
 
 
-import static com.torresj.apisensorserver.security.SecurityConstants.SIGN_UP_URL;
-
 import com.torresj.apisensorserver.services.UserService;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -17,6 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
   /* Services */
@@ -33,8 +32,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.cors().and().csrf().disable().authorizeRequests().antMatchers(HttpMethod.POST, SIGN_UP_URL)
-        .permitAll()
+    http.cors().and().csrf().disable().authorizeRequests()
         .antMatchers("/v2/api-docs", "/swagger-resources/configuration/ui", "/swagger-resources",
             "/swagger-resources/configuration/security", "/swagger-ui.html", "/webjars/**")
         .permitAll().anyRequest().authenticated().and()

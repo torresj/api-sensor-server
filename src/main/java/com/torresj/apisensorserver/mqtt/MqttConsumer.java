@@ -32,7 +32,7 @@ public class MqttConsumer {
 
   public void messageHandler(String message) {
     try {
-      logger.info("[MQTT - MESSAGE RECIVE] Message recive from mqtt server :" + message);
+      logger.info("[MQTT - MESSAGE RECEIVE] Message receive from mqtt server :" + message);
 
       ObjectMapper objectMapper = new ObjectMapper();
       MqttMessage mqttMsg = objectMapper.readValue(message, MqttMessage.class);
@@ -69,7 +69,7 @@ public class MqttConsumer {
   private void errorProcessor(MqttMessage message) {
     try {
       Sensor sensor = sensorService.getSensor(message.getSensorId());
-      logger.error("[ERROR] Error recive from sensor => " + sensor);
+      logger.error("[ERROR] Error receive from sensor => " + sensor);
       logger.error(message);
     } catch (EntityNotFoundException e) {
       logger.error("[ERROR] Entity not found: " + message);

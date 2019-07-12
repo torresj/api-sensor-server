@@ -57,14 +57,14 @@ public class TestUtils {
     return record;
   }
 
-  public static User getExampleUser(String name, String password, User.Rol rol) {
+  public static User getExampleUser(String name, String password, User.Role rol) {
     User user = new User();
     user.setCreateAt(LocalDateTime.now());
     user.setLastConnection(LocalDateTime.now());
     user.setId(random.nextLong());
     user.setUsername(name);
     user.setPassword(password);
-    user.setRol(rol);
+    user.setRole(rol);
     return user;
   }
 

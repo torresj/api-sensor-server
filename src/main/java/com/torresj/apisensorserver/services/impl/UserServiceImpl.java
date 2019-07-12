@@ -1,7 +1,5 @@
 package com.torresj.apisensorserver.services.impl;
 
-import static java.util.Collections.emptyList;
-
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.HouseRepository;
@@ -9,17 +7,23 @@ import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
 import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.User;
+import com.torresj.apisensorserver.models.User.Role;
 import com.torresj.apisensorserver.models.UserHouseRelation;
 import com.torresj.apisensorserver.services.UserService;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -128,8 +132,7 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(() -> new UsernameNotFoundException(username));
 
     return new org.springframework.security.core.userdetails.User(user.getUsername(),
-        user.getPassword(),
-        emptyList());
+        user.getPassword(), getAuthorities(user.getRole()));
   }
 
   @Override
@@ -137,5 +140,13 @@ public class UserServiceImpl implements UserService {
     Principal principal = SecurityContextHolder.getContext().getAuthentication();
     return userRepository.findByUsername(principal.getName())
         .orElseThrow(EntityNotFoundException::new);
+  }
+
+  private Set<? extends GrantedAuthority> getAuthorities(User.Role userRole) {
+    List<Role> roles = new ArrayList<>();
+    roles.add(userRole);
+    Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+    roles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name())));
+    return authorities;
   }
 }
