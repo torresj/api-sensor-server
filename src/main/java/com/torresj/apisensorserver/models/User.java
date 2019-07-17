@@ -8,19 +8,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements Serializable {
 
   private static final long serialVersionUID = 608601372639930858L;
-  private static final String ROL_ADMIN = "admin";
-  private static final String ROL_USER = "user";
-  private static final String ROL_SENSOR = "sensor";
 
   public enum Role {
     USER,

@@ -4,6 +4,7 @@ import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.User;
+import com.torresj.apisensorserver.models.User.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -27,4 +28,5 @@ public interface UserService extends UserDetailsService {
 
   House removeHouse(long id, long houseId) throws EntityNotFoundException;
 
+  boolean isUserAllowed(String userName, Role... roles) throws EntityNotFoundException;
 }

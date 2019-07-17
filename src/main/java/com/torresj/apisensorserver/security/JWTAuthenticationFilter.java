@@ -47,7 +47,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       FilterChain chain,
       Authentication auth) {
     String token = Jwts.builder().setIssuedAt(new Date()).setIssuer(ISSUER_INFO)
-        .setSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal())
+        .setSubject(((CustomUserDetails) auth.getPrincipal())
             .getUsername())
         .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
         .signWith(SignatureAlgorithm.HS512, SECRET).compact();

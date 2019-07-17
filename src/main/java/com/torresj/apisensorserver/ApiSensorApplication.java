@@ -1,4 +1,4 @@
-package com.torresj.apisensorserver.server;
+package com.torresj.apisensorserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
