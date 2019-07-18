@@ -144,4 +144,18 @@ public class UserServiceImpl implements UserService {
     User user = getUser(userName);
     return Arrays.asList(roles).contains(user.getRole()) ? true : false;
   }
+
+  @Override
+  public boolean isSameUser(String userName, long userId) throws EntityNotFoundException {
+    User principal = getUser(userName);
+    User user = getUser(userId);
+    return principal.equals(user);
+  }
+
+  @Override
+  public boolean isSameUser(String userName, String userToFind) throws EntityNotFoundException {
+    User principal = getUser(userName);
+    User user = getUser(userToFind);
+    return principal.equals(user);
+  }
 }

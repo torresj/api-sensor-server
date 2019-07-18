@@ -73,11 +73,39 @@ public class UserController {
 
   @GetMapping(value = "/{id}")
   @ApiOperation(value = "Retrieve user by id", response = User.class)
-  public ResponseEntity<User> getHouseByID(@PathVariable("id") long id) {
+  public ResponseEntity<User> getUserByID(@PathVariable("id") long id, Principal principal) {
     try {
-      logger.info("[USER - GET] Get users from DB with id: " + id);
+      logger.info("[USER - GET] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN) && !userService
+          .isSameUser(principal.getName(), id)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
+      logger.info("[USER - GET] Get user from DB with id: " + id);
 
       User user = userService.getUser(id);
+
+      return new ResponseEntity<>(user, HttpStatus.OK);
+    } catch (EntityNotFoundException e) {
+      logger.error("[USER - GET] User not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[USER - GET] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
+    } catch (Exception e) {
+      logger.error("[USER - GET] Error getting users from DB", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+    }
+  }
+
+  @GetMapping(value = "/logged")
+  @ApiOperation(value = "Retrieve logged user data", response = User.class)
+  public ResponseEntity<User> getUserLogged(Principal principal) {
+    try {
+      logger.info("[USER - GET] Get user logged");
+
+      User user = userService.getUser(principal.getName());
 
       return new ResponseEntity<>(user, HttpStatus.OK);
     } catch (EntityNotFoundException e) {
@@ -93,8 +121,14 @@ public class UserController {
   @ApiOperation(value = "Retrieve user by id", response = User.class)
   public ResponseEntity<Page<House>> getHouseSensorsByID(@PathVariable("id") long id,
       @RequestParam(value = "page") int nPage,
-      @RequestParam(value = "elements") int elements) {
+      @RequestParam(value = "elements") int elements, Principal principal) {
     try {
+      logger.info("[USER - GET] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN) && !userService
+          .isSameUser(principal.getName(), id)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[USER HOUSE - GET] Get user houses from DB with id: " + id);
 
       Page<House> page = userService.getHouses(id, nPage, elements);
@@ -103,24 +137,10 @@ public class UserController {
     } catch (EntityNotFoundException e) {
       logger.error("[USER - GET] User not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found", e);
-    } catch (Exception e) {
-      logger.error("[USER - GET] Error getting users from DB", e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
-    }
-  }
-
-  @GetMapping(value = "/{name}")
-  @ApiOperation(value = "Retrieve user by user name", response = User.class)
-  public ResponseEntity<User> getHouseByName(@PathVariable("name") String name) {
-    try {
-      logger.info("[USER - GET] Get users from DB with user name: " + name);
-
-      User user = userService.getUser(name);
-
-      return new ResponseEntity<>(user, HttpStatus.OK);
-    } catch (EntityNotFoundException e) {
-      logger.error("[USER - GET] User not found", e);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[USER - GET] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[USER - GET] Error getting users from DB", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -156,8 +176,14 @@ public class UserController {
 
   @PutMapping
   @ApiOperation(value = "Update user", response = User.class)
-  public ResponseEntity<User> update(@RequestBody() User user) {
+  public ResponseEntity<User> update(@RequestBody() User user, Principal principal) {
     try {
+      logger.info("[USER - UPDATE] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN) && !userService
+          .isSameUser(principal.getName(), user.getUsername())) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[USER - UPDATE] Registering user");
       user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
       User userRegister = userService.update(user);
@@ -166,6 +192,10 @@ public class UserController {
     } catch (EntityNotFoundException e) {
       logger.error("[USER - UPDATE] User not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "User not found", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[USER - REGISTER] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[USER - UPDATE] Error registering user", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);

@@ -29,4 +29,8 @@ public interface UserService extends UserDetailsService {
   House removeHouse(long id, long houseId) throws EntityNotFoundException;
 
   boolean isUserAllowed(String userName, Role... roles) throws EntityNotFoundException;
+
+  boolean isSameUser(String userName, long userId) throws EntityNotFoundException;
+
+  boolean isSameUser(String userName, String userNAme) throws EntityNotFoundException;
 }

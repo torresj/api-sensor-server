@@ -33,6 +33,7 @@ import java.util.Random;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -55,7 +56,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApiSensorApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2, replace = Replace.ANY)
-public class IntegrationApplicationTest {
+public class UserTest {
 
   @LocalServerPort
   private int port;
@@ -319,7 +320,7 @@ public class IntegrationApplicationTest {
   @Test
   public void createNewUserAsUser() throws IOException {
     if (authorizationUser == null) {
-      getAdminAuthorization();
+      getUserAuthorization();
     }
 
     CloseableHttpClient client = HttpClients.createDefault();
@@ -368,7 +369,7 @@ public class IntegrationApplicationTest {
   @Test
   public void getAllUserAsUser() throws IOException {
     if (authorizationUser == null) {
-      getAdminAuthorization();
+      getUserAuthorization();
     }
 
     CloseableHttpClient client = HttpClients.createDefault();
@@ -381,6 +382,352 @@ public class IntegrationApplicationTest {
     CloseableHttpResponse response = client.execute(httpGet);
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+
+    client.close();
+  }
+
+  @Test
+  public void getUserByIdAsAdmin() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + USERS + "/" + user.getId());
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    User userResponse = objectMapper
+        .readValue(jsonFromResponse, User.class);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(userResponse, equalTo(user));
+
+    client.close();
+  }
+
+  @Test
+  public void getUserByIdAsUser() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    User user = userRepository.findByUsername("Admin").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + USERS + "/" + user.getId());
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationUser);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+
+    client.close();
+  }
+
+  @Test
+  public void getUserByIdAsUserLoggued() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + USERS + "/" + user.getId());
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationUser);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+    User userResponse = objectMapper
+        .readValue(jsonFromResponse, User.class);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(userResponse, equalTo(user));
+
+    client.close();
+  }
+
+  @Test
+  public void getUserLoggued() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + USERS + "/logged");
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationUser);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+    User userResponse = objectMapper
+        .readValue(jsonFromResponse, User.class);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(userResponse, equalTo(user));
+
+    client.close();
+  }
+
+  @Test
+  public void getAdminLoggued() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    User user = userRepository.findByUsername("Admin").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + USERS + "/logged");
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+    User userResponse = objectMapper
+        .readValue(jsonFromResponse, User.class);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(userResponse, equalTo(user));
+
+    client.close();
+  }
+
+  @Test
+  public void getHousesByUserIdAsUser() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses?page=" + nPage + "&elements="
+            + elements);
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationUser);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    Page<House> page = objectMapper
+        .readValue(jsonFromResponse, new TypeReference<RestPage<House>>() {
+        });
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(page.getContent().size(), equalTo(1));
+
+    client.close();
+  }
+
+  @Test
+  public void getHousesByUserIdAsAdmin() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses?page=" + nPage + "&elements="
+            + elements);
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    Page<House> page = objectMapper
+        .readValue(jsonFromResponse, new TypeReference<RestPage<House>>() {
+        });
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(page.getContent().size(), equalTo(1));
+
+    client.close();
+  }
+
+  @Test
+  public void getHousesByUserIdToOtherUserId() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    User user = userRepository.findByUsername("Admin").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses?page=" + nPage + "&elements="
+            + elements);
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationUser);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+
+    client.close();
+  }
+
+  @Test
+  public void updateUserAsAdmin() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpPut httpPut = new HttpPut(
+        BASE_URL + port + PATH + USERS);
+
+    httpPut.setHeader("Content-type", "application/json");
+    httpPut.setHeader("Authorization", authorizationAdmin);
+
+    String json = "{\"username\":\"User\",\"password\":\"test\",\"role\":\"ADMIN\"}";
+    StringEntity entity = new StringEntity(json);
+
+    httpPut.setEntity(entity);
+
+    CloseableHttpResponse response = client.execute(httpPut);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    User user = objectMapper
+        .readValue(jsonFromResponse, User.class);
+
+    User userDB = userRepository.findByUsername("User").get();
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(userDB.getRole(), equalTo(user.getRole()));
+
+    userDB.setRole(Role.USER);
+    userRepository.save(userDB);
+
+    client.close();
+  }
+
+  @Test
+  public void updateUserAsUser() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpPut httpPut = new HttpPut(
+        BASE_URL + port + PATH + USERS);
+
+    httpPut.setHeader("Content-type", "application/json");
+    httpPut.setHeader("Authorization", authorizationUser);
+
+    String json = "{\"username\":\"User\",\"password\":\"test\",\"role\":\"ADMIN\"}";
+    StringEntity entity = new StringEntity(json);
+
+    httpPut.setEntity(entity);
+
+    CloseableHttpResponse response = client.execute(httpPut);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    User user = objectMapper
+        .readValue(jsonFromResponse, User.class);
+
+    User userDB = userRepository.findByUsername("User").get();
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(userDB.getRole(), equalTo(user.getRole()));
+
+    userDB.setRole(Role.USER);
+    userRepository.save(userDB);
+
+    client.close();
+  }
+
+  @Test
+  public void updateUserAsUserToOtherUser() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpPut httpPut = new HttpPut(
+        BASE_URL + port + PATH + USERS);
+
+    httpPut.setHeader("Content-type", "application/json");
+    httpPut.setHeader("Authorization", authorizationUser);
+
+    String json = "{\"username\":\"Admin\",\"password\":\"test\",\"role\":\"USER\"}";
+    StringEntity entity = new StringEntity(json);
+
+    httpPut.setEntity(entity);
+
+    CloseableHttpResponse response = client.execute(httpPut);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+
+    client.close();
+  }
+
+  @Test
+  public void addHouseToUserAsAdmin() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpPut httpPut = new HttpPut(
+        BASE_URL + port + PATH + USERS);
+
+    httpPut.setHeader("Content-type", "application/json");
+    httpPut.setHeader("Authorization", authorizationAdmin);
+
+    String json = "{\"houseId\":}";
+    StringEntity entity = new StringEntity(json);
+
+    httpPut.setEntity(entity);
+
+    CloseableHttpResponse response = client.execute(httpPut);
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    User user = objectMapper
+        .readValue(jsonFromResponse, User.class);
+
+    User userDB = userRepository.findByUsername("User").get();
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(userDB.getRole(), equalTo(user.getRole()));
+
+    userDB.setRole(Role.USER);
+    userRepository.save(userDB);
 
     client.close();
   }
