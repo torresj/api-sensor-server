@@ -696,39 +696,4 @@ public class UserTest {
 
     client.close();
   }
-
-  @Test
-  public void addHouseToUserAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
-    }
-
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPut httpPut = new HttpPut(
-        BASE_URL + port + PATH + USERS);
-
-    httpPut.setHeader("Content-type", "application/json");
-    httpPut.setHeader("Authorization", authorizationAdmin);
-
-    String json = "{\"houseId\":}";
-    StringEntity entity = new StringEntity(json);
-
-    httpPut.setEntity(entity);
-
-    CloseableHttpResponse response = client.execute(httpPut);
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
-
-    User user = objectMapper
-        .readValue(jsonFromResponse, User.class);
-
-    User userDB = userRepository.findByUsername("User").get();
-
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(userDB.getRole(), equalTo(user.getRole()));
-
-    userDB.setRole(Role.USER);
-    userRepository.save(userDB);
-
-    client.close();
-  }
 }
