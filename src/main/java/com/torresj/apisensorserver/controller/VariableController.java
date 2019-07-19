@@ -3,10 +3,13 @@ package com.torresj.apisensorserver.controller;
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.Sensor;
+import com.torresj.apisensorserver.models.User.Role;
 import com.torresj.apisensorserver.models.Variable;
+import com.torresj.apisensorserver.services.UserService;
 import com.torresj.apisensorserver.services.VariableService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.security.Principal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -33,9 +36,12 @@ public class VariableController {
 
   /* Services */
   private VariableService variableService;
+  private UserService userService;
 
-  public VariableController(VariableService variableService) {
+  public VariableController(VariableService variableService,
+      UserService userService) {
     this.variableService = variableService;
+    this.userService = userService;
   }
 
   @GetMapping
@@ -44,14 +50,23 @@ public class VariableController {
       notes = "Pageable data are required and de maximum records per page are 100",
       response = Variable.class, responseContainer = "List")
   public ResponseEntity<Page<Variable>> getVariables(@RequestParam(value = "page") int nPage,
-      @RequestParam(value = "elements") int elements) {
+      @RequestParam(value = "elements") int elements, Principal principal) {
     try {
+      logger.info("[VARIABLE - GET ALL] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[VARIABLE - GET ALL] Get variables from DB with page " + nPage + ", elements "
           + elements);
 
       Page<Variable> page = variableService.getVariables(nPage, elements);
 
       return new ResponseEntity<>(page, HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      logger.error("[VARIABLE - GET ALL] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[VARIABLE - GET ALL] Error getting variables", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -60,8 +75,15 @@ public class VariableController {
 
   @GetMapping(value = "/{id}")
   @ApiOperation(value = "Retrieve variable by id", response = Variable.class)
-  public ResponseEntity<Variable> getVariableById(@PathVariable("id") long id) {
+  public ResponseEntity<Variable> getVariableById(@PathVariable("id") long id,
+      Principal principal) {
     try {
+      logger.info("[VARIABLE - GET] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN) && !variableService
+          .hasUserVisibilityVariable(principal.getName(), id)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[VARIABLE - GET] Get variable from DB with id: " + id);
 
       Variable variable = variableService.getVariable(id);
@@ -70,6 +92,10 @@ public class VariableController {
     } catch (EntityNotFoundException e) {
       logger.error("[VARIABLE - GET] Error variable not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Variable not found", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[VARIABLE - GET] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[VARIABLE - GET] Error getting variable", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);

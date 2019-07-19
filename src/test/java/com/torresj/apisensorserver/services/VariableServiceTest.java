@@ -7,7 +7,10 @@ import static org.mockito.Mockito.when;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
+import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
+import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.jpa.VariableSensorRelationRepository;
 import com.torresj.apisensorserver.models.Sensor;
@@ -38,6 +41,12 @@ public class VariableServiceTest {
   private SensorRepository sensorRepository;
   @Mock
   private VariableSensorRelationRepository variableSensorRelationRepository;
+  @Mock
+  private UserRepository userRepository;
+  @Mock
+  private HouseRepository houseRepository;
+  @Mock
+  private UserHouseRelationRepository userHouseRelationRepository;
 
   private static final int nPage = 0;
   private static final int elements = 20;
@@ -46,7 +55,8 @@ public class VariableServiceTest {
 
   @InjectMocks
   private VariableService variableService = new VariableServiceImpl(variableRepository,
-      sensorRepository, variableSensorRelationRepository);
+      sensorRepository, userRepository, variableSensorRelationRepository, houseRepository,
+      userHouseRelationRepository);
 
 
   @Test

@@ -12,4 +12,6 @@ public interface HouseRepository extends JpaRepository<House, Long> {
   Optional<House> findByName(String name);
 
   Page<House> findByIdIn(List<Long> ids, Pageable pageable);
+
+  List<House> findByIdIn(List<Long> ids);
 }

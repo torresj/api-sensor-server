@@ -25,7 +25,8 @@ public class User implements Serializable {
 
   public enum Role {
     USER,
-    ADMIN
+    ADMIN,
+    STATION
   }
 
   @Id

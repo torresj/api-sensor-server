@@ -2,10 +2,14 @@ package com.torresj.apisensorserver.services.impl;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
+import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
+import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.jpa.VariableSensorRelationRepository;
 import com.torresj.apisensorserver.models.Sensor;
+import com.torresj.apisensorserver.models.User;
 import com.torresj.apisensorserver.models.Variable;
 import com.torresj.apisensorserver.models.VariableSensorRelation;
 import com.torresj.apisensorserver.services.VariableService;
@@ -29,14 +33,26 @@ public class VariableServiceImpl implements VariableService {
 
   private SensorRepository sensorRepository;
 
+  private UserRepository userRepository;
+
   private VariableSensorRelationRepository variableSensorRelationRepository;
+
+  private HouseRepository houseRepository;
+
+  private UserHouseRelationRepository userHouseRelationRepository;
 
   public VariableServiceImpl(VariableRepository variableRepository,
       SensorRepository sensorRepository,
-      VariableSensorRelationRepository variableSensorRelationRepository) {
+      UserRepository userService,
+      VariableSensorRelationRepository variableSensorRelationRepository,
+      HouseRepository houseRepository,
+      UserHouseRelationRepository userHouseRelationRepository) {
     this.variableRepository = variableRepository;
     this.sensorRepository = sensorRepository;
+    this.userRepository = userService;
     this.variableSensorRelationRepository = variableSensorRelationRepository;
+    this.houseRepository = houseRepository;
+    this.userHouseRelationRepository = userHouseRelationRepository;
   }
 
   @Override
@@ -101,5 +117,16 @@ public class VariableServiceImpl implements VariableService {
             Collectors.toList());
 
     return sensorRepository.findByIdIn(ids, pageRequest);
+  }
+
+  @Override
+  public boolean hasUserVisibilityVariable(String name, long id) throws EntityNotFoundException {
+    User user = userRepository.findByUsername(name).get();
+    userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    return userHouseRelationRepository.findByUserId(user.getId()).stream()
+        .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
+        .flatMap(house -> sensorRepository.findByHouseId(house.getId()).stream())
+        .flatMap(sensor -> variableSensorRelationRepository.findBySensorId(sensor.getId()).stream())
+        .anyMatch(relation -> relation.getVariableId() == id);
   }
 }

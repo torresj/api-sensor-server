@@ -19,4 +19,6 @@ public interface VariableService {
   Variable deleteVariable(long id) throws EntityNotFoundException;
 
   Page<Sensor> getSensors(long id, int nPage, int elements);
+
+  boolean hasUserVisibilityVariable(String name, long id) throws EntityNotFoundException;
 }
