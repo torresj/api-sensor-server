@@ -2,6 +2,7 @@ package com.torresj.apisensorserver.jpa;
 
 import com.torresj.apisensorserver.models.UserHouseRelation;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserHouseRelationRepository extends JpaRepository<UserHouseRelation, Long> {
@@ -10,5 +11,5 @@ public interface UserHouseRelationRepository extends JpaRepository<UserHouseRela
 
   List<UserHouseRelation> findByHouseId(long houseId);
 
-  void deleteByHouseIdAndUserId(long houseId, long userId);
+  Optional<UserHouseRelation> findByUserIdAndHouseId(long userId, long houseId);
 }

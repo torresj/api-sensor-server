@@ -202,34 +202,78 @@ public class UserController {
     }
   }
 
-  @PutMapping("/{id}/houses")
+  @DeleteMapping("/{id}")
+  @ApiOperation(value = "Remove user", response = User.class)
+  public ResponseEntity<User> remove(@PathVariable("id") long id, Principal principal) {
+    try {
+      logger.info("[USER - REMOVE] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
+      logger.info("[USER - REMOVE] Removing user");
+      User user = userService.remove(id);
+
+      return new ResponseEntity<>(user, HttpStatus.OK);
+    } catch (EntityNotFoundException e) {
+      logger.error("[USER - REMOVE] User not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "User not found", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[USER - REMOVE] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
+    } catch (Exception e) {
+      logger.error("[USER - REMOVE] Error removing user", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+    }
+  }
+
+  @PutMapping("/{id}/houses/{houseId}")
   @ApiOperation(value = "Add house", response = House.class, notes = "House must exist")
   public ResponseEntity<House> addUserHouseById(@PathVariable("id") long id,
-      @RequestBody() long houseId) {
+      @PathVariable() long houseId, Principal principal) {
     try {
+      logger.info("[USER HOUSE - ADD] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[USER HOUSE - ADD] Add new house to user");
       House house = userService.addHouse(id, houseId);
       return new ResponseEntity<>(house, HttpStatus.OK);
     } catch (EntityNotFoundException e) {
       logger.error("[USER HOUSE - ADD] User not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "User or house not found", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[USER HOUSE - ADD] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[USER HOUSE - ADD] Error adding house", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
 
-  @DeleteMapping("/{id}/houses")
+  @DeleteMapping("/{id}/houses/{houseId}")
   @ApiOperation(value = "Delete relation house-user", response = House.class, notes = "House must exist")
   public ResponseEntity<House> removeUserHouseById(@PathVariable("id") long id,
-      @RequestBody() long houseId) {
+      @PathVariable() long houseId, Principal principal) {
     try {
+      logger.info("[USER HOUSE - REMOVE] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[USER HOUSE - REMOVE] Remove house to user");
       House house = userService.removeHouse(id, houseId);
       return new ResponseEntity<>(house, HttpStatus.OK);
     } catch (EntityNotFoundException e) {
       logger.error("[USER HOUSE - REMOVE] User not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "User or house not found", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[USER HOUSE - REMOVE] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[USER HOUSE - REMOVE] Error removing house", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);

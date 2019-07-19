@@ -115,11 +115,13 @@ public class UserServiceImpl implements UserService {
   @Override
   public House removeHouse(long userId, long houseId) throws EntityNotFoundException {
     logger.debug(
-        "[USER HOUSE - REM|OVE] Remove house " + houseId + " from User houses " + userId + " list");
+        "[USER HOUSE - REMOVE] Remove house " + houseId + " from User houses " + userId + " list");
     userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
     House house = houseRepository.findById(houseId)
         .orElseThrow(EntityNotFoundException::new);
-    userHouseRelationRepository.deleteByHouseIdAndUserId(houseId, userId);
+    userHouseRelationRepository.delete(
+        userHouseRelationRepository.findByUserIdAndHouseId(userId, houseId)
+            .orElseThrow(EntityNotFoundException::new));
     return house;
   }
 
@@ -157,5 +159,17 @@ public class UserServiceImpl implements UserService {
     User principal = getUser(userName);
     User user = getUser(userToFind);
     return principal.equals(user);
+  }
+
+  @Override
+  public User remove(long id) throws EntityNotFoundException {
+    logger.debug("[USER - REMOVE] Removing user ");
+    User entity = userRepository.findById(id)
+        .orElseThrow(EntityNotFoundException::new);
+    userHouseRelationRepository.findByUserId(id).stream()
+        .forEach(userHouseRelationRepository::delete);
+    userRepository.delete(entity);
+
+    return entity;
   }
 }

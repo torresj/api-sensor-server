@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -691,6 +692,162 @@ public class UserTest {
     httpPut.setEntity(entity);
 
     CloseableHttpResponse response = client.execute(httpPut);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+
+    client.close();
+  }
+
+  @Test
+  public void addHouseToUserAsAdmin() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    House house = houseRepository.findByName("House1").get();
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpPut httpPut = new HttpPut(
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses/" + house.getId());
+
+    httpPut.setHeader("Content-type", "application/json");
+    httpPut.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpPut);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    House responseHouse = objectMapper
+        .readValue(jsonFromResponse, House.class);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(responseHouse, equalTo(house));
+    assertThat(userHouseRelationRepository.findByUserId(user.getId()).size(), equalTo(2));
+
+    client.close();
+  }
+
+  @Test
+  public void addHouseToUserAsUser() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    House house = houseRepository.findByName("House1").get();
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpPut httpPut = new HttpPut(
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses/" + house.getId());
+
+    httpPut.setHeader("Content-type", "application/json");
+    httpPut.setHeader("Authorization", authorizationUser);
+
+    CloseableHttpResponse response = client.execute(httpPut);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+    client.close();
+  }
+
+  @Test
+  public void removeHouseToUserAsAdmin() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    House house = houseRepository.findByName("House2").get();
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpDelete httpDelete = new HttpDelete(
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses/" + house.getId());
+
+    httpDelete.setHeader("Content-type", "application/json");
+    httpDelete.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpDelete);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    House responseHouse = objectMapper
+        .readValue(jsonFromResponse, House.class);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(responseHouse, equalTo(house));
+    assertThat(userHouseRelationRepository.findByUserId(user.getId()).size(), equalTo(0));
+
+    client.close();
+  }
+
+  @Test
+  public void removeHouseToUserAsUser() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    House house = houseRepository.findByName("House2").get();
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpDelete httpDelete = new HttpDelete(
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses/" + house.getId());
+
+    httpDelete.setHeader("Content-type", "application/json");
+    httpDelete.setHeader("Authorization", authorizationUser);
+
+    CloseableHttpResponse response = client.execute(httpDelete);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+    client.close();
+  }
+
+  @Test
+  public void removeUserAsAdmin() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpDelete httpDelete = new HttpDelete(
+        BASE_URL + port + PATH + USERS + "/" + user.getId());
+
+    httpDelete.setHeader("Content-type", "application/json");
+    httpDelete.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpDelete);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    User responseUser = objectMapper
+        .readValue(jsonFromResponse, User.class);
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(responseUser, equalTo(user));
+    assertThat(userRepository.findByUsername("User").isPresent(), equalTo(false));
+    assertThat(userHouseRelationRepository.findByUserId(user.getId()).isEmpty(), equalTo(true));
+
+    client.close();
+  }
+
+  @Test
+  public void removeUserAsUser() throws IOException {
+    if (authorizationUser == null) {
+      getUserAuthorization();
+    }
+
+    User user = userRepository.findByUsername("User").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpDelete httpDelete = new HttpDelete(
+        BASE_URL + port + PATH + USERS + "/" + user.getId());
+
+    httpDelete.setHeader("Content-type", "application/json");
+    httpDelete.setHeader("Authorization", authorizationUser);
+
+    CloseableHttpResponse response = client.execute(httpDelete);
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
 

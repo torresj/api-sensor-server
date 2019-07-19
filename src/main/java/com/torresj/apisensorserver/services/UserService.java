@@ -33,4 +33,6 @@ public interface UserService extends UserDetailsService {
   boolean isSameUser(String userName, long userId) throws EntityNotFoundException;
 
   boolean isSameUser(String userName, String userNAme) throws EntityNotFoundException;
+
+  User remove(long id) throws EntityNotFoundException;
 }
