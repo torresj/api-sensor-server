@@ -102,7 +102,8 @@ public class VariableServiceImpl implements VariableService {
     variableRepository.delete(variable);
 
     logger.debug("[VARIABLE - DELETE] Delete sensor - variable relation");
-    variableSensorRelationRepository.deleteByVariableId(id);
+    variableSensorRelationRepository.findByVariableId(id).stream()
+        .forEach(variableSensorRelationRepository::delete);
 
     return variable;
   }

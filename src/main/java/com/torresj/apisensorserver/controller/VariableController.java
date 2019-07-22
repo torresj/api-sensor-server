@@ -79,7 +79,8 @@ public class VariableController {
       Principal principal) {
     try {
       logger.info("[VARIABLE - GET] Check user permission");
-      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN) && !variableService
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)
+          && !variableService
           .hasUserVisibilityVariable(principal.getName(), id)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "user Not have permission for this endpoint");
@@ -104,23 +105,37 @@ public class VariableController {
 
   @PutMapping
   @ApiOperation(value = "Update variable", response = Variable.class)
-  public ResponseEntity<Variable> update(@RequestBody() Variable variable) {
+  public ResponseEntity<Variable> update(@RequestBody() Variable variable, Principal principal) {
     try {
+      logger.info("[VARIABLE - REGISTER] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[VARIABLE - REGISTER] Register variable: " + variable);
 
       Variable variableRegister = variableService.update(variable);
 
       return new ResponseEntity<>(variableRegister, HttpStatus.CREATED);
+    } catch (ResponseStatusException e) {
+      logger.error("[VARIABLE - REGISTER] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[VARIABLE - GET] Error registering variable", e);
+      logger.error("[VARIABLE - REGISTER] Error registering variable", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
 
   @PostMapping
   @ApiOperation(value = "Register variable", response = Variable.class)
-  public ResponseEntity<Variable> register(@RequestBody() Variable variable) {
+  public ResponseEntity<Variable> register(@RequestBody() Variable variable, Principal principal) {
     try {
+      logger.info("[VARIABLE - REGISTER] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[VARIABLE - REGISTER] Register variable: " + variable);
 
       Variable variableRegister = variableService.register(variable);
@@ -129,6 +144,10 @@ public class VariableController {
     } catch (EntityAlreadyExists e) {
       logger.error("[VARIABLE - REGISTER] Variable already exists", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Variable already exists", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[VARIABLE - REGISTER] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[VARIABLE - REGISTER] Error registering variable", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -137,8 +156,13 @@ public class VariableController {
 
   @DeleteMapping(value = "/{id}")
   @ApiOperation(value = "Delete variable by id", response = Variable.class)
-  public ResponseEntity<Variable> delete(@PathVariable("id") long id) {
+  public ResponseEntity<Variable> delete(@PathVariable("id") long id, Principal principal) {
     try {
+      logger.info("[VARIABLE - DELETE] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[VARIABLE - DELETE] Delete variable with id: " + id);
 
       Variable variableRegister = variableService.deleteVariable(id);
@@ -147,6 +171,10 @@ public class VariableController {
     } catch (EntityNotFoundException e) {
       logger.error("[VARIABLE - DELETE] Variable not exists", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Variable not exists", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[VARIABLE - DELETE] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[VARIABLE - DELETE] Error deleting variable", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -157,8 +185,13 @@ public class VariableController {
   @ApiOperation(value = "Retrieve all sensors witch have variable by id", response = Sensor.class, responseContainer = "List")
   public ResponseEntity<Page<Sensor>> getSensorsHaveVariableById(@PathVariable("id") long id,
       @RequestParam(value = "page") int nPage,
-      @RequestParam(value = "elements") int elements) {
+      @RequestParam(value = "elements") int elements, Principal principal) {
     try {
+      logger.info("[SENSORS HAVE VARIABLE - GET] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info(
           "[SENSORS HAVE VARIABLE - GET] Get sensors contains variable from DB with variableId: "
               + id);
@@ -166,6 +199,10 @@ public class VariableController {
       Page<Sensor> sensors = variableService.getSensors(id, nPage, elements);
 
       return new ResponseEntity<>(sensors, HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      logger.error("[SENSORS HAVE VARIABLE - GET] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[SENSORS HAVE VARIABLE - GET] Error getting sensors", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
