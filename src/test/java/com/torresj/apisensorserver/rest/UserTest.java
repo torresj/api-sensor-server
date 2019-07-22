@@ -39,6 +39,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -193,18 +194,26 @@ public class UserTest {
     User user2 = new User(null, "User", bCryptPasswordEncoder.encode("test"), Role.USER,
         LocalDateTime.now(),
         LocalDateTime.now());
+    User user3 = new User(null, "User2", bCryptPasswordEncoder.encode("test"), Role.USER,
+        LocalDateTime.now(),
+        LocalDateTime.now());
 
     user1 = userRepository.save(user1);
     user2 = userRepository.save(user2);
+    userRepository.save(user3);
 
     //Create User - House
     UserHouseRelation uhRelation1 = new UserHouseRelation(null, user1.getId(), house1.getId());
     UserHouseRelation uhRelation2 = new UserHouseRelation(null, user1.getId(), house2.getId());
     UserHouseRelation uhRelation3 = new UserHouseRelation(null, user2.getId(), house2.getId());
+    UserHouseRelation uhRelation4 = new UserHouseRelation(null, user3.getId(), house1.getId());
+    UserHouseRelation uhRelation5 = new UserHouseRelation(null, user3.getId(), house2.getId());
 
     userHouseRelationRepository.save(uhRelation1);
     userHouseRelationRepository.save(uhRelation2);
     userHouseRelationRepository.save(uhRelation3);
+    userHouseRelationRepository.save(uhRelation4);
+    userHouseRelationRepository.save(uhRelation5);
 
     //Create records
     Record record1 = new Record(null, sensor1.getId(), variable1.getId(), new Random().nextDouble(),
@@ -243,7 +252,8 @@ public class UserTest {
 
   }
 
-  private void clearDB() {
+  @After
+  public void clearDB() {
     variableRepository.deleteAll();
     sensorRepository.deleteAll();
     houseRepository.deleteAll();
@@ -362,7 +372,7 @@ public class UserTest {
         });
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(page.getContent().size(), equalTo(2));
+    assertThat(page.getContent().size(), equalTo(3));
 
     client.close();
   }
@@ -808,7 +818,7 @@ public class UserTest {
       getAdminAuthorization();
     }
 
-    User user = userRepository.findByUsername("User").get();
+    User user = userRepository.findByUsername("User2").get();
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpDelete httpDelete = new HttpDelete(
@@ -826,7 +836,7 @@ public class UserTest {
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
     assertThat(responseUser, equalTo(user));
-    assertThat(userRepository.findByUsername("User").isPresent(), equalTo(false));
+    assertThat(userRepository.findByUsername("User2").isPresent(), equalTo(false));
     assertThat(userHouseRelationRepository.findByUserId(user.getId()).isEmpty(), equalTo(true));
 
     client.close();
@@ -838,7 +848,7 @@ public class UserTest {
       getUserAuthorization();
     }
 
-    User user = userRepository.findByUsername("User").get();
+    User user = userRepository.findByUsername("User2").get();
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpDelete httpDelete = new HttpDelete(

@@ -122,7 +122,7 @@ public class VariableServiceImpl implements VariableService {
   @Override
   public boolean hasUserVisibilityVariable(String name, long id) throws EntityNotFoundException {
     User user = userRepository.findByUsername(name).get();
-    userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    variableRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     return userHouseRelationRepository.findByUserId(user.getId()).stream()
         .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
         .flatMap(house -> sensorRepository.findByHouseId(house.getId()).stream())
