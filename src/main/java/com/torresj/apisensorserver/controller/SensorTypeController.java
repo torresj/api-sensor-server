@@ -4,9 +4,12 @@ import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.SensorType;
+import com.torresj.apisensorserver.models.User.Role;
 import com.torresj.apisensorserver.services.SensorTypeService;
+import com.torresj.apisensorserver.services.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.security.Principal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -33,8 +36,12 @@ public class SensorTypeController {
 
   private SensorTypeService service;
 
-  public SensorTypeController(SensorTypeService service) {
+  private UserService userService;
+
+  public SensorTypeController(SensorTypeService service,
+      UserService userService) {
     this.service = service;
+    this.userService = userService;
   }
 
   @GetMapping
@@ -74,8 +81,13 @@ public class SensorTypeController {
 
   @PostMapping()
   @ApiOperation(value = "Save new sensor type", response = SensorType.class)
-  public ResponseEntity<SensorType> register(@RequestBody() SensorType type) {
+  public ResponseEntity<SensorType> register(@RequestBody() SensorType type, Principal principal) {
     try {
+      logger.info("[SENSOR TYPE - REGISTER] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[SENSOR TYPE - REGISTER] Register sensor type: " + type);
 
       SensorType sensorType = service.register(type);
@@ -84,6 +96,10 @@ public class SensorTypeController {
     } catch (EntityAlreadyExists e) {
       logger.error("[SENSOR TYPE - REGISTER] Sensor type already exists", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[SENSOR TYPE - REGISTER] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[SENSOR TYPE - REGISTER] Error registering sensor type from DB", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -92,8 +108,13 @@ public class SensorTypeController {
 
   @PutMapping()
   @ApiOperation(value = "Update new sensor type", response = SensorType.class)
-  public ResponseEntity<SensorType> update(@RequestBody() SensorType type) {
+  public ResponseEntity<SensorType> update(@RequestBody() SensorType type, Principal principal) {
     try {
+      logger.info("[SENSOR TYPE - UPDATE] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[SENSOR TYPE - UPDATE] Update sensor type: " + type);
 
       SensorType sensorType = service.update(type);
@@ -102,6 +123,10 @@ public class SensorTypeController {
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR TYPE - UPDATE] Sensor type not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor type not found", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[SENSOR TYPE - UPDATE] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[SENSOR TYPE - UPDATE] Error getting sensor type from DB", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -110,8 +135,13 @@ public class SensorTypeController {
 
   @DeleteMapping(value = "/{id}")
   @ApiOperation(value = "Delete sensor type", response = SensorType.class)
-  public ResponseEntity<SensorType> remove(@PathVariable("id") long id) {
+  public ResponseEntity<SensorType> remove(@PathVariable("id") long id, Principal principal) {
     try {
+      logger.info("[SENSOR TYPE - REMOVE] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[SENSOR TYPE - REMOVE] Remove sensor type: " + id);
 
       SensorType sensorType = service.remove(id);
@@ -123,6 +153,10 @@ public class SensorTypeController {
               + id + " before remove sensor type", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Sensor type has relation with existing sensors", e);
+    } catch (ResponseStatusException e) {
+      logger.error("[SENSOR TYPE - UPDATE] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR TYPE - REMOVE] Sensor type not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor type not found", e);
