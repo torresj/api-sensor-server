@@ -9,6 +9,8 @@ import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
 import com.torresj.apisensorserver.jpa.SensorTypeRepository;
+import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
+import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.jpa.VariableSensorRelationRepository;
 import com.torresj.apisensorserver.models.House;
@@ -45,15 +47,21 @@ public class SensorServiceTest {
   private SensorTypeRepository sensorTypeRepository;
   @Mock
   private HouseRepository houseRepository;
+  @Mock
+  private UserRepository userRepository;
+  @Mock
+  private UserHouseRelationRepository userHouseRelationRepository;
 
   private static final int nPage = 0;
   private static final int elements = 20;
   private static final PageRequest pageRequest = PageRequest
       .of(nPage, elements, Sort.by("createAt").descending());
 
+
   @InjectMocks
   private SensorService sensorService = new SensorServiceImpl(sensorRepository, variableRepository,
-      variableSensorRelationRepository, sensorTypeRepository, houseRepository);
+      variableSensorRelationRepository, sensorTypeRepository, houseRepository, userRepository,
+      userHouseRelationRepository);
 
   @Test
   public void getSensors() {

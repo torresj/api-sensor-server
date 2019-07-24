@@ -4,9 +4,12 @@ import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
 import com.torresj.apisensorserver.jpa.SensorTypeRepository;
+import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
+import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.jpa.VariableSensorRelationRepository;
 import com.torresj.apisensorserver.models.Sensor;
+import com.torresj.apisensorserver.models.User;
 import com.torresj.apisensorserver.models.Variable;
 import com.torresj.apisensorserver.models.VariableSensorRelation;
 import com.torresj.apisensorserver.services.SensorService;
@@ -37,16 +40,24 @@ public class SensorServiceImpl implements SensorService {
 
   private HouseRepository houseRepository;
 
+  private UserRepository userRepository;
+
+  private UserHouseRelationRepository userHouseRelationRepository;
+
   public SensorServiceImpl(SensorRepository sensorRepository,
       VariableRepository variableRepository,
       VariableSensorRelationRepository variableSensorRelationRepository,
       SensorTypeRepository sensorTypeRepository,
-      HouseRepository houseRepository) {
+      HouseRepository houseRepository,
+      UserRepository userRepository,
+      UserHouseRelationRepository userHouseRelationRepository) {
     this.sensorRepository = sensorRepository;
     this.variableRepository = variableRepository;
     this.variableSensorRelationRepository = variableSensorRelationRepository;
     this.sensorTypeRepository = sensorTypeRepository;
     this.houseRepository = houseRepository;
+    this.userRepository = userRepository;
+    this.userHouseRelationRepository = userHouseRelationRepository;
   }
 
   @Override
@@ -162,5 +173,15 @@ public class SensorServiceImpl implements SensorService {
         .orElseThrow(EntityNotFoundException::new);
     variableSensorRelationRepository.deleteBySensorIdAndVariableId(sensorId, variableId);
     return variable;
+  }
+
+  @Override
+  public boolean hasUserVisibilitySensor(String name, long id) throws EntityNotFoundException {
+    User user = userRepository.findByUsername(name).get();
+    sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    return userHouseRelationRepository.findByUserId(user.getId()).stream()
+        .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
+        .flatMap(house -> sensorRepository.findByHouseId(house.getId()).stream())
+        .anyMatch(sensor -> sensor.getId() == id);
   }
 }

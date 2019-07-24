@@ -227,7 +227,7 @@ public class BasicRestTest {
       Record record6 = new Record(null, sensor2.getId(), variable2.getId(),
           new Random().nextDouble(),
           LocalDateTime.now());
-      Record record7 = new Record(null, sensor3.getId(), variable1.getId(),
+      Record record7 = new Record(null, sensor3.getId(), variable3.getId(),
           new Random().nextDouble(),
           LocalDateTime.now());
       Record record8 = new Record(null, sensor4.getId(), variable1.getId(),

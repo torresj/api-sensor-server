@@ -2,9 +2,13 @@ package com.torresj.apisensorserver.controller;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.Record;
+import com.torresj.apisensorserver.models.User.Role;
 import com.torresj.apisensorserver.services.RecordService;
+import com.torresj.apisensorserver.services.SensorService;
+import com.torresj.apisensorserver.services.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.security.Principal;
 import java.time.LocalDate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,8 +35,15 @@ public class RecordController {
   /* Services */
   private RecordService recordService;
 
-  public RecordController(RecordService recordService) {
+  private UserService userService;
+
+  private SensorService sensorService;
+
+  public RecordController(RecordService recordService,
+      UserService userService, SensorService sensorService) {
     this.recordService = recordService;
+    this.userService = userService;
+    this.sensorService = sensorService;
   }
 
   @GetMapping
@@ -43,14 +54,25 @@ public class RecordController {
       @RequestParam(value = "page") int nPage,
       @RequestParam(value = "elements") int elements,
       @RequestParam(value = "from") @DateTimeFormat(iso = ISO.DATE) LocalDate from,
-      @RequestParam(value = "to") @DateTimeFormat(iso = ISO.DATE) LocalDate to) {
+      @RequestParam(value = "to") @DateTimeFormat(iso = ISO.DATE) LocalDate to,
+      Principal principal) {
     try {
+      logger.info("[RECORD - GET] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)
+          && !sensorService.hasUserVisibilitySensor(principal.getName(), sensorId)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info(
           "[RECORD - GET] Get records for sensor " + sensorId + " and variable " + variableId
               + " from DB with page " + nPage + ", elements " + elements + ", from "
               + from + " to " + to);
       Page<Record> page = recordService.getRecords(sensorId, variableId, nPage, elements, from, to);
       return new ResponseEntity<>(page, HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      logger.error("[RECORD - GET] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (Exception e) {
       logger.error("[RECORD - GET] Error getting records from DB", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
@@ -59,11 +81,21 @@ public class RecordController {
 
   @GetMapping(value = "/{id}")
   @ApiOperation(value = "Retrieve a record by id", response = Record.class)
-  public ResponseEntity<Record> getSensor(@PathVariable("id") long id) {
+  public ResponseEntity<Record> getSensor(@PathVariable("id") long id, Principal principal) {
     try {
+      logger.info("[RECORD - GET] Check user permission");
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)
+          && !recordService.hasUserVisibilityRecord(principal.getName(), id)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "user Not have permission for this endpoint");
+      }
       logger.info("[RECORD - GET] Get record from DB with id: " + id);
       Record record = recordService.getRecord(id);
       return new ResponseEntity<>(record, HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      logger.error("[RECORD - GET] user Not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[RECORD - GET] Error record not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "record not found", e);

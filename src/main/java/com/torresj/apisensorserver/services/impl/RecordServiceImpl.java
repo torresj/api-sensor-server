@@ -1,10 +1,14 @@
 package com.torresj.apisensorserver.services.impl;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.RecordRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
+import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
+import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.models.Record;
+import com.torresj.apisensorserver.models.User;
 import com.torresj.apisensorserver.services.RecordService;
 import java.time.LocalDate;
 import org.apache.logging.log4j.LogManager;
@@ -27,11 +31,23 @@ public class RecordServiceImpl implements RecordService {
 
   private SensorRepository sensorRepository;
 
+  private UserRepository userRepository;
+
+  private UserHouseRelationRepository userHouseRelationRepository;
+
+  private HouseRepository houseRepository;
+
   public RecordServiceImpl(RecordRepository recordRespository,
-      VariableRepository variableRepository, SensorRepository sensorRepository) {
+      VariableRepository variableRepository, SensorRepository sensorRepository,
+      UserRepository userRepository,
+      UserHouseRelationRepository userHouseRelationRepository,
+      HouseRepository houseRepository) {
     this.recordRespository = recordRespository;
     this.variableRepository = variableRepository;
     this.sensorRepository = sensorRepository;
+    this.userRepository = userRepository;
+    this.userHouseRelationRepository = userHouseRelationRepository;
+    this.houseRepository = houseRepository;
   }
 
   @Override
@@ -59,7 +75,7 @@ public class RecordServiceImpl implements RecordService {
 
     return recordRespository
         .findBySensorIdAndVariableIdAndCreateAtBetween(sensorId, variableId, from.atStartOfDay(),
-            to.atStartOfDay(),
+            to.atTime(23, 59),
             pageRequest);
 
   }
@@ -70,6 +86,16 @@ public class RecordServiceImpl implements RecordService {
     logger.debug("[RECORD - GET] Getting record with id: " + id);
     return recordRespository.findById(id).orElseThrow(EntityNotFoundException::new);
 
+  }
+
+  @Override
+  public boolean hasUserVisibilityRecord(String name, long id) throws EntityNotFoundException {
+    User user = userRepository.findByUsername(name).get();
+    Record record = recordRespository.findById(id).orElseThrow(EntityNotFoundException::new);
+    return userHouseRelationRepository.findByUserId(user.getId()).stream()
+        .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
+        .flatMap(house -> sensorRepository.findByHouseId(house.getId()).stream())
+        .anyMatch(sensor -> sensor.getId() == record.getSensorId());
   }
 
 }

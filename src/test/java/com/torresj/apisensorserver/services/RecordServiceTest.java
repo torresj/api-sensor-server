@@ -6,8 +6,11 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.RecordRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
+import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
+import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.jpa.VariableRepository;
 import com.torresj.apisensorserver.models.Record;
 import com.torresj.apisensorserver.models.Sensor;
@@ -36,10 +39,16 @@ public class RecordServiceTest {
   private SensorRepository sensorRepository;
   @Mock
   private VariableRepository variableRepository;
+  @Mock
+  private UserRepository userRepository;
+  @Mock
+  private UserHouseRelationRepository userHouseRelationRepository;
+  @Mock
+  private HouseRepository houseRepository;
 
   @InjectMocks
   private RecordService recordService = new RecordServiceImpl(recordRepository, variableRepository,
-      sensorRepository);
+      sensorRepository, userRepository, userHouseRelationRepository, houseRepository);
 
 
   private static final int nPage = 0;
@@ -82,7 +91,7 @@ public class RecordServiceTest {
 
     //When
     when(recordRepository.findBySensorIdAndVariableIdAndCreateAtBetween(1, 1,
-        date.atStartOfDay(), date.atStartOfDay(), pageRequest)).thenReturn(new PageImpl<>(records));
+        date.atStartOfDay(), date.atTime(23, 59), pageRequest)).thenReturn(new PageImpl<>(records));
     List<Record> recordsActual = recordService
         .getRecords(1, 1, 0, 20, date, date).getContent();
 

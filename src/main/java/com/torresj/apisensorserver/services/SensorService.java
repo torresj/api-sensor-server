@@ -25,4 +25,6 @@ public interface SensorService {
   Sensor removeSensor(long id) throws EntityNotFoundException;
 
   Variable removeVariable(long id, long variableId) throws EntityNotFoundException;
+
+  boolean hasUserVisibilitySensor(String name, long id) throws EntityNotFoundException;
 }

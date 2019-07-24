@@ -13,4 +13,6 @@ public interface RecordService {
       LocalDate from, LocalDate to);
 
   Record getRecord(long id) throws EntityNotFoundException;
+
+  boolean hasUserVisibilityRecord(String name, long id) throws EntityNotFoundException;
 }
