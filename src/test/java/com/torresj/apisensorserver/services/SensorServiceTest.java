@@ -1,10 +1,12 @@
 package com.torresj.apisensorserver.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
@@ -198,7 +200,7 @@ public class SensorServiceTest {
   }
 
   @Test
-  public void register() throws EntityNotFoundException {
+  public void register() throws EntityNotFoundException, EntityAlreadyExists {
     //Given
     Sensor sensor = TestUtils.getExampleSensor(1, 1, 1);
     Sensor sensorExpected = TestUtils.getExampleSensor(1, 1, 1);
@@ -206,7 +208,9 @@ public class SensorServiceTest {
     House house = TestUtils.getExampleHouse(1);
 
     //When
-    when(sensorRepository.findByMac(anyString())).thenReturn(Optional.of(sensor));
+    when(houseRepository.findById(anyLong())).thenReturn(Optional.of(house));
+    when(sensorTypeRepository.findById(anyLong())).thenReturn(Optional.of(type));
+    when(sensorRepository.save(any())).thenReturn(sensor);
     Sensor sensorActual = sensorService.register(sensor);
 
     //Then
@@ -232,10 +236,13 @@ public class SensorServiceTest {
     //Given
     Sensor sensor = TestUtils.getExampleSensor(1, 1, 1);
     Variable variable = TestUtils.getExampleVariable(1);
+    VariableSensorRelation relation = TestUtils.getExampleVariableRelation(1, 1);
 
     //When
     when(sensorRepository.findById(anyLong())).thenReturn(Optional.of(sensor));
     when(variableRepository.findById(anyLong())).thenReturn(Optional.of(variable));
+    when(variableSensorRelationRepository.findBySensorIdAndVariableId(1l, 1l))
+        .thenReturn(Optional.of(relation));
     sensorService.removeVariable(1, 1);
   }
 }

@@ -2,6 +2,7 @@ package com.torresj.apisensorserver.jpa;
 
 import com.torresj.apisensorserver.models.VariableSensorRelation;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface VariableSensorRelationRepository extends
@@ -14,6 +15,8 @@ public interface VariableSensorRelationRepository extends
   List<VariableSensorRelation> findByVariableId(Long variableId);
 
   List<VariableSensorRelation> findBySensorId(Long sensorId);
+
+  Optional<VariableSensorRelation> findBySensorIdAndVariableId(long sensorId, long variableId);
 
   void deleteBySensorIdAndVariableId(long sensorId, long variableId);
 }

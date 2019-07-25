@@ -1,5 +1,6 @@
 package com.torresj.apisensorserver.services;
 
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.models.Variable;
@@ -20,7 +21,7 @@ public interface SensorService {
 
   Sensor update(Sensor sensor) throws EntityNotFoundException;
 
-  Sensor register(Sensor sensor) throws EntityNotFoundException;
+  Sensor register(Sensor sensor) throws EntityNotFoundException, EntityAlreadyExists;
 
   Sensor removeSensor(long id) throws EntityNotFoundException;
 

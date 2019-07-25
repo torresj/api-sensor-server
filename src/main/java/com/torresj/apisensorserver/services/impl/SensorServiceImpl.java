@@ -1,5 +1,6 @@
 package com.torresj.apisensorserver.services.impl;
 
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
@@ -130,13 +131,13 @@ public class SensorServiceImpl implements SensorService {
   }
 
   @Override
-  public Sensor register(Sensor sensor) throws EntityNotFoundException {
+  public Sensor register(Sensor sensor) throws EntityNotFoundException, EntityAlreadyExists {
     logger.debug("[SENSOR - REGISTER] Searching sensor on DB");
     Optional<Sensor> entity = sensorRepository.findByMac(sensor.getMac());
 
     if (entity.isPresent()) {
       logger.debug("[SENSOR - REGISTER] Sensor exists");
-      return entity.get();
+      throw new EntityAlreadyExists(entity.get());
     } else {
       logger.info("[SENSOR - REGISTER] Registering new sensor ...");
       //check for house id and sensor type id
@@ -157,7 +158,8 @@ public class SensorServiceImpl implements SensorService {
     sensorRepository.delete(sensor);
 
     logger.debug("[SENSOR - REGISTER] Remove relations variable - sensor");
-    variableSensorRelationRepository.deleteBySensorId(id);
+    variableSensorRelationRepository.findBySensorId(id).stream()
+        .forEach(variableSensorRelationRepository::delete);
 
     return sensor;
   }
@@ -171,7 +173,9 @@ public class SensorServiceImpl implements SensorService {
     sensorRepository.findById(sensorId).orElseThrow(EntityNotFoundException::new);
     Variable variable = variableRepository.findById(variableId)
         .orElseThrow(EntityNotFoundException::new);
-    variableSensorRelationRepository.deleteBySensorIdAndVariableId(sensorId, variableId);
+    variableSensorRelationRepository
+        .delete(variableSensorRelationRepository.findBySensorIdAndVariableId(sensorId, variableId)
+            .orElseThrow(EntityNotFoundException::new));
     return variable;
   }
 
