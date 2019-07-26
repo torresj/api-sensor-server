@@ -54,7 +54,8 @@ public class HouseTest extends BasicRestTest {
         });
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(page.getContent().size(), equalTo(2));
+    assertThat(page.getContent().size(), equalTo(3
+    ));
 
     client.close();
   }
@@ -306,7 +307,7 @@ public class HouseTest extends BasicRestTest {
       getAdminAuthorization();
     }
 
-    House house = houseRepository.findByName("House1").get();
+    House house = houseRepository.findByName("House3").get();
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpDelete httpDelete = new HttpDelete(
@@ -324,7 +325,7 @@ public class HouseTest extends BasicRestTest {
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
     assertThat(responseHouse, equalTo(house));
-    assertThat(houseRepository.findByName("House1").isPresent(), equalTo(false));
+    assertThat(houseRepository.findByName("House3").isPresent(), equalTo(false));
     assertThat(userHouseRelationRepository.findByHouseId(house.getId()).isEmpty(), equalTo(true));
 
     houseRepository.save(house);
@@ -337,7 +338,7 @@ public class HouseTest extends BasicRestTest {
       getUserAuthorization();
     }
 
-    House house = houseRepository.findByName("House1").get();
+    House house = houseRepository.findByName("House3").get();
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpDelete httpDelete = new HttpDelete(
@@ -359,7 +360,7 @@ public class HouseTest extends BasicRestTest {
       getAdminAuthorization();
     }
 
-    House house = new House(null, "House3", LocalDateTime.now());
+    House house = new House(null, "House4", LocalDateTime.now());
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpPost httpPost = new HttpPost(
@@ -381,7 +382,7 @@ public class HouseTest extends BasicRestTest {
         .readValue(jsonFromResponse, House.class);
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(201));
-    assertThat(respondeHouse, equalTo(houseRepository.findByName("House3").get()));
+    assertThat(respondeHouse, equalTo(houseRepository.findByName("House4").get()));
 
     client.close();
   }
@@ -392,7 +393,7 @@ public class HouseTest extends BasicRestTest {
       getUserAuthorization();
     }
 
-    House house = new House(null, "House3", LocalDateTime.now());
+    House house = new House(null, "House4", LocalDateTime.now());
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpPost httpPost = new HttpPost(

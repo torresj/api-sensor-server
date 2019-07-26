@@ -130,9 +130,11 @@ public class BasicRestTest {
       //Create House
       House house1 = new House(null, "House1", LocalDateTime.now());
       House house2 = new House(null, "House2", LocalDateTime.now());
+      House house3 = new House(null, "House3", LocalDateTime.now());
 
       house1 = houseRepository.save(house1);
       house2 = houseRepository.save(house2);
+      house3 = houseRepository.save(house3);
 
       //Create Sensor
       Sensor sensor1 = new Sensor(null, "Sensor1", type1.getId(), house1.getId(), "MAC1",
@@ -198,15 +200,17 @@ public class BasicRestTest {
       //Create User - House
       UserHouseRelation uhRelation1 = new UserHouseRelation(null, user1.getId(), house1.getId());
       UserHouseRelation uhRelation2 = new UserHouseRelation(null, user1.getId(), house2.getId());
-      UserHouseRelation uhRelation3 = new UserHouseRelation(null, user2.getId(), house2.getId());
-      UserHouseRelation uhRelation4 = new UserHouseRelation(null, user3.getId(), house1.getId());
-      UserHouseRelation uhRelation5 = new UserHouseRelation(null, user3.getId(), house2.getId());
+      UserHouseRelation uhRelation3 = new UserHouseRelation(null, user1.getId(), house3.getId());
+      UserHouseRelation uhRelation4 = new UserHouseRelation(null, user2.getId(), house2.getId());
+      UserHouseRelation uhRelation5 = new UserHouseRelation(null, user3.getId(), house1.getId());
+      UserHouseRelation uhRelation6 = new UserHouseRelation(null, user3.getId(), house2.getId());
 
       userHouseRelationRepository.save(uhRelation1);
       userHouseRelationRepository.save(uhRelation2);
       userHouseRelationRepository.save(uhRelation3);
       userHouseRelationRepository.save(uhRelation4);
       userHouseRelationRepository.save(uhRelation5);
+      userHouseRelationRepository.save(uhRelation6);
 
       //Create records
       Record record1 = new Record(null, sensor1.getId(), variable1.getId(),
