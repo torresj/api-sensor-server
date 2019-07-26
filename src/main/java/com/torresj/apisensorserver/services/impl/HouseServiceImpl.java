@@ -4,8 +4,11 @@ import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
+import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
+import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.Sensor;
+import com.torresj.apisensorserver.models.User;
 import com.torresj.apisensorserver.services.HouseService;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
@@ -25,10 +28,18 @@ public class HouseServiceImpl implements HouseService {
 
   private SensorRepository sensorRepository;
 
+  private UserRepository userRepository;
+
+  private UserHouseRelationRepository userHouseRelationRepository;
+
   public HouseServiceImpl(HouseRepository houseRepository,
-      SensorRepository sensorRepository) {
+      SensorRepository sensorRepository,
+      UserRepository userRepository,
+      UserHouseRelationRepository userHouseRelationRepository) {
     this.houseRepository = houseRepository;
     this.sensorRepository = sensorRepository;
+    this.userRepository = userRepository;
+    this.userHouseRelationRepository = userHouseRelationRepository;
   }
 
   @Override
@@ -84,7 +95,19 @@ public class HouseServiceImpl implements HouseService {
     logger.debug("[HOUSE - REMOVE HOUSE] update all sensor's house");
     sensorRepository.findByHouseId(id).stream().peek(sensor -> sensor.setHouseId(null))
         .forEach(sensorRepository::save);
+    logger.debug("[HOUSE - REMOVE HOUSE] Deleting all relation between User and House " + id);
+    userHouseRelationRepository.findByHouseId(id).stream()
+        .forEach(userHouseRelationRepository::delete);
     houseRepository.delete(house);
     return house;
+  }
+
+  @Override
+  public boolean hasUserVisibilityHouse(String name, long id) throws EntityNotFoundException {
+    User user = userRepository.findByUsername(name).get();
+    sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    return userHouseRelationRepository.findByUserId(user.getId()).stream()
+        .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
+        .anyMatch(house -> house.getId() == id);
   }
 }

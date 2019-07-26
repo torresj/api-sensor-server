@@ -19,4 +19,6 @@ public interface HouseService {
   House register(House house) throws EntityAlreadyExists;
 
   House removeHouse(long id) throws EntityNotFoundException;
+
+  boolean hasUserVisibilityHouse(String name, long id) throws EntityNotFoundException;
 }

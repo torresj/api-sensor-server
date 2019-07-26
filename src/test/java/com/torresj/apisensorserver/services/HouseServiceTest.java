@@ -10,6 +10,8 @@ import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.jpa.HouseRepository;
 import com.torresj.apisensorserver.jpa.SensorRepository;
+import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
+import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.services.impl.HouseServiceImpl;
@@ -35,13 +37,20 @@ public class HouseServiceTest {
   @Mock
   private HouseRepository houseRepository;
 
+  @Mock
+  private UserRepository userRepository;
+
+  @Mock
+  private UserHouseRelationRepository userHouseRelationRepository;
+
   private static final int nPage = 0;
   private static final int elements = 20;
   private static final PageRequest pageRequest = PageRequest
       .of(nPage, elements, Sort.by("createAt").descending());
 
   @InjectMocks
-  private HouseService houseService = new HouseServiceImpl(houseRepository, sensorRepository);
+  private HouseService houseService = new HouseServiceImpl(houseRepository, sensorRepository,
+      userRepository, userHouseRelationRepository);
 
   @Test
   public void getHouses() {
