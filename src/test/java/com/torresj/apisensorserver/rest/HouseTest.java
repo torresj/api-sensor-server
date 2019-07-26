@@ -60,6 +60,7 @@ public class HouseTest extends BasicRestTest {
     client.close();
   }
 
+  @Test
   public void getAllHousesAsUser() throws IOException {
     if (authorizationUser == null) {
       getUserAuthorization();
@@ -329,28 +330,6 @@ public class HouseTest extends BasicRestTest {
     assertThat(userHouseRelationRepository.findByHouseId(house.getId()).isEmpty(), equalTo(true));
 
     houseRepository.save(house);
-    client.close();
-  }
-
-  @Test
-  public void removeHouseAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
-    }
-
-    House house = houseRepository.findByName("House3").get();
-
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpDelete httpDelete = new HttpDelete(
-        BASE_URL + port + PATH + HOUSES + "/" + house.getId());
-
-    httpDelete.setHeader("Content-type", "application/json");
-    httpDelete.setHeader("Authorization", authorizationUser);
-
-    CloseableHttpResponse response = client.execute(httpDelete);
-
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
-
     client.close();
   }
 

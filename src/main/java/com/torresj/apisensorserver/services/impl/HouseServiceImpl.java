@@ -105,7 +105,7 @@ public class HouseServiceImpl implements HouseService {
   @Override
   public boolean hasUserVisibilityHouse(String name, long id) throws EntityNotFoundException {
     User user = userRepository.findByUsername(name).get();
-    sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     return userHouseRelationRepository.findByUserId(user.getId()).stream()
         .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
         .anyMatch(house -> house.getId() == id);
