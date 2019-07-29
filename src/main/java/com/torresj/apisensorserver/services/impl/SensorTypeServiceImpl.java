@@ -40,6 +40,13 @@ public class SensorTypeServiceImpl implements SensorTypeService {
   }
 
   @Override
+  public Page<SensorType> getSensorTypes(int nPage, int elements, String name) {
+    logger.debug("[SENSOR TYPES - GET ALL] Getting sensor types");
+    PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
+    return sensorTypeRepository.findByName(name, pageRequest);
+  }
+
+  @Override
   public SensorType getSensorType(long id) throws EntityNotFoundException {
     logger.debug("[SENSOR TYPES - GET] Searching sensor type by id: " + id);
     return sensorTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());

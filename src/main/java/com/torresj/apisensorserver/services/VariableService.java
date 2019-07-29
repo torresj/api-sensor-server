@@ -21,4 +21,6 @@ public interface VariableService {
   Page<Sensor> getSensors(long id, int nPage, int elements);
 
   boolean hasUserVisibilityVariable(String name, long id) throws EntityNotFoundException;
+
+  Page<Variable> getVariables(int nPage, int elements, String name);
 }

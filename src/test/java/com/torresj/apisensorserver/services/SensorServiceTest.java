@@ -102,11 +102,29 @@ public class SensorServiceTest {
     sensors.add(TestUtils.getExampleSensor(3, 1, 1));
 
     //When
-    when(sensorTypeRepository.findById(anyLong())).thenReturn(Optional.of(type));
+    when(sensorRepository.findByName("Sensor1", pageRequest))
+        .thenReturn(new PageImpl<>(sensors));
+    List<Sensor> sensorsActual = new ArrayList<>(
+        sensorService.getSensors(nPage, elements, null, "Sensor1").getContent());
+
+    //then
+    assertEquals(sensors, sensorsActual);
+  }
+
+  @Test
+  public void getSensorsFilterByName() throws EntityNotFoundException {
+    //Given
+    List<Sensor> sensors = new ArrayList<>();
+    SensorType type = TestUtils.getExampleSensorType(1);
+    sensors.add(TestUtils.getExampleSensor(1, 1, 1));
+    sensors.add(TestUtils.getExampleSensor(2, 1, 1));
+    sensors.add(TestUtils.getExampleSensor(3, 1, 1));
+
+    //When
     when(sensorRepository.findBySensorTypeId(1L, pageRequest))
         .thenReturn(new PageImpl<>(sensors));
     List<Sensor> sensorsActual = new ArrayList<>(
-        sensorService.getSensors(nPage, elements, 1L).getContent());
+        sensorService.getSensors(nPage, elements, 1L, null).getContent());
 
     //then
     assertEquals(sensors, sensorsActual);

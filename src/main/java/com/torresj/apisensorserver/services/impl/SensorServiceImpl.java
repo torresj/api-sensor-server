@@ -69,12 +69,20 @@ public class SensorServiceImpl implements SensorService {
   }
 
   @Override
-  public Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId)
+  public Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId, String name)
       throws EntityNotFoundException {
-    logger.debug("[SENSOR - GET] Getting sensors filter by sensor type " + sensorTypeId);
-    sensorTypeRepository.findById(sensorTypeId).orElseThrow(EntityNotFoundException::new);
+    logger.debug(
+        "[SENSOR - GET] Getting sensors filter by sensor type " + sensorTypeId + "and/or name "
+            + name);
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-    return sensorRepository.findBySensorTypeId(sensorTypeId, pageRequest);
+    if (sensorTypeId != null && name != null) {
+      sensorTypeRepository.findById(sensorTypeId).orElseThrow(EntityNotFoundException::new);
+      return sensorRepository.findBySensorTypeIdAndName(sensorTypeId, name, pageRequest);
+    } else if (sensorTypeId != null) {
+      return sensorRepository.findBySensorTypeId(sensorTypeId, pageRequest);
+    } else {
+      return sensorRepository.findByName(name, pageRequest);
+    }
   }
 
   @Override
@@ -122,7 +130,9 @@ public class SensorServiceImpl implements SensorService {
     sensor.setLastConnection(LocalDateTime.now());
     sensor.setId(entity.getId());
     //check for house id and sensor type id
-    houseRepository.findById(sensor.getHouseId()).orElseThrow(EntityNotFoundException::new);
+    if (sensor.getHouseId() != null) {
+      houseRepository.findById(sensor.getHouseId()).orElseThrow(EntityNotFoundException::new);
+    }
     sensorTypeRepository.findById(sensor.getSensorTypeId())
         .orElseThrow(EntityNotFoundException::new);
     sensor = sensorRepository.save(sensor);
@@ -141,7 +151,9 @@ public class SensorServiceImpl implements SensorService {
     } else {
       logger.info("[SENSOR - REGISTER] Registering new sensor ...");
       //check for house id and sensor type id
-      houseRepository.findById(sensor.getHouseId()).orElseThrow(EntityNotFoundException::new);
+      if (sensor.getHouseId() != null) {
+        houseRepository.findById(sensor.getHouseId()).orElseThrow(EntityNotFoundException::new);
+      }
       sensorTypeRepository.findById(sensor.getSensorTypeId())
           .orElseThrow(EntityNotFoundException::new);
       sensor.setLastConnection(LocalDateTime.now());

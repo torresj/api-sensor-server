@@ -57,10 +57,18 @@ public class VariableServiceImpl implements VariableService {
 
   @Override
   public Page<Variable> getVariables(int nPage, int elements) {
-    logger.debug("[VARIABLE - GET] Getting variables beetween");
+    logger.debug("[VARIABLE - GET] Getting variables");
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
 
     return variableRepository.findAll(pageRequest);
+  }
+
+  @Override
+  public Page<Variable> getVariables(int nPage, int elements, String name) {
+    logger.debug("[VARIABLE - GET] Getting variables");
+    PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
+
+    return variableRepository.findByName(name, pageRequest);
   }
 
   @Override

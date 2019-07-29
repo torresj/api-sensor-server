@@ -51,11 +51,12 @@ public class SensorController {
       @RequestParam(value = "page") int nPage,
       @RequestParam(value = "elements") int elements,
       @RequestParam(value = "sensorTypeId", required = false) Long sensorTypeId,
+      @RequestParam(value = "name", required = false) String name,
       Principal principal
   ) {
     try {
       logger.info("[SENSOR - GET ALL] Check user permission");
-      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "user Not have permission for this endpoint");
       }
@@ -63,8 +64,9 @@ public class SensorController {
           "[SENSOR - GET ALL] Get sensors from DB with page " + nPage + ", elements " + elements
               + ", sensorTypeId " + sensorTypeId);
 
-      Page<Sensor> page = sensorTypeId == null ? sensorService.getSensors(nPage, elements)
-          : sensorService.getSensors(nPage, elements, sensorTypeId);
+      Page<Sensor> page =
+          sensorTypeId == null && name == null ? sensorService.getSensors(nPage, elements)
+              : sensorService.getSensors(nPage, elements, sensorTypeId, name);
 
       return new ResponseEntity<>(page, HttpStatus.OK);
     } catch (ResponseStatusException e) {
@@ -206,7 +208,7 @@ public class SensorController {
   public ResponseEntity<Sensor> update(@RequestBody() Sensor sensor, Principal principal) {
     try {
       logger.info("[SENSOR - UPDATE] Check user permission");
-      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "user Not have permission for this endpoint");
       }

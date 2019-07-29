@@ -10,7 +10,7 @@ public interface SensorService {
 
   Page<Sensor> getSensors(int nPage, int elements);
 
-  Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId)
+  Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId, String name)
       throws EntityNotFoundException;
 
   Sensor getSensor(long id) throws EntityNotFoundException;

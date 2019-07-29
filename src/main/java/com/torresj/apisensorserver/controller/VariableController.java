@@ -50,17 +50,19 @@ public class VariableController {
       notes = "Pageable data are required and de maximum records per page are 100",
       response = Variable.class, responseContainer = "List")
   public ResponseEntity<Page<Variable>> getVariables(@RequestParam(value = "page") int nPage,
-      @RequestParam(value = "elements") int elements, Principal principal) {
+      @RequestParam(value = "elements") int elements,
+      @RequestParam(value = "name", required = false) String name, Principal principal) {
     try {
       logger.info("[VARIABLE - GET ALL] Check user permission");
-      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "user Not have permission for this endpoint");
       }
       logger.info("[VARIABLE - GET ALL] Get variables from DB with page " + nPage + ", elements "
-          + elements);
+          + elements + "and with name " + name);
 
-      Page<Variable> page = variableService.getVariables(nPage, elements);
+      Page<Variable> page = name == null ? variableService.getVariables(nPage, elements)
+          : variableService.getVariables(nPage, elements, name);
 
       return new ResponseEntity<>(page, HttpStatus.OK);
     } catch (ResponseStatusException e) {

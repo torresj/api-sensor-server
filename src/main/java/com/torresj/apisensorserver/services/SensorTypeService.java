@@ -17,4 +17,6 @@ public interface SensorTypeService {
   SensorType update(SensorType type) throws EntityNotFoundException;
 
   SensorType remove(long id) throws EntityNotFoundException, EntityHasRelationsException;
+
+  Page<SensorType> getSensorTypes(int nPage, int elements, String name);
 }

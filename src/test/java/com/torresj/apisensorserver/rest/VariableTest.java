@@ -61,6 +61,37 @@ public class VariableTest extends BasicRestTest {
   }
 
   @Test
+  public void getVariablesAsAdminByName() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    Variable variable = variableRepository.findByName("Variable2").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + VARIABLES + "?page=" + nPage + "&elements=" + elements + "&name="
+            + variable.getName());
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    Page<Variable> page = objectMapper
+        .readValue(jsonFromResponse, new TypeReference<RestPage<Variable>>() {
+        });
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(page.getContent().size(), equalTo(1));
+    assertThat(page.getContent().get(0), equalTo(variable));
+
+    client.close();
+  }
+
+  @Test
   public void getAllVariablesAsUser() throws IOException {
     if (authorizationUser == null) {
       getUserAuthorization();

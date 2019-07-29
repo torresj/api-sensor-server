@@ -95,6 +95,37 @@ public class SensorTest extends BasicRestTest {
   }
 
   @Test
+  public void getAllSensorsAsAdminByName() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    Sensor sensor = sensorRepository.findByMac("MAC1").get();
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+        BASE_URL + port + PATH + SENSORS + "?page=" + nPage + "&elements=" + elements
+            + "&name=" + sensor.getName());
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    Page<Sensor> page = objectMapper
+        .readValue(jsonFromResponse, new TypeReference<RestPage<Sensor>>() {
+        });
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(page.getContent().size(), equalTo(1));
+    assertThat(page.getContent().get(0), equalTo(sensor));
+
+    client.close();
+  }
+
+  @Test
   public void getAllSensorsAsUser() throws IOException {
     if (authorizationUser == null) {
       getUserAuthorization();

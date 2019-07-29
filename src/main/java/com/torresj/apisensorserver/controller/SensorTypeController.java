@@ -47,12 +47,14 @@ public class SensorTypeController {
   @GetMapping
   @ApiOperation(value = "Retrieve sensor types", notes = "Pageable data are required and de maximum records per page are 100", response = SensorType.class, responseContainer = "List")
   public ResponseEntity<Page<SensorType>> getSensorTypes(@RequestParam(value = "page") int nPage,
-      @RequestParam(value = "elements") int elements) {
+      @RequestParam(value = "elements") int elements,
+      @RequestParam(value = "name", required = false) String name) {
     try {
       logger.info(
           "[SENSOR TYPES - GET ALL] Get sensor types from DB with page " + nPage + ", elements "
               + elements);
-      Page<SensorType> page = service.getSensorTypes(nPage, elements);
+      Page<SensorType> page = name == null ? service.getSensorTypes(nPage, elements)
+          : service.getSensorTypes(nPage, elements, name);
 
       return new ResponseEntity<>(page, HttpStatus.OK);
     } catch (Exception e) {
