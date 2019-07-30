@@ -1,6 +1,8 @@
 package com.torresj.apisensorserver.station;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -8,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.torresj.apisensorserver.ApiSensorApplication;
 import com.torresj.apisensorserver.jackson.RestPage;
+import com.torresj.apisensorserver.models.Record;
 import com.torresj.apisensorserver.models.Sensor;
 import com.torresj.apisensorserver.models.SensorType;
 import com.torresj.apisensorserver.models.User;
@@ -22,6 +25,9 @@ import com.torresj.apisensorserver.repositories.VariableRepository;
 import com.torresj.apisensorserver.repositories.VariableSensorRelationRepository;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -30,6 +36,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,7 +96,12 @@ public class StationTest {
 
   private static final String SENSORS = "v1/sensors";
   private static final String VARIABLES = "v1/variables";
-  private final String TYPE = "v1/sensortypes";
+  private static final String TYPE = "v1/sensortypes";
+
+  private static final String RABBITMQ = "tcp://localhost:1883";
+  private static final String MQTT_TOPIC = "mqtt/topic";
+  private static final String MQTT_USER = "mqtt-user";
+  private static final String MQTT_PASSWORD = "mqtt-user";
 
 
   private final String BASE_URL = "http://localhost:";
@@ -179,9 +197,14 @@ public class StationTest {
     variableId = variableRest.getId();
     sensorId = sensorRest.getId();
 
+    addVariable();
+
+    VariableSensorRelation relation = variableSensorRelationRepository
+        .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
+
     assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
     assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
-
+    assertThat(relation, notNullValue());
 
   }
 
@@ -205,10 +228,136 @@ public class StationTest {
     variableId = variableRest.getId();
     sensorId = sensorRest.getId();
 
+    addVariable();
+
+    VariableSensorRelation relation = variableSensorRelationRepository
+        .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
+
     assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
     assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
+    assertThat(relation, notNullValue());
 
+  }
 
+  @Test
+  public void initStationTestSenorExistsAndVariableNotExists() throws IOException {
+    //Init sensor with hardware values
+    Sensor sensor = new Sensor();
+    sensor.setIp("192.168.1.1");
+    sensor.setMac("MAC1");
+    sensor.setName("test");
+
+    Variable variable = new Variable();
+    variable.setName("VariableTest");
+
+    SensorType type = getSensorType("type1");
+    sensor.setSensorTypeId(type.getId());
+
+    Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
+    Variable variableRest = getVariableFromRest(variable.getName());
+
+    variableId = variableRest.getId();
+    sensorId = sensorRest.getId();
+
+    addVariable();
+
+    VariableSensorRelation relation = variableSensorRelationRepository
+        .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
+
+    assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
+    assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
+    assertThat(relation, notNullValue());
+  }
+
+  @Test
+  public void initStationTestSenorNotExistsAndVariableNotExists() throws IOException {
+    //Init sensor with hardware values
+    Sensor sensor = new Sensor();
+    sensor.setIp("192.168.1.1");
+    sensor.setMac("00:0a:95:9d:68:16");
+    sensor.setName("test");
+
+    Variable variable = new Variable();
+    variable.setName("VariableTest");
+
+    SensorType type = getSensorType("type1");
+    sensor.setSensorTypeId(type.getId());
+
+    Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
+    Variable variableRest = getVariableFromRest(variable.getName());
+
+    variableId = variableRest.getId();
+    sensorId = sensorRest.getId();
+
+    addVariable();
+
+    VariableSensorRelation relation = variableSensorRelationRepository
+        .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
+
+    assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
+    assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
+    assertThat(relation, notNullValue());
+  }
+
+  @Test
+  public void sendValidRecord()
+      throws IOException, MqttException, JSONException, InterruptedException {
+    variableId = variableRepository.findByName("Variable1").get().getId();
+    sensorId = sensorRepository.findByMac("MAC1").get().getId();
+
+    Record record = new Record();
+    record.setSensorId(sensorId);
+    record.setVariableId(variableId);
+    record.setDate(LocalDateTime.now());
+    record.setValue(ThreadLocalRandom.current().nextLong(100));
+
+    String jsonString = objectMapper.writeValueAsString(record);
+    JSONObject json = new JSONObject(jsonString);
+    json.put("type", "record");
+    byte[] payload = json.toString().getBytes();
+
+    IMqttClient publisher = connectToRabbitMQ();
+
+    MqttMessage msg = new MqttMessage(payload);
+    msg.setQos(0);
+    msg.setRetained(true);
+    publisher.publish(MQTT_TOPIC, msg);
+
+    Thread.sleep(1000);
+
+    Record recordDB = recordRepository
+        .findBySensorIdAndVariableIdAndDate(sensorId, variableId, record.getDate()).orElse(null);
+    assertThat(recordDB, notNullValue());
+  }
+
+  @Test
+  public void sendInvalidRecord()
+      throws IOException, MqttException, JSONException, InterruptedException {
+
+    Record record = new Record();
+    record.setSensorId(new Random().nextLong());
+    record.setVariableId(new Random().nextLong());
+    record.setDate(LocalDateTime.now());
+    record.setValue(ThreadLocalRandom.current().nextLong(100));
+
+    String jsonString = objectMapper.writeValueAsString(record);
+    JSONObject json = new JSONObject(jsonString);
+    json.put("type", "record");
+    byte[] payload = json.toString().getBytes();
+
+    IMqttClient publisher = connectToRabbitMQ();
+
+    MqttMessage msg = new MqttMessage(payload);
+    msg.setQos(0);
+    msg.setRetained(true);
+    publisher.publish(MQTT_TOPIC, msg);
+
+    Thread.sleep(1000);
+
+    Record recordDB = recordRepository
+        .findBySensorIdAndVariableIdAndDate(record.getSensorId(), record.getVariableId(),
+            record.getDate()).orElse(null);
+    assertThat(recordDB, nullValue());
   }
 
   private SensorType getSensorType(String typeName) throws IOException {
@@ -294,6 +443,7 @@ public class StationTest {
   }
 
   private Variable getVariableFromRest(String name) throws IOException {
+    Variable variableRest;
     CloseableHttpClient client = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(
         BASE_URL + port + PATH + VARIABLES + "?page=" + nPage + "&elements=" + elements
@@ -309,9 +459,67 @@ public class StationTest {
     Page<Variable> page = objectMapper
         .readValue(jsonFromResponse, new TypeReference<RestPage<Variable>>() {
         });
-    Variable variableRest = page.getContent().get(0);
 
+    if (page.getContent().isEmpty()) {
+      variableRest = registerVariable(name);
+    } else {
+      variableRest = page.getContent().get(0);
+    }
     client.close();
     return variableRest;
+  }
+
+  private Variable registerVariable(String name)
+      throws IOException {
+    Variable variable = new Variable();
+    variable.setName(name);
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpPost httpPost = new HttpPost(
+        BASE_URL + port + PATH + VARIABLES);
+
+    httpPost.setHeader("Content-type", "application/json");
+    httpPost.setHeader("Authorization", AUTHORIZATION);
+
+    String json = objectMapper.writeValueAsString(variable);
+    StringEntity entity = new StringEntity(json);
+
+    httpPost.setEntity(entity);
+
+    CloseableHttpResponse response = client.execute(httpPost);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    Variable variableRest = objectMapper
+        .readValue(jsonFromResponse, Variable.class);
+
+    client.close();
+
+    return variableRest;
+  }
+
+  private void addVariable() throws IOException {
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpPut httpPut = new HttpPut(
+        BASE_URL + port + PATH + SENSORS + "/" + sensorId + "/variables/" + variableId);
+
+    httpPut.setHeader("Content-type", "application/json");
+    httpPut.setHeader("Authorization", AUTHORIZATION);
+
+    client.execute(httpPut);
+  }
+
+  private IMqttClient connectToRabbitMQ() throws MqttException {
+    String publisherId = UUID.randomUUID().toString();
+    IMqttClient publisher = new MqttClient(RABBITMQ, publisherId);
+
+    MqttConnectOptions options = new MqttConnectOptions();
+    options.setAutomaticReconnect(true);
+    options.setCleanSession(true);
+    options.setConnectionTimeout(10);
+    options.setUserName(MQTT_USER);
+    options.setPassword(MQTT_PASSWORD.toCharArray());
+    publisher.connect(options);
+
+    return publisher;
   }
 }

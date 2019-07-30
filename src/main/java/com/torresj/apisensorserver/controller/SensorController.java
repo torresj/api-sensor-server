@@ -148,7 +148,7 @@ public class SensorController {
       @PathVariable("variableId") long variableId, Principal principal) {
     try {
       logger.info("[SENSOR VARIABLES - ADD] Check user permission");
-      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "user Not have permission for this endpoint");
       }

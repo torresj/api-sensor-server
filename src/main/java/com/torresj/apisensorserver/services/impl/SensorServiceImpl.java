@@ -112,11 +112,16 @@ public class SensorServiceImpl implements SensorService {
     sensorRepository.findById(sensorId).orElseThrow(EntityNotFoundException::new);
     Variable variable = variableRepository.findById(variableId)
         .orElseThrow(EntityNotFoundException::new);
-    VariableSensorRelation relation = new VariableSensorRelation();
-    relation.setSensorId(sensorId);
-    relation.setVariableId(variableId);
-    variableSensorRelationRepository.save(relation);
-    return variable;
+    if (variableSensorRelationRepository.findBySensorIdAndVariableId(sensorId, variableId)
+        .isPresent()) {
+      return variable;
+    } else {
+      VariableSensorRelation relation = new VariableSensorRelation();
+      relation.setSensorId(sensorId);
+      relation.setVariableId(variableId);
+      variableSensorRelationRepository.save(relation);
+      return variable;
+    }
   }
 
   @Override

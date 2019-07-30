@@ -134,7 +134,7 @@ public class VariableController {
   public ResponseEntity<Variable> register(@RequestBody() Variable variable, Principal principal) {
     try {
       logger.info("[VARIABLE - REGISTER] Check user permission");
-      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "user Not have permission for this endpoint");
       }
