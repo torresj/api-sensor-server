@@ -1,6 +1,7 @@
 package com.torresj.apisensorserver.mqtt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.Record;
 import com.torresj.apisensorserver.models.Sensor;
@@ -25,16 +26,21 @@ public class MqttConsumer {
 
   private SensorService sensorService;
 
-  public MqttConsumer(RecordService recordService, SensorService sensorService) {
+  private ObjectMapper objectMapper;
+
+  public MqttConsumer(RecordService recordService, SensorService sensorService,
+      ObjectMapper objectMapper) {
     this.recordService = recordService;
     this.sensorService = sensorService;
+    this.objectMapper = objectMapper;
+
+    objectMapper.registerModule(new JavaTimeModule());
   }
 
   public void messageHandler(String message) {
     try {
       logger.info("[MQTT - MESSAGE RECEIVE] Message receive from mqtt server :" + message);
 
-      ObjectMapper objectMapper = new ObjectMapper();
       MqttMessage mqttMsg = objectMapper.readValue(message, MqttMessage.class);
       switch (mqttMsg.getType()) {
         case ERRORTYPE:
@@ -55,7 +61,6 @@ public class MqttConsumer {
 
   private void recordProcessor(String message) {
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
       Record record = objectMapper.readValue(message, Record.class);
       recordService.register(record);
     } catch (IOException e) {
@@ -70,7 +75,7 @@ public class MqttConsumer {
     try {
       Sensor sensor = sensorService.getSensor(message.getSensorId());
       logger.error("[ERROR] Error receive from sensor => " + sensor);
-      logger.error(message);
+      logger.error(message.getMsg());
     } catch (EntityNotFoundException e) {
       logger.error("[ERROR] Entity not found: " + message);
     }

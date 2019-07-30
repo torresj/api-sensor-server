@@ -7,14 +7,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.torresj.apisensorserver.ApiSensorApplication;
-import com.torresj.apisensorserver.jpa.HouseRepository;
-import com.torresj.apisensorserver.jpa.RecordRepository;
-import com.torresj.apisensorserver.jpa.SensorRepository;
-import com.torresj.apisensorserver.jpa.SensorTypeRepository;
-import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
-import com.torresj.apisensorserver.jpa.UserRepository;
-import com.torresj.apisensorserver.jpa.VariableRepository;
-import com.torresj.apisensorserver.jpa.VariableSensorRelationRepository;
 import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.Record;
 import com.torresj.apisensorserver.models.Sensor;
@@ -24,6 +16,14 @@ import com.torresj.apisensorserver.models.User.Role;
 import com.torresj.apisensorserver.models.UserHouseRelation;
 import com.torresj.apisensorserver.models.Variable;
 import com.torresj.apisensorserver.models.VariableSensorRelation;
+import com.torresj.apisensorserver.repositories.HouseRepository;
+import com.torresj.apisensorserver.repositories.RecordRepository;
+import com.torresj.apisensorserver.repositories.SensorRepository;
+import com.torresj.apisensorserver.repositories.SensorTypeRepository;
+import com.torresj.apisensorserver.repositories.UserHouseRelationRepository;
+import com.torresj.apisensorserver.repositories.UserRepository;
+import com.torresj.apisensorserver.repositories.VariableRepository;
+import com.torresj.apisensorserver.repositories.VariableSensorRelationRepository;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -215,33 +215,33 @@ public class BasicRestTest {
       //Create records
       Record record1 = new Record(null, sensor1.getId(), variable1.getId(),
           new Random().nextDouble(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
       Record record2 = new Record(null, sensor1.getId(), variable2.getId(),
           new Random().nextDouble(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
       Record record3 = new Record(null, sensor1.getId(), variable3.getId(),
           new Random().nextDouble(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
       Record record4 = new Record(null, sensor2.getId(), variable1.getId(),
           new Random().nextDouble(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
       Record record5 = new Record(null, sensor2.getId(), variable2.getId(),
           new Random().nextDouble(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
       Record record6 = new Record(null, sensor2.getId(), variable2.getId(),
           new Random().nextDouble(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
       Record record7 = new Record(null, sensor3.getId(), variable3.getId(),
           new Random().nextDouble(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
       Record record8 = new Record(null, sensor4.getId(), variable1.getId(),
           new Random().nextDouble(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
       Record record9 = new Record(null, sensor4.getId(), variable3.getId(),
           new Random().nextDouble(),
-          LocalDateTime.now());
+          LocalDateTime.now(), LocalDateTime.now());
       Record record10 = new Record(null, sensor1.getId(), variable2.getId(),
-          new Random().nextDouble(), LocalDateTime.now());
+          new Random().nextDouble(), LocalDateTime.now(), LocalDateTime.now());
 
       recordRepository.save(record1);
       recordRepository.save(record2);

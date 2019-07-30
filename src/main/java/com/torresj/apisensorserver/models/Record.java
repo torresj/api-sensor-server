@@ -37,6 +37,9 @@ public class Record implements Serializable {
   private double value;
 
   @Column(nullable = false, updatable = false)
+  private LocalDateTime date;
+
+  @Column(nullable = false, updatable = false)
   @CreationTimestamp
   private LocalDateTime createAt;
 

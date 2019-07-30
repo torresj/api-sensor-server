@@ -1,4 +1,4 @@
-package com.torresj.apisensorserver.jpa;
+package com.torresj.apisensorserver.repositories;
 
 import com.torresj.apisensorserver.models.House;
 import java.util.List;

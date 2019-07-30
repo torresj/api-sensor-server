@@ -1,4 +1,4 @@
-package com.torresj.apisensorserver.jpa;
+package com.torresj.apisensorserver.repositories;
 
 import com.torresj.apisensorserver.models.SensorType;
 import java.util.Optional;

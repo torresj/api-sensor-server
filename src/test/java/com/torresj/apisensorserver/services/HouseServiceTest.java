@@ -8,12 +8,12 @@ import static org.mockito.Mockito.when;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.jpa.HouseRepository;
-import com.torresj.apisensorserver.jpa.SensorRepository;
-import com.torresj.apisensorserver.jpa.UserHouseRelationRepository;
-import com.torresj.apisensorserver.jpa.UserRepository;
 import com.torresj.apisensorserver.models.House;
 import com.torresj.apisensorserver.models.Sensor;
+import com.torresj.apisensorserver.repositories.HouseRepository;
+import com.torresj.apisensorserver.repositories.SensorRepository;
+import com.torresj.apisensorserver.repositories.UserHouseRelationRepository;
+import com.torresj.apisensorserver.repositories.UserRepository;
 import com.torresj.apisensorserver.services.impl.HouseServiceImpl;
 import com.torresj.apisensorserver.utils.TestUtils;
 import java.util.ArrayList;
