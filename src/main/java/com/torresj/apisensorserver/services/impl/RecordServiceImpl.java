@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,17 +38,21 @@ public class RecordServiceImpl implements RecordService {
 
   private HouseRepository houseRepository;
 
+  private SimpMessagingTemplate template;
+
   public RecordServiceImpl(RecordRepository recordRespository,
       VariableRepository variableRepository, SensorRepository sensorRepository,
       UserRepository userRepository,
       UserHouseRelationRepository userHouseRelationRepository,
-      HouseRepository houseRepository) {
+      HouseRepository houseRepository,
+      SimpMessagingTemplate template) {
     this.recordRespository = recordRespository;
     this.variableRepository = variableRepository;
     this.sensorRepository = sensorRepository;
     this.userRepository = userRepository;
     this.userHouseRelationRepository = userHouseRelationRepository;
     this.houseRepository = houseRepository;
+    this.template = template;
   }
 
   @Override
@@ -58,6 +63,11 @@ public class RecordServiceImpl implements RecordService {
     variableRepository.findById(record.getVariableId()).orElseThrow(EntityNotFoundException::new);
 
     Record entity = recordRespository.save(record);
+
+    String destination = "/topic/station/" + record.getSensorId();
+    logger.debug(
+        "[RECORD - REGISTER] Sending data to destination /topic/station/" + record.getSensorId());
+    template.convertAndSend(destination, record);
 
     return entity;
   }

@@ -29,6 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecordServiceTest {
@@ -45,10 +46,12 @@ public class RecordServiceTest {
   private UserHouseRelationRepository userHouseRelationRepository;
   @Mock
   private HouseRepository houseRepository;
+  @Mock
+  private SimpMessagingTemplate template;
 
   @InjectMocks
   private RecordService recordService = new RecordServiceImpl(recordRepository, variableRepository,
-      sensorRepository, userRepository, userHouseRelationRepository, houseRepository);
+      sensorRepository, userRepository, userHouseRelationRepository, houseRepository, template);
 
 
   private static final int nPage = 0;

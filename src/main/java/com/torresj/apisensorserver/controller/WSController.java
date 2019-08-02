@@ -2,6 +2,7 @@ package com.torresj.apisensorserver.controller;
 
 import com.torresj.apisensorserver.models.WSResponse;
 import com.torresj.apisensorserver.services.WSService;
+import java.security.Principal;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -18,9 +19,8 @@ public class WSController {
 
   @MessageMapping("/station/{stationId}")
   @SendTo("/topic/station/{stationId}")
-  public WSResponse connection(@DestinationVariable("stationId") long stationId)
-      throws Exception {
-    return wsService.validateConnection(stationId);
+  public WSResponse connection(@DestinationVariable("stationId") long stationId,
+      Principal principal) {
+    return wsService.validateConnection(stationId, principal);
   }
-
 }
