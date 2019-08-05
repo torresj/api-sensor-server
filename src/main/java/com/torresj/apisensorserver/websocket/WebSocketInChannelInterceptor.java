@@ -4,6 +4,7 @@ import static com.torresj.apisensorserver.security.SecurityConstants.SECRET;
 import static com.torresj.apisensorserver.security.SecurityConstants.TOKEN_PREFIX;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.exceptions.WSConnectionException;
 import com.torresj.apisensorserver.services.WSService;
 import io.jsonwebtoken.Jwts;
 import java.util.ArrayList;
@@ -41,11 +42,12 @@ public class WebSocketInChannelInterceptor implements ChannelInterceptor {
     } else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
       try {
         if (!wsService.checkSensorAndUserVisibility(accessor)) {
-          return null;
+          logger.error("[WebSocket interceptor] User hasn't visibility to this station");
+          throw new WSConnectionException("User hasn't visibility to this station");
         }
       } catch (EntityNotFoundException e) {
-        logger.error("[WebSocket interceptor] Station not exists");
-        return null;
+        logger.error("[WebSocket interceptor] Sensor not exists");
+        throw new WSConnectionException("Sensor not exists");
       }
     }
     return message;

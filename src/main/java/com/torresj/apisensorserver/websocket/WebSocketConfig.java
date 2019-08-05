@@ -12,13 +12,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   private WebSocketInChannelInterceptor webSocketInChannelInterceptor;
-  private WebSocketOutChannelInterceptor webSocketOutChannelInterceptor;
 
   public WebSocketConfig(
-      WebSocketInChannelInterceptor webSocketInChannelInterceptor,
-      WebSocketOutChannelInterceptor webSocketOutChannelInterceptor) {
+      WebSocketInChannelInterceptor webSocketInChannelInterceptor) {
     this.webSocketInChannelInterceptor = webSocketInChannelInterceptor;
-    this.webSocketOutChannelInterceptor = webSocketOutChannelInterceptor;
   }
 
 
@@ -30,17 +27,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/ws").setAllowedOrigins("*")
-        .withSockJS();
+    registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
   }
 
   @Override
   public void configureClientInboundChannel(ChannelRegistration registration) {
     registration.interceptors(webSocketInChannelInterceptor);
-  }
-
-  @Override
-  public void configureClientOutboundChannel(ChannelRegistration registration) {
-    registration.interceptors(webSocketOutChannelInterceptor);
   }
 }

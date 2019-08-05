@@ -147,10 +147,8 @@ public class InitialData {
     userRepository.save(user3);
 
     //User-House relation
-    UserHouseRelation uhRelation1 = new UserHouseRelation(null, user2.getId(), house1.getId());
     UserHouseRelation uhRelation2 = new UserHouseRelation(null, user2.getId(), house2.getId());
 
-    userHouseRelationRepository.save(uhRelation1);
     userHouseRelationRepository.save(uhRelation2);
 
   }

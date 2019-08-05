@@ -66,6 +66,7 @@ public class WSServiceImpl implements WSService {
       String destination = headers.get(0);
       String idStr = destination.substring(destination.lastIndexOf('/') + 1);
       long id = Long.parseLong(idStr);
+      sensorService.getSensor(id);
       User user = userService.getUser(accessor.getUser().getName());
       if (user != null && user.getRole() == Role.ADMIN) {
         allowed = true;
