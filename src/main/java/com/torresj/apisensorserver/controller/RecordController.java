@@ -57,24 +57,28 @@ public class RecordController {
       @RequestParam(value = "to") @DateTimeFormat(iso = ISO.DATE) LocalDate to,
       Principal principal) {
     try {
-      logger.info("[RECORD - GET] Check user permission");
+      logger.info(
+          "[RECORD - GET] Getting records for sensor {}  and variable {} with page {}, elements {}, from {} to {} by user \"{}\"",
+          sensorId, variableId, nPage, elements, from, to, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)
           && !sensorService.hasUserVisibilitySensor(principal.getName(), sensorId)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info(
-          "[RECORD - GET] Get records for sensor " + sensorId + " and variable " + variableId
-              + " from DB with page " + nPage + ", elements " + elements + ", from "
-              + from + " to " + to);
+
       Page<Record> page = recordService.getRecords(sensorId, variableId, nPage, elements, from, to);
+
+      logger.info(
+          "[RECORD - GET] Request getting records for sensor {}  and variable {} with page {}, elements {}, from {} to {}, finished by user \"{}\"",
+          sensorId, variableId, nPage, elements, from, to, principal.getName());
       return new ResponseEntity<>(page, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[RECORD - GET] user Not have permission for this endpoint");
+      logger.error("[RECORD - GET] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[RECORD - GET] Error getting records from DB", e);
+      logger.error("[RECORD - GET] Error getting records for sensor {}  and variable {}", sensorId,
+          variableId, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -83,24 +87,24 @@ public class RecordController {
   @ApiOperation(value = "Retrieve a record by id", response = Record.class)
   public ResponseEntity<Record> getSensor(@PathVariable("id") long id, Principal principal) {
     try {
-      logger.info("[RECORD - GET] Check user permission");
+      logger.info("[RECORD - GET] Getting record {} by user \"{}\"", id, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)
           && !recordService.hasUserVisibilityRecord(principal.getName(), id)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
       logger.info("[RECORD - GET] Get record from DB with id: " + id);
       Record record = recordService.getRecord(id);
       return new ResponseEntity<>(record, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[RECORD - GET] user Not have permission for this endpoint");
+      logger.error("[RECORD - GET] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[RECORD - GET] Error record not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "record not found", e);
     } catch (Exception e) {
-      logger.error("[RECORD - GET] Error getting records from DB", e);
+      logger.error("[RECORD - GET] Error getting record {}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
