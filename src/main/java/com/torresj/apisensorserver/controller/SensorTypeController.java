@@ -48,14 +48,17 @@ public class SensorTypeController {
   @ApiOperation(value = "Retrieve sensor types", notes = "Pageable data are required and de maximum records per page are 100", response = SensorType.class, responseContainer = "List")
   public ResponseEntity<Page<SensorType>> getSensorTypes(@RequestParam(value = "page") int nPage,
       @RequestParam(value = "elements") int elements,
-      @RequestParam(value = "name", required = false) String name) {
+      @RequestParam(value = "name", required = false) String name, Principal principal) {
     try {
       logger.info(
-          "[SENSOR TYPES - GET ALL] Get sensor types from DB with page " + nPage + ", elements "
-              + elements);
+          "[SENSOR TYPES - GET ALL] Getting sensor types with page {} , elements {}, name {} by user \"{}\"",
+          nPage, elements, name, principal.getName());
       Page<SensorType> page = name == null ? service.getSensorTypes(nPage, elements)
           : service.getSensorTypes(nPage, elements, name);
 
+      logger.info(
+          "[SENSOR TYPES - GET ALL] Request for getting sensor types with page {} , elements {}, name {} finished by user \"{}\"",
+          nPage, elements, name, principal.getName());
       return new ResponseEntity<>(page, HttpStatus.OK);
     } catch (Exception e) {
       logger.error("[SENSOR TYPES - GET ALL] Error getting sensor types from DB", e);
@@ -65,18 +68,21 @@ public class SensorTypeController {
 
   @GetMapping(value = "/{id}")
   @ApiOperation(value = "Retrieve sensor type by id", response = SensorType.class)
-  public ResponseEntity<SensorType> getSensorByID(@PathVariable("id") long id) {
+  public ResponseEntity<SensorType> getSensorByID(@PathVariable("id") long id,
+      Principal principal) {
     try {
-      logger.info("[SENSOR TYPE - GET] Get sensor from DB with id: " + id);
+      logger.info("[SENSOR TYPE - GET] Getting sensor {} by user \"{}\"", id, principal.getName());
 
       SensorType sensorType = service.getSensorType(id);
 
+      logger.info("[SENSOR TYPE - GET] Request for getting sensor {} finished by user \"{}\"", id,
+          principal.getName());
       return new ResponseEntity<>(sensorType, HttpStatus.OK);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR TYPE - GET] Sensor type not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor type not found", e);
     } catch (Exception e) {
-      logger.error("[SENSOR TYPE - GET] Error getting sensor type from DB", e);
+      logger.error("[SENSOR TYPE - GET] Error getting sensor type {}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -85,25 +91,30 @@ public class SensorTypeController {
   @ApiOperation(value = "Save new sensor type", response = SensorType.class)
   public ResponseEntity<SensorType> register(@RequestBody() SensorType type, Principal principal) {
     try {
-      logger.info("[SENSOR TYPE - REGISTER] Check user permission");
+      logger.info("[SENSOR TYPE - REGISTER] Registering sensor type {} by user \"{}\"", type,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
       logger.info("[SENSOR TYPE - REGISTER] Register sensor type: " + type);
 
       SensorType sensorType = service.register(type);
 
+      logger.info(
+          "[SENSOR TYPE - REGISTER] Request for registering sensor type {} finished by user \"{}\"",
+          type,
+          principal.getName());
       return new ResponseEntity<>(sensorType, HttpStatus.CREATED);
     } catch (EntityAlreadyExists e) {
       logger.error("[SENSOR TYPE - REGISTER] Sensor type already exists", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR TYPE - REGISTER] user Not have permission for this endpoint");
+      logger.error("[SENSOR TYPE - REGISTER] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[SENSOR TYPE - REGISTER] Error registering sensor type from DB", e);
+      logger.error("[SENSOR TYPE - REGISTER] Error registering sensor type {}", type, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -112,25 +123,29 @@ public class SensorTypeController {
   @ApiOperation(value = "Update new sensor type", response = SensorType.class)
   public ResponseEntity<SensorType> update(@RequestBody() SensorType type, Principal principal) {
     try {
-      logger.info("[SENSOR TYPE - UPDATE] Check user permission");
+      logger.info("[SENSOR TYPE - UPDATE] Updating sensor type {} by user \"{}\"", type,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[SENSOR TYPE - UPDATE] Update sensor type: " + type);
 
       SensorType sensorType = service.update(type);
 
+      logger.info(
+          "[SENSOR TYPE - UPDATE] Request for updating sensor type {} finished by user \"{}\"",
+          type,
+          principal.getName());
       return new ResponseEntity<>(sensorType, HttpStatus.OK);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR TYPE - UPDATE] Sensor type not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor type not found", e);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR TYPE - UPDATE] user Not have permission for this endpoint");
+      logger.error("[SENSOR TYPE - UPDATE] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[SENSOR TYPE - UPDATE] Error getting sensor type from DB", e);
+      logger.error("[SENSOR TYPE - UPDATE] Error updating sensor type {}}", type, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -139,31 +154,34 @@ public class SensorTypeController {
   @ApiOperation(value = "Delete sensor type", response = SensorType.class)
   public ResponseEntity<SensorType> remove(@PathVariable("id") long id, Principal principal) {
     try {
-      logger.info("[SENSOR TYPE - REMOVE] Check user permission");
+      logger.info("[SENSOR TYPE - REMOVE] Removing sensor type {} by user \"{}\"", id,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[SENSOR TYPE - REMOVE] Remove sensor type: " + id);
 
       SensorType sensorType = service.remove(id);
 
+      logger.info("[SENSOR TYPE - REMOVE] Request removing sensor type {} finished by user \"{}\"",
+          id,
+          principal.getName());
       return new ResponseEntity<>(sensorType, HttpStatus.OK);
     } catch (EntityHasRelationsException e) {
       logger.error(
-          "[SENSOR TYPE - REMOVE] Sensor type has relation with existing sensors. You need to change each sensor with sensor type "
-              + id + " before remove sensor type", e);
+          "[SENSOR TYPE - REMOVE] Sensor type has relation with existing sensors. You need to change each sensor with sensor type {} before remove sensor type",
+          id, e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "Sensor type has relation with existing sensors", e);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR TYPE - UPDATE] user Not have permission for this endpoint");
+      logger.error("[SENSOR TYPE - UPDATE] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR TYPE - REMOVE] Sensor type not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor type not found", e);
     } catch (Exception e) {
-      logger.error("[SENSOR TYPE - REMOVE] Error removing sensor type from DB", e);
+      logger.error("[SENSOR TYPE - REMOVE] Error removing sensor type {}}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
