@@ -55,22 +55,24 @@ public class SensorController {
       Principal principal
   ) {
     try {
-      logger.info("[SENSOR - GET ALL] Check user permission");
+      logger.info(
+          "[SENSOR - GET ALL] Getting sensors with page {}, elements {}, sensorTypeId {} by user \"{}\"",
+          nPage, elements, sensorTypeId, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info(
-          "[SENSOR - GET ALL] Get sensors from DB with page " + nPage + ", elements " + elements
-              + ", sensorTypeId " + sensorTypeId);
 
       Page<Sensor> page =
           sensorTypeId == null && name == null ? sensorService.getSensors(nPage, elements)
               : sensorService.getSensors(nPage, elements, sensorTypeId, name);
 
+      logger.info(
+          "[SENSOR - GET ALL] Request for getting sensors with page {}, elements {}, sensorTypeId {} finished by user \"{}\"",
+          nPage, elements, sensorTypeId, principal.getName());
       return new ResponseEntity<>(page, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR - GET ALL] user Not have permission for this endpoint");
+      logger.error("[SENSOR - GET ALL] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
@@ -84,26 +86,27 @@ public class SensorController {
   public ResponseEntity<Sensor> getSensorByID(@PathVariable("id") long id,
       Principal principal) {
     try {
-      logger.info("[SENSOR - GET] Check user permission");
+      logger.info("[SENSOR - GET] Getting sensor {} by user \"{}\"", id, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)
           && !sensorService.hasUserVisibilitySensor(principal.getName(), id)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[SENSOR - GET] Get sensor from DB with id: " + id);
 
       Sensor sensor = sensorService.getSensor(id);
 
+      logger.info("[SENSOR - GET] Request for getting sensor {} finished by user \"{}\"", id,
+          principal.getName());
       return new ResponseEntity<>(sensor, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR - GET] user Not have permission for this endpoint");
+      logger.error("[SENSOR - GET] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR - GET] Sensor not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
     } catch (Exception e) {
-      logger.error("[SENSOR - GET] Error getting sensors from DB", e);
+      logger.error("[SENSOR - GET] Error getting sensor {}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -115,29 +118,31 @@ public class SensorController {
       @RequestParam(value = "elements") int elements,
       Principal principal) {
     try {
-      logger.info("[SENSOR VARIABLES - GET] Check user permission");
+      logger.info(
+          "[SENSOR VARIABLES - GET] Getting sensor {} variables with page {}, elements {} by user \"{}\"",
+          id, nPage, elements, principal.getName());
+      ;
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)
           && !sensorService.hasUserVisibilitySensor(principal.getName(), id)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info(
-          "[SENSOR VARIABLES - GET] Get variables sensor from DB with id: " + id + " page: " + nPage
-              + ", elements: " + elements);
-      ;
 
       Page<Variable> page = sensorService.getVariables(id, nPage, elements);
 
+      logger.info(
+          "[SENSOR VARIABLES - GET] Request for getting sensor {} variables with page {}, elements {} finished by user \"{}\"",
+          id, nPage, elements, principal.getName());
       return new ResponseEntity<>(page, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR VARIABLES - GET] user Not have permission for this endpoint");
+      logger.error("[SENSOR VARIABLES - GET] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR VARIABLES - GET] Sensor not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
     } catch (Exception e) {
-      logger.error("[SENSOR VARIABLES - GET] Error getting variables from DB", e);
+      logger.error("[SENSOR VARIABLES - GET] Error getting sensor {} variables ", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -147,27 +152,30 @@ public class SensorController {
   public ResponseEntity<Variable> addVariablesSensorByID(@PathVariable("id") long id,
       @PathVariable("variableId") long variableId, Principal principal) {
     try {
-      logger.info("[SENSOR VARIABLES - ADD] Check user permission");
+      logger.info(
+          "[SENSOR VARIABLES - ADD] Adding variable {} to variables sensor {} list by user \"{}\"",
+          variableId, id, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info(
-          "[SENSOR VARIABLES - ADD] Add variable " + variableId + " to variables sensor " + id
-              + " list");
 
       Variable variable = sensorService.addVariable(id, variableId);
 
+      logger.info(
+          "[SENSOR VARIABLES - ADD] Request for adding variable {} to variables sensor {} list finished by user \"{}\"",
+          variableId, id, principal.getName());
       return new ResponseEntity<>(variable, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR VARIABLES - GET] user Not have permission for this endpoint");
+      logger.error("[SENSOR VARIABLES - ADD] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR VARIABLES - ADD] Sensor or variable not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor or variable not found", e);
     } catch (Exception e) {
-      logger.error("[SENSOR VARIABLES - ADD] Error getting sensors from DB", e);
+      logger.error("[SENSOR VARIABLES - ADD] Error adding variable {} to sensor {} variable list",
+          variableId, id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -177,28 +185,31 @@ public class SensorController {
   public ResponseEntity<Variable> deleteVariablesSensorByID(@PathVariable("id") long id,
       @PathVariable("variableId") long variableId, Principal principal) {
     try {
-      logger.info("[SENSOR VARIABLES - REMOVE] Check user permission");
+      logger.info(
+          "[SENSOR VARIABLES - REMOVE] Removing variable {} to variables sensor {} list by user \"{}\"",
+          variableId, id, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info(
-          "[SENSOR VARIABLES - REMOVE] Remove variable " + variableId + " from variables sensor "
-              + id
-              + " list");
 
       Variable variable = sensorService.removeVariable(id, variableId);
 
+      logger.info(
+          "[SENSOR VARIABLES - REMOVE] Request for removing variable {} to variables sensor {} list finished by user \"{}\"",
+          variableId, id, principal.getName());
       return new ResponseEntity<>(variable, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR VARIABLES - REMOVE] user Not have permission for this endpoint");
+      logger.error("[SENSOR VARIABLES - REMOVE] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR VARIABLES - REMOVE] Sensor or variable not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor or variable not found", e);
     } catch (Exception e) {
-      logger.error("[SENSOR VARIABLES - REMOVE] Error removing variable from DB", e);
+      logger.error(
+          "[SENSOR VARIABLES - REMOVE] Error removing variable {} to variables sensor {} list",
+          variableId, id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -207,21 +218,25 @@ public class SensorController {
   @ApiOperation(value = "Update sensor", response = Sensor.class, notes = "SensorType and House must exist. House can be null")
   public ResponseEntity<Sensor> update(@RequestBody() Sensor sensor, Principal principal) {
     try {
-      logger.info("[SENSOR - UPDATE] Check user permission");
+      logger
+          .info("[SENSOR - UPDATE] Updating sensor {} by user \"{}\"", sensor, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[SENSOR - UPDDATE] Updating sensor -> " + sensor);
+
       Sensor sensorRegister = sensorService.update(sensor);
 
+      logger
+          .info("[SENSOR - UPDATE] Request for updating sensor {} finished by user \"{}\"", sensor,
+              principal.getName());
       return new ResponseEntity<>(sensorRegister, HttpStatus.CREATED);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR - UPDATE] user Not have permission for this endpoint");
+      logger.error("[SENSOR - UPDATE] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[SENSOR - UPDATE] Error updating sensor", e);
+      logger.error("[SENSOR - UPDATE] Error updating sensor {}", sensor, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -230,23 +245,29 @@ public class SensorController {
   @ApiOperation(value = "Register sensor", response = Sensor.class)
   public ResponseEntity<Sensor> register(@RequestBody() Sensor sensor, Principal principal) {
     try {
-      logger.info("[SENSOR - REGISTER] Check user permission");
+      logger
+          .info("[SENSOR - REGISTER] Registering sensor {} by user \"{}\"", sensor,
+              principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[SENSOR - REGISTER] Registering sensor -> " + sensor);
+
       Sensor sensorRegister = sensorService.register(sensor);
+      logger
+          .info("[SENSOR - REGISTER] Request for registering sensor {} finished by user \"{}\"",
+              sensor,
+              principal.getName());
       return new ResponseEntity<>(sensorRegister, HttpStatus.CREATED);
     } catch (EntityAlreadyExists e) {
       logger.info("[SENSOR - REGISTER] Entity already exists and it hasn't been modified/created");
       return new ResponseEntity<>((Sensor) e.getObject(), HttpStatus.ACCEPTED);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR - REGISTER] user Not have permission for this endpoint");
+      logger.error("[SENSOR - REGISTER] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[SENSOR - REGISTER] Error registering sensor", e);
+      logger.error("[SENSOR - REGISTER] Error registering sensor {}", sensor, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -255,25 +276,26 @@ public class SensorController {
   @ApiOperation(value = "Delete sensor", response = Sensor.class)
   public ResponseEntity<Sensor> delete(@PathVariable("id") long id, Principal principal) {
     try {
-      logger.info("[SENSOR - REMOVE] Check user permission");
+      logger.info("[SENSOR - REMOVE] Removing sensor {} by user \"{}\"", id, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[SENSOR - REMOVE] Remove sensor from DB with id: " + id);
 
       Sensor sensor = sensorService.removeSensor(id);
 
+      logger.info("[SENSOR - REMOVE] Request removing sensor {} finished by user \"{}\"", id,
+          principal.getName());
       return new ResponseEntity<>(sensor, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSOR - REMOVE] user Not have permission for this endpoint");
+      logger.error("[SENSOR - REMOVE] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[SENSOR - REMOVE] Sensor not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
     } catch (Exception e) {
-      logger.error("[SENSOR - REMOVE] Error removing sensors from DB", e);
+      logger.error("[SENSOR - REMOVE] Error removing sensor {}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
