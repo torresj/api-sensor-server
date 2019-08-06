@@ -50,19 +50,21 @@ public class HouseController {
   public ResponseEntity<Page<House>> getHouses(@RequestParam(value = "page") int nPage,
       @RequestParam(value = "elements") int elements, Principal principal) {
     try {
-      logger.info("[HOUSE - GET ALL] Check user permission");
+      logger.info(
+          "[HOUSE - GET ALL] Getting houses from DB with page {}, elements {} by user \"{}\"",
+          nPage, elements, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info(
-          "[HOUSE - GET ALL] Get houses from DB with page " + nPage + ", elements " + elements);
 
       Page<House> page = houseService.getHouses(nPage, elements);
 
+      logger.info("[HOUSE - GET ALL] Request for houses finished by user \"{}\"",
+          principal.getName());
       return new ResponseEntity<>(page, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[HOUSE - GET ALL] user Not have permission for this endpoint");
+      logger.error("[HOUSE - GET ALL] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
@@ -75,27 +77,29 @@ public class HouseController {
   @ApiOperation(value = "Retrieve house by id", response = House.class)
   public ResponseEntity<House> getHouseByID(@PathVariable("id") long id, Principal principal) {
     try {
-      logger.info("[HOUSE - GET] Check user permission");
+      logger.info("[HOUSE - GET] Getting house {} by user \"{}\"", id,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)
           && !houseService
           .hasUserVisibilityHouse(principal.getName(), id)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[HOUSE - GET] Get houses from DB with id: " + id);
 
       House house = houseService.getHouse(id);
 
+      logger.info("[HOUSE - GET] Request for house {} finished by user \"{}\"", id,
+          principal.getName());
       return new ResponseEntity<>(house, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[HOUSE - GET] user Not have permission for this endpoint");
+      logger.error("[HOUSE - GET] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[HOUSE - GET] House not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
     } catch (Exception e) {
-      logger.error("[HOUSE - GET] Error getting houses from DB", e);
+      logger.error("[HOUSE - GET] Error getting house {}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -106,27 +110,29 @@ public class HouseController {
       @RequestParam(value = "page") int nPage, @RequestParam(value = "elements") int elements,
       Principal principal) {
     try {
-      logger.info("[HOUSE - SENSORS] Check user permission");
+      logger.info("[HOUSE - SENSORS] Getting house {} sensors by user \"{}\"", id,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)
           && !houseService
           .hasUserVisibilityHouse(principal.getName(), id)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[HOUSE - SENSORS] Get sensors from DB with house id: " + id);
 
       Page<Sensor> sensors = houseService.getSensors(id, nPage, elements);
 
+      logger.info("[HOUSE - SENSORS] Request for house {} sensors finished by user \"{}\"", id,
+          principal.getName());
       return new ResponseEntity<>(sensors, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[HOUSE - SENSORS] user Not have permission for this endpoint");
+      logger.error("[HOUSE - SENSORS] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[HOUSE - SENSORS] House not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
     } catch (Exception e) {
-      logger.error("[HOUSE - SENSORS] Error getting sensors from DB", e);
+      logger.error("[HOUSE - SENSORS] Error getting house {} sensors", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -135,21 +141,23 @@ public class HouseController {
   @ApiOperation(value = "Update house", response = House.class)
   public ResponseEntity<House> update(@RequestBody House house, Principal principal) {
     try {
-      logger.info("[HOUSE - UPDATE] Check user permission");
+      logger.info("[HOUSE - UPDATE] Updating house {} by user \"{}\"", house, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[HOUSE - UPDATE] Updating house -> " + house);
+
       House houseRegister = houseService.update(house);
 
+      logger.info("[HOUSE - UPDATE] Request for updating house {} finished by user \"{}\"",
+          houseRegister.getId(), principal.getName());
       return new ResponseEntity<>(houseRegister, HttpStatus.CREATED);
     } catch (ResponseStatusException e) {
-      logger.error("[HOUSE - UPDATE] user Not have permission for this endpoint");
+      logger.error("[HOUSE - UPDATE] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[HOUSE - UPDATE] Error updating house", e);
+      logger.error("[HOUSE - UPDATE] Error updating house {}", house, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -158,24 +166,27 @@ public class HouseController {
   @ApiOperation(value = "Register house", response = House.class)
   public ResponseEntity<House> register(@RequestBody House house, Principal principal) {
     try {
-      logger.info("[HOUSE - UPDATE] Check user permission");
+      logger.info("[HOUSE - REGISTER] Registering house {} by user \"{}\"", house,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[HOUSE - REGISTER] Registering house -> " + house);
-      House houseRegister = houseService.register(house);
 
+      House houseRegister = houseService.register(house);
+      logger.info("[HOUSE - REGISTER] Request for registering house {} finished by user \"{}\"",
+          houseRegister.getId(),
+          principal.getName());
       return new ResponseEntity<>(houseRegister, HttpStatus.CREATED);
     } catch (ResponseStatusException e) {
-      logger.error("[HOUSE - REGISTER] user Not have permission for this endpoint");
+      logger.error("[HOUSE - REGISTER] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityAlreadyExists e) {
       logger.error("[HOUSE - REGISTER] House already exists", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "House already exists", e);
     } catch (Exception e) {
-      logger.error("[HOUSE - REGISTER] Error registering house", e);
+      logger.error("[HOUSE - REGISTER] Error registering house {}", house, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -184,25 +195,27 @@ public class HouseController {
   @ApiOperation(value = "Delete house", response = House.class)
   public ResponseEntity<House> delete(@PathVariable("id") long id, Principal principal) {
     try {
-      logger.info("[HOUSE - REMOVE] Check user permission");
+      logger.info("[HOUSE - REMOVE] Removing house {} by user \"{}\"", id,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[HOUSE - REMOVE] Remove house from DB with id: " + id);
 
       House house = houseService.removeHouse(id);
 
+      logger.info("[HOUSE - REMOVE] Request for removing house {} finished by user \"{}\"", id,
+          principal.getName());
       return new ResponseEntity<>(house, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[HOUSE - REMOVE] user Not have permission for this endpoint");
+      logger.error("[HOUSE - REMOVE] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
       logger.error("[HOUSE - REMOVE] House not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
     } catch (Exception e) {
-      logger.error("[HOUSE - REMOVE] Error removing houses from DB", e);
+      logger.error("[HOUSE - REMOVE] Error removing house {}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
