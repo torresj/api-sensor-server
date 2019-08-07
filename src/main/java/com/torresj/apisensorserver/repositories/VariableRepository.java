@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.repositories;
 
-import com.torresj.apisensorserver.models.Variable;
+import com.torresj.apisensorserver.models.entities.Variable;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;

@@ -1,4 +1,4 @@
-package com.torresj.apisensorserver.models;
+package com.torresj.apisensorserver.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;

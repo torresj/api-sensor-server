@@ -3,7 +3,7 @@ package com.torresj.apisensorserver.services;
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.SensorType;
+import com.torresj.apisensorserver.models.entities.SensorType;
 import org.springframework.data.domain.Page;
 
 public interface SensorTypeService {

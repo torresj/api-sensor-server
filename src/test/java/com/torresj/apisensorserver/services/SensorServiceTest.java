@@ -8,11 +8,11 @@ import static org.mockito.Mockito.when;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.House;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.SensorType;
-import com.torresj.apisensorserver.models.Variable;
-import com.torresj.apisensorserver.models.VariableSensorRelation;
+import com.torresj.apisensorserver.models.entities.House;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.SensorType;
+import com.torresj.apisensorserver.models.entities.Variable;
+import com.torresj.apisensorserver.models.entities.VariableSensorRelation;
 import com.torresj.apisensorserver.repositories.HouseRepository;
 import com.torresj.apisensorserver.repositories.SensorRepository;
 import com.torresj.apisensorserver.repositories.SensorTypeRepository;
@@ -144,7 +144,8 @@ public class SensorServiceTest {
     assertEquals(sensorExpected.getName(), sensorActual.getName());
     assertEquals(sensorExpected.getId(), sensorActual.getId());
     assertEquals(sensorExpected.getMac(), sensorActual.getMac());
-    assertEquals(sensorExpected.getIp(), sensorActual.getIp());
+    assertEquals(sensorExpected.getPublicIp(), sensorActual.getPublicIp());
+    assertEquals(sensorExpected.getPrivateIp(), sensorActual.getPrivateIp());
 
   }
 
@@ -214,7 +215,8 @@ public class SensorServiceTest {
     assertEquals(sensorExpected.getName(), sensorActual.getName());
     assertEquals(sensorExpected.getId(), sensorActual.getId());
     assertEquals(sensorExpected.getMac(), sensorActual.getMac());
-    assertEquals(sensorExpected.getIp(), sensorActual.getIp());
+    assertEquals(sensorExpected.getPublicIp(), sensorActual.getPublicIp());
+    assertEquals(sensorExpected.getPrivateIp(), sensorActual.getPrivateIp());
   }
 
   @Test
@@ -235,7 +237,8 @@ public class SensorServiceTest {
     assertEquals(sensorExpected.getName(), sensorActual.getName());
     assertEquals(sensorExpected.getId(), sensorActual.getId());
     assertEquals(sensorExpected.getMac(), sensorActual.getMac());
-    assertEquals(sensorExpected.getIp(), sensorActual.getIp());
+    assertEquals(sensorExpected.getPublicIp(), sensorActual.getPublicIp());
+    assertEquals(sensorExpected.getPrivateIp(), sensorActual.getPrivateIp());
   }
 
   @Test

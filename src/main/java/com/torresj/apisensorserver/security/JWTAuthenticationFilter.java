@@ -7,7 +7,7 @@ import static com.torresj.apisensorserver.security.SecurityConstants.SECRET;
 import static com.torresj.apisensorserver.security.SecurityConstants.TOKEN_PREFIX;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.torresj.apisensorserver.models.User;
+import com.torresj.apisensorserver.models.entities.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.io.IOException;

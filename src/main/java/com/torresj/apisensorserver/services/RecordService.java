@@ -1,7 +1,7 @@
 package com.torresj.apisensorserver.services;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.Record;
+import com.torresj.apisensorserver.models.entities.Record;
 import java.time.LocalDate;
 import org.springframework.data.domain.Page;
 

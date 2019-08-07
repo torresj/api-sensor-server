@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.security;
 
-import com.torresj.apisensorserver.models.User;
+import com.torresj.apisensorserver.models.entities.User;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.security.core.GrantedAuthority;

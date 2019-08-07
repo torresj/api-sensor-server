@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.repositories;
 
-import com.torresj.apisensorserver.models.Record;
+import com.torresj.apisensorserver.models.entities.Record;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Page;

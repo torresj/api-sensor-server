@@ -2,8 +2,8 @@ package com.torresj.apisensorserver.services;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.Variable;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.Variable;
 import org.springframework.data.domain.Page;
 
 public interface VariableService {

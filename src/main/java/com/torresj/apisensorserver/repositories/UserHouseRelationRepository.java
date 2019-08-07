@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.repositories;
 
-import com.torresj.apisensorserver.models.UserHouseRelation;
+import com.torresj.apisensorserver.models.entities.UserHouseRelation;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

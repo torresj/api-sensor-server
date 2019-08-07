@@ -1,4 +1,4 @@
-package com.torresj.apisensorserver.models;
+package com.torresj.apisensorserver.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
@@ -18,25 +18,29 @@ import org.hibernate.annotations.CreationTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Variable implements Serializable {
+public class Record implements Serializable {
 
-  private static final long serialVersionUID = 4696253582022144805L;
+  private static final long serialVersionUID = 3094710057682194602L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(updatable = false, nullable = false)
+  @Column(updatable = false)
   private Long id;
 
-  @Column(nullable = false, unique = true)
-  private String name;
+  @Column(nullable = false)
+  private long sensorId;
 
-  @Column
-  private String units;
+  @Column(nullable = false)
+  private long variableId;
 
-  @Column
-  private String description;
+  @Column(nullable = false)
+  private double value;
+
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime date;
 
   @Column(nullable = false, updatable = false)
   @CreationTimestamp
   private LocalDateTime createAt;
+
 }

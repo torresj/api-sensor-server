@@ -10,13 +10,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.torresj.apisensorserver.ApiSensorApplication;
 import com.torresj.apisensorserver.jackson.RestPage;
-import com.torresj.apisensorserver.models.Record;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.SensorType;
-import com.torresj.apisensorserver.models.User;
-import com.torresj.apisensorserver.models.User.Role;
-import com.torresj.apisensorserver.models.Variable;
-import com.torresj.apisensorserver.models.VariableSensorRelation;
+import com.torresj.apisensorserver.models.entities.Record;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.SensorType;
+import com.torresj.apisensorserver.models.entities.User;
+import com.torresj.apisensorserver.models.entities.User.Role;
+import com.torresj.apisensorserver.models.entities.Variable;
+import com.torresj.apisensorserver.models.entities.VariableSensorRelation;
 import com.torresj.apisensorserver.repositories.RecordRepository;
 import com.torresj.apisensorserver.repositories.SensorRepository;
 import com.torresj.apisensorserver.repositories.SensorTypeRepository;
@@ -130,7 +130,7 @@ public class StationTest {
 
     //Create Sensor
     Sensor sensor1 = new Sensor(null, "Sensor1", type1.getId(), null, "MAC1",
-        "192.168.0.1", LocalDateTime.now(),
+        "192.168.0.1", "192.168.0.1", LocalDateTime.now(),
         LocalDateTime.now());
 
     sensor1 = sensorRepository.save(sensor1);
@@ -181,7 +181,8 @@ public class StationTest {
   public void initStationTestSensorAndVariableExists() throws IOException {
     //Init sensor with hardware values
     Sensor sensor = new Sensor();
-    sensor.setIp("192.168.1.1");
+    sensor.setPrivateIp("192.168.1.1");
+    sensor.setPublicIp("192.168.1.1");
     sensor.setMac("MAC1");
     sensor.setName("test");
 
@@ -212,7 +213,8 @@ public class StationTest {
   public void initStationTestSenorNotExistsAndVariableExists() throws IOException {
     //Init sensor with hardware values
     Sensor sensor = new Sensor();
-    sensor.setIp("192.168.1.1");
+    sensor.setPrivateIp("192.168.1.1");
+    sensor.setPublicIp("192.168.1.1");
     sensor.setMac("00:0a:95:9d:68:16");
     sensor.setName("test");
 
@@ -243,7 +245,8 @@ public class StationTest {
   public void initStationTestSenorExistsAndVariableNotExists() throws IOException {
     //Init sensor with hardware values
     Sensor sensor = new Sensor();
-    sensor.setIp("192.168.1.1");
+    sensor.setPrivateIp("192.168.1.1");
+    sensor.setPublicIp("192.168.1.1");
     sensor.setMac("MAC1");
     sensor.setName("test");
 
@@ -273,7 +276,8 @@ public class StationTest {
   public void initStationTestSenorNotExistsAndVariableNotExists() throws IOException {
     //Init sensor with hardware values
     Sensor sensor = new Sensor();
-    sensor.setIp("192.168.1.1");
+    sensor.setPrivateIp("192.168.1.1");
+    sensor.setPublicIp("192.168.1.1");
     sensor.setMac("00:0a:95:9d:68:16");
     sensor.setName("test");
 
@@ -410,7 +414,7 @@ public class StationTest {
     if (response.getStatusLine().getStatusCode() == 201) {
       return sensorRest;
     } else if (response.getStatusLine().getStatusCode() == 202) {
-      sensorRest.setIp(sensor.getIp());
+      sensorRest.setPublicIp(sensor.getPublicIp());
       return updateSensor(sensorRest);
     } else {
       return null;

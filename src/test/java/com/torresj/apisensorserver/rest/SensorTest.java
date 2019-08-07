@@ -5,10 +5,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.torresj.apisensorserver.jackson.RestPage;
-import com.torresj.apisensorserver.models.House;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.SensorType;
-import com.torresj.apisensorserver.models.Variable;
+import com.torresj.apisensorserver.models.entities.House;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.SensorType;
+import com.torresj.apisensorserver.models.entities.Variable;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -423,7 +423,7 @@ public class SensorTest extends BasicRestTest {
     }
 
     Sensor sensor = sensorRepository.findByMac("MAC3").get();
-    sensor.setIp("IP modified");
+    sensor.setPublicIp("IP modified");
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpPut httpPut = new HttpPut(
@@ -447,7 +447,7 @@ public class SensorTest extends BasicRestTest {
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(201));
     assertThat(responseSensor, equalTo(sensorModified));
-    assertThat(responseSensor.getIp(), equalTo("IP modified"));
+    assertThat(responseSensor.getPublicIp(), equalTo("IP modified"));
 
     client.close();
   }
@@ -459,7 +459,7 @@ public class SensorTest extends BasicRestTest {
     }
 
     Sensor sensor = sensorRepository.findByMac("MAC3").get();
-    sensor.setIp("IP modified");
+    sensor.setPublicIp("IP modified");
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpPut httpPut = new HttpPut(
@@ -489,7 +489,7 @@ public class SensorTest extends BasicRestTest {
     SensorType type = sensorTypeRepository.findByName("type1").get();
     House house = houseRepository.findByName("House1").get();
     Sensor sensor = new Sensor(null, "test", type.getId(), house.getId(), "MAC5",
-        "192.168.0.4", LocalDateTime.now(),
+        "192.168.0.5", "192.168.0.5", LocalDateTime.now(),
         LocalDateTime.now());
 
     CloseableHttpClient client = HttpClients.createDefault();
@@ -526,7 +526,7 @@ public class SensorTest extends BasicRestTest {
     SensorType type = sensorTypeRepository.findByName("type1").get();
     House house = houseRepository.findByName("House1").get();
     Sensor sensor = new Sensor(null, "test", type.getId(), house.getId(), "MAC2",
-        "192.168.0.4", LocalDateTime.now(),
+        "192.168.0.4", "192.168.0.4", LocalDateTime.now(),
         LocalDateTime.now());
 
     CloseableHttpClient client = HttpClients.createDefault();
@@ -565,7 +565,7 @@ public class SensorTest extends BasicRestTest {
     SensorType type = sensorTypeRepository.findByName("type1").get();
     House house = houseRepository.findByName("House1").get();
     Sensor sensor = new Sensor(null, "test", type.getId(), house.getId(), "MAC5",
-        "192.168.0.4", LocalDateTime.now(),
+        "192.168.0.4", "192.168.0.4", LocalDateTime.now(),
         LocalDateTime.now());
 
     CloseableHttpClient client = HttpClients.createDefault();

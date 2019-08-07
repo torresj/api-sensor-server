@@ -1,8 +1,8 @@
 package com.torresj.apisensorserver.services.impl;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.Record;
-import com.torresj.apisensorserver.models.User;
+import com.torresj.apisensorserver.models.entities.Record;
+import com.torresj.apisensorserver.models.entities.User;
 import com.torresj.apisensorserver.repositories.HouseRepository;
 import com.torresj.apisensorserver.repositories.RecordRepository;
 import com.torresj.apisensorserver.repositories.SensorRepository;

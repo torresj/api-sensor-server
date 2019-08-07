@@ -6,9 +6,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.Record;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.Variable;
+import com.torresj.apisensorserver.models.entities.Record;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.Variable;
 import com.torresj.apisensorserver.repositories.HouseRepository;
 import com.torresj.apisensorserver.repositories.RecordRepository;
 import com.torresj.apisensorserver.repositories.SensorRepository;

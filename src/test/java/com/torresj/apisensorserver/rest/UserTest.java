@@ -5,9 +5,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.torresj.apisensorserver.jackson.RestPage;
-import com.torresj.apisensorserver.models.House;
-import com.torresj.apisensorserver.models.User;
-import com.torresj.apisensorserver.models.User.Role;
+import com.torresj.apisensorserver.models.entities.House;
+import com.torresj.apisensorserver.models.entities.User;
+import com.torresj.apisensorserver.models.entities.User.Role;
 import java.io.IOException;
 import java.util.Optional;
 import org.apache.http.client.methods.CloseableHttpResponse;

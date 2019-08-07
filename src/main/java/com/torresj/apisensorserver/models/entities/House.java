@@ -1,5 +1,6 @@
-package com.torresj.apisensorserver.models;
+package com.torresj.apisensorserver.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -16,26 +17,20 @@ import org.hibernate.annotations.CreationTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class SensorType implements Serializable {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class House implements Serializable {
 
-  private static final long serialVersionUID = -3992426688582455846L;
+  private static final long serialVersionUID = 5385374710106449676L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(updatable = false)
   private Long id;
 
-  @Column(nullable = false, unique = true)
+  @Column(unique = true, nullable = false)
   private String name;
-
-  @Column
-  private String description;
-
-  @Column
-  private String actions;
 
   @Column(nullable = false, updatable = false)
   @CreationTimestamp
   private LocalDateTime createAt;
-
 }

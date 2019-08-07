@@ -2,9 +2,9 @@ package com.torresj.apisensorserver.controller;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.User.Role;
-import com.torresj.apisensorserver.models.Variable;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.User.Role;
+import com.torresj.apisensorserver.models.entities.Variable;
 import com.torresj.apisensorserver.services.SensorService;
 import com.torresj.apisensorserver.services.UserService;
 import io.swagger.annotations.Api;
@@ -296,6 +296,73 @@ public class SensorController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
     } catch (Exception e) {
       logger.error("[SENSOR - REMOVE] Error removing sensor {}", id, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+    }
+  }
+
+  @GetMapping(value = "/{id}/reset")
+  @ApiOperation(value = "Reset sensor by id", response = Void.class)
+  public ResponseEntity<Void> sendResetToSensor(@PathVariable("id") long id,
+      Principal principal) {
+    try {
+      logger.info(
+          "[SENSOR ACTIONS - RESET] Sending reset to sensor {} by user \"{}\"",
+          id, principal.getName());
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)
+          && !sensorService.hasUserVisibilitySensor(principal.getName(), id)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "User does not have permission for this endpoint");
+      }
+
+      sensorService.reset(id);
+
+      logger.info(
+          "[SENSOR ACTIONS - RESET] Request for sending reset to sensor {} finished by user \"{}\"",
+          id, principal.getName());
+      return new ResponseEntity<>(null, HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      logger.error("[SENSOR ACTIONS - RESET] User does not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
+    } catch (EntityNotFoundException e) {
+      logger.error("[[SENSOR ACTIONS - RESET] - GET] Sensor not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
+    } catch (Exception e) {
+      logger.error("[[SENSOR ACTIONS - RESET]] Error sending reset to sensor {}", id, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+    }
+  }
+
+  @GetMapping(value = "/{id}/actions/{action}")
+  @ApiOperation(value = "Reset sensor by id", response = Void.class)
+  public ResponseEntity<Void> sendResetToSensor(@PathVariable("id") long id,
+      @PathVariable("action") String action,
+      Principal principal) {
+    try {
+      logger.info(
+          "[SENSOR ACTIONS] Sending {} action to sensor {} by user \"{}\"",
+          action, id, principal.getName());
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)
+          && !sensorService.hasUserVisibilitySensor(principal.getName(), id)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "User does not have permission for this endpoint");
+      }
+
+      sensorService.sendAction(id, action);
+
+      logger.info(
+          "[SENSOR ACTIONS] Request sending {} action to sensor {} finished by user \"{}\"",
+          action, id, principal.getName());
+      return new ResponseEntity<>(null, HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      logger.error("[SENSOR ACTIONS] User does not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          e.getReason(), e);
+    } catch (EntityNotFoundException e) {
+      logger.error("[[SENSOR ACTIONS] - GET] Sensor not found", e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
+    } catch (Exception e) {
+      logger.error("[[SENSOR ACTIONS]] Error sending {} action to sensor {}", action, id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }

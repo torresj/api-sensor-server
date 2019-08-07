@@ -7,15 +7,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.torresj.apisensorserver.ApiSensorApplication;
-import com.torresj.apisensorserver.models.House;
-import com.torresj.apisensorserver.models.Record;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.SensorType;
-import com.torresj.apisensorserver.models.User;
-import com.torresj.apisensorserver.models.User.Role;
-import com.torresj.apisensorserver.models.UserHouseRelation;
-import com.torresj.apisensorserver.models.Variable;
-import com.torresj.apisensorserver.models.VariableSensorRelation;
+import com.torresj.apisensorserver.models.entities.House;
+import com.torresj.apisensorserver.models.entities.Record;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.SensorType;
+import com.torresj.apisensorserver.models.entities.User;
+import com.torresj.apisensorserver.models.entities.User.Role;
+import com.torresj.apisensorserver.models.entities.UserHouseRelation;
+import com.torresj.apisensorserver.models.entities.Variable;
+import com.torresj.apisensorserver.models.entities.VariableSensorRelation;
 import com.torresj.apisensorserver.repositories.HouseRepository;
 import com.torresj.apisensorserver.repositories.RecordRepository;
 import com.torresj.apisensorserver.repositories.SensorRepository;
@@ -138,16 +138,16 @@ public class BasicRestTest {
 
       //Create Sensor
       Sensor sensor1 = new Sensor(null, "Sensor1", type1.getId(), house1.getId(), "MAC1",
-          "192.168.0.1", LocalDateTime.now(),
+          "192.168.0.1", "192.168.0.1", LocalDateTime.now(),
           LocalDateTime.now());
       Sensor sensor2 = new Sensor(null, "Sensor2", type2.getId(), house1.getId(), "MAC2",
-          "192.168.0.2", LocalDateTime.now(),
+          "192.168.0.2", "192.168.0.2", LocalDateTime.now(),
           LocalDateTime.now());
       Sensor sensor3 = new Sensor(null, "Sensor3", type1.getId(), house2.getId(), "MAC3",
-          "192.168.0.3", LocalDateTime.now(),
+          "192.168.0.3", "192.168.0.3", LocalDateTime.now(),
           LocalDateTime.now());
       Sensor sensor4 = new Sensor(null, "Sensor4", type2.getId(), house2.getId(), "MAC4",
-          "192.168.0.4", LocalDateTime.now(),
+          "192.168.0.4", "192.168.0.4", LocalDateTime.now(),
           LocalDateTime.now());
 
       sensor1 = sensorRepository.save(sensor1);

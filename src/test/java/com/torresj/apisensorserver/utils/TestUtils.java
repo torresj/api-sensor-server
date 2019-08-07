@@ -1,13 +1,13 @@
 package com.torresj.apisensorserver.utils;
 
-import com.torresj.apisensorserver.models.House;
-import com.torresj.apisensorserver.models.Record;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.SensorType;
-import com.torresj.apisensorserver.models.User;
-import com.torresj.apisensorserver.models.UserHouseRelation;
-import com.torresj.apisensorserver.models.Variable;
-import com.torresj.apisensorserver.models.VariableSensorRelation;
+import com.torresj.apisensorserver.models.entities.House;
+import com.torresj.apisensorserver.models.entities.Record;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.SensorType;
+import com.torresj.apisensorserver.models.entities.User;
+import com.torresj.apisensorserver.models.entities.UserHouseRelation;
+import com.torresj.apisensorserver.models.entities.Variable;
+import com.torresj.apisensorserver.models.entities.VariableSensorRelation;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,8 @@ public class TestUtils {
     Sensor sensor = new Sensor();
     sensor.setCreateAt(LocalDateTime.now());
     sensor.setId(id);
-    sensor.setIp("192.168.0.X");
+    sensor.setPublicIp("192.168.0.X");
+    sensor.setPrivateIp("192.168.0.X");
     sensor.setLastConnection(LocalDateTime.now());
     sensor.setMac("mac" + id);
     sensor.setName("Sensor" + id);

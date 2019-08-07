@@ -1,9 +1,9 @@
 package com.torresj.apisensorserver.services.impl;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.User;
-import com.torresj.apisensorserver.models.User.Role;
 import com.torresj.apisensorserver.models.WSResponse;
+import com.torresj.apisensorserver.models.entities.User;
+import com.torresj.apisensorserver.models.entities.User.Role;
 import com.torresj.apisensorserver.services.SensorService;
 import com.torresj.apisensorserver.services.UserService;
 import com.torresj.apisensorserver.services.WSService;

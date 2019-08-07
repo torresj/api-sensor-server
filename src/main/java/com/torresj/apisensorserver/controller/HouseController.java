@@ -2,9 +2,9 @@ package com.torresj.apisensorserver.controller;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.House;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.User.Role;
+import com.torresj.apisensorserver.models.entities.House;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.User.Role;
 import com.torresj.apisensorserver.services.HouseService;
 import com.torresj.apisensorserver.services.UserService;
 import io.swagger.annotations.Api;

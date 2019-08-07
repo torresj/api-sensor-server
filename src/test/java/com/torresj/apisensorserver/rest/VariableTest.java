@@ -6,7 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.torresj.apisensorserver.jackson.RestPage;
-import com.torresj.apisensorserver.models.Variable;
+import com.torresj.apisensorserver.models.entities.Variable;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import org.apache.http.client.methods.CloseableHttpResponse;

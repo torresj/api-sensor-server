@@ -2,10 +2,10 @@ package com.torresj.apisensorserver.services.impl;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.House;
-import com.torresj.apisensorserver.models.User;
-import com.torresj.apisensorserver.models.User.Role;
-import com.torresj.apisensorserver.models.UserHouseRelation;
+import com.torresj.apisensorserver.models.entities.House;
+import com.torresj.apisensorserver.models.entities.User;
+import com.torresj.apisensorserver.models.entities.User.Role;
+import com.torresj.apisensorserver.models.entities.UserHouseRelation;
 import com.torresj.apisensorserver.repositories.HouseRepository;
 import com.torresj.apisensorserver.repositories.UserHouseRelationRepository;
 import com.torresj.apisensorserver.repositories.UserRepository;

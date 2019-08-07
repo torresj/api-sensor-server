@@ -1,11 +1,14 @@
 package com.torresj.apisensorserver.services.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
-import com.torresj.apisensorserver.models.Sensor;
-import com.torresj.apisensorserver.models.User;
-import com.torresj.apisensorserver.models.Variable;
-import com.torresj.apisensorserver.models.VariableSensorRelation;
+import com.torresj.apisensorserver.models.SocketMessage;
+import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.User;
+import com.torresj.apisensorserver.models.entities.Variable;
+import com.torresj.apisensorserver.models.entities.VariableSensorRelation;
 import com.torresj.apisensorserver.repositories.HouseRepository;
 import com.torresj.apisensorserver.repositories.SensorRepository;
 import com.torresj.apisensorserver.repositories.SensorTypeRepository;
@@ -14,12 +17,20 @@ import com.torresj.apisensorserver.repositories.UserRepository;
 import com.torresj.apisensorserver.repositories.VariableRepository;
 import com.torresj.apisensorserver.repositories.VariableSensorRelationRepository;
 import com.torresj.apisensorserver.services.SensorService;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,6 +41,11 @@ public class SensorServiceImpl implements SensorService {
 
   /* Logs */
   private static final Logger logger = LogManager.getLogger(SensorServiceImpl.class);
+
+  private static final String RESET = "reset";
+
+  @Value("${socket.port}")
+  private int socketPort;
 
   private SensorRepository sensorRepository;
 
@@ -204,5 +220,50 @@ public class SensorServiceImpl implements SensorService {
         .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
         .flatMap(house -> sensorRepository.findByHouseId(house.getId()).stream())
         .anyMatch(sensor -> sensor.getId() == id);
+  }
+
+  @Override
+  public void reset(long id) throws EntityNotFoundException, JsonProcessingException {
+    logger.debug("[SENSOR - RESET] Searching sensor by id: " + id);
+    Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+    String socketMessage = new ObjectMapper()
+        .writeValueAsString(new SocketMessage(sensor.getPrivateIp(), RESET));
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    executor.submit(() -> {
+      try {
+        InetAddress ip = InetAddress.getByName(sensor.getPrivateIp());
+        Socket socket = new Socket(ip, socketPort);
+        OutputStream output = socket.getOutputStream();
+        PrintWriter writer = new PrintWriter(output, true);
+        writer.println(socketMessage);
+        socket.close();
+      } catch (IOException e) {
+        logger
+            .error("[SENSOR - RESET] error reset sensor {}. Message: {}", id, socketMessage, e);
+      }
+    });
+  }
+
+  @Override
+  public void sendAction(long id, String action)
+      throws EntityNotFoundException, JsonProcessingException {
+    logger.debug("[SENSOR - SEND ACTION] Searching sensor by id: " + id);
+    Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+    String socketMessage = new ObjectMapper()
+        .writeValueAsString(new SocketMessage(sensor.getPrivateIp(), action));
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    executor.submit(() -> {
+      try {
+        InetAddress ip = InetAddress.getByName(sensor.getPrivateIp());
+        Socket socket = new Socket(ip, socketPort);
+        OutputStream output = socket.getOutputStream();
+        PrintWriter writer = new PrintWriter(output, true);
+        writer.println(socketMessage);
+        socket.close();
+      } catch (IOException e) {
+        logger
+            .error("[SENSOR - ACTION] error sending action {} to sensor {}", action, id, e);
+      }
+    });
   }
 }

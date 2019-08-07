@@ -1,4 +1,4 @@
-package com.torresj.apisensorserver.models;
+package com.torresj.apisensorserver.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
@@ -12,35 +12,42 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Record implements Serializable {
+public class User implements Serializable {
 
-  private static final long serialVersionUID = 3094710057682194602L;
+  private static final long serialVersionUID = 608601372639930858L;
+
+  public enum Role {
+    USER,
+    ADMIN,
+    STATION
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(updatable = false)
   private Long id;
 
-  @Column(nullable = false)
-  private long sensorId;
+  @Column(unique = true, nullable = false)
+  private String username;
 
   @Column(nullable = false)
-  private long variableId;
+  private String password;
 
   @Column(nullable = false)
-  private double value;
-
-  @Column(nullable = false, updatable = false)
-  private LocalDateTime date;
+  private Role role;
 
   @Column(nullable = false, updatable = false)
   @CreationTimestamp
   private LocalDateTime createAt;
 
+  @Column(nullable = false, updatable = false)
+  @UpdateTimestamp
+  private LocalDateTime lastConnection;
 }
