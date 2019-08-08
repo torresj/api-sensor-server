@@ -53,20 +53,23 @@ public class VariableController {
       @RequestParam(value = "elements") int elements,
       @RequestParam(value = "name", required = false) String name, Principal principal) {
     try {
-      logger.info("[VARIABLE - GET ALL] Check user permission");
+      logger.info(
+          "[VARIABLE - GET ALL] Getting variables with page {}, elements {} and name {} by user \"{}\"",
+          nPage, elements, name, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[VARIABLE - GET ALL] Get variables from DB with page " + nPage + ", elements "
-          + elements + "and with name " + name);
 
       Page<Variable> page = name == null ? variableService.getVariables(nPage, elements)
           : variableService.getVariables(nPage, elements, name);
 
+      logger.info(
+          "[VARIABLE - GET ALL] Request for getting variables with page {}, elements {} and name {} finished by user \"{}\"",
+          nPage, elements, name, principal.getName());
       return new ResponseEntity<>(page, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[VARIABLE - GET ALL] user Not have permission for this endpoint");
+      logger.error("[VARIABLE - GET ALL] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
@@ -80,27 +83,28 @@ public class VariableController {
   public ResponseEntity<Variable> getVariableById(@PathVariable("id") long id,
       Principal principal) {
     try {
-      logger.info("[VARIABLE - GET] Check user permission");
+      logger.info("[VARIABLE - GET] Getting variable {} by user \"{}\"", id, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)
           && !variableService
           .hasUserVisibilityVariable(principal.getName(), id)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[VARIABLE - GET] Get variable from DB with id: " + id);
 
       Variable variable = variableService.getVariable(id);
 
+      logger.info("[VARIABLE - GET] Request for getting variable {} finished by user \"{}\"", id,
+          principal.getName());
       return new ResponseEntity<>(variable, HttpStatus.OK);
     } catch (EntityNotFoundException e) {
       logger.error("[VARIABLE - GET] Error variable not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Variable not found", e);
     } catch (ResponseStatusException e) {
-      logger.error("[VARIABLE - GET] user Not have permission for this endpoint");
+      logger.error("[VARIABLE - GET] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[VARIABLE - GET] Error getting variable", e);
+      logger.error("[VARIABLE - GET] Error getting variable {}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -109,22 +113,24 @@ public class VariableController {
   @ApiOperation(value = "Update variable", response = Variable.class)
   public ResponseEntity<Variable> update(@RequestBody() Variable variable, Principal principal) {
     try {
-      logger.info("[VARIABLE - REGISTER] Check user permission");
+      logger.info("[VARIABLE - UPDATE] Updating variable {} by user \"{}\"", variable,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[VARIABLE - REGISTER] Register variable: " + variable);
 
       Variable variableRegister = variableService.update(variable);
 
+      logger.info("[VARIABLE - UPDATE] Updating variable {} finished by user \"{}\"", variable,
+          principal.getName());
       return new ResponseEntity<>(variableRegister, HttpStatus.CREATED);
     } catch (ResponseStatusException e) {
-      logger.error("[VARIABLE - REGISTER] user Not have permission for this endpoint");
+      logger.error("[VARIABLE - UPDATE] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[VARIABLE - REGISTER] Error registering variable", e);
+      logger.error("[VARIABLE - UPDATE] Error Updating variable {}", variable, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -133,25 +139,28 @@ public class VariableController {
   @ApiOperation(value = "Register variable", response = Variable.class)
   public ResponseEntity<Variable> register(@RequestBody() Variable variable, Principal principal) {
     try {
-      logger.info("[VARIABLE - REGISTER] Check user permission");
+      logger.info("[VARIABLE - REGISTER] Register variable {} by user \"{}\"", variable,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[VARIABLE - REGISTER] Register variable: " + variable);
 
       Variable variableRegister = variableService.register(variable);
 
+      logger.info("[VARIABLE - REGISTER] Request for register variable {} finished by user \"{}\"",
+          variable,
+          principal.getName());
       return new ResponseEntity<>(variableRegister, HttpStatus.CREATED);
     } catch (EntityAlreadyExists e) {
       logger.error("[VARIABLE - REGISTER] Variable already exists", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Variable already exists", e);
     } catch (ResponseStatusException e) {
-      logger.error("[VARIABLE - REGISTER] user Not have permission for this endpoint");
+      logger.error("[VARIABLE - REGISTER] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[VARIABLE - REGISTER] Error registering variable", e);
+      logger.error("[VARIABLE - REGISTER] Error registering variable {}", variable, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -160,25 +169,27 @@ public class VariableController {
   @ApiOperation(value = "Delete variable by id", response = Variable.class)
   public ResponseEntity<Variable> delete(@PathVariable("id") long id, Principal principal) {
     try {
-      logger.info("[VARIABLE - DELETE] Check user permission");
+      logger.info("[VARIABLE - DELETE] Delete variable {} by user \"{}\"", id, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "user Not have permission for this endpoint");
+            "User does not have permission for this endpoint");
       }
-      logger.info("[VARIABLE - DELETE] Delete variable with id: " + id);
 
       Variable variableRegister = variableService.deleteVariable(id);
 
+      logger
+          .info("[VARIABLE - DELETE] Request for deleting variable {} finished by user \"{}\"", id,
+              principal.getName());
       return new ResponseEntity<>(variableRegister, HttpStatus.OK);
     } catch (EntityNotFoundException e) {
       logger.error("[VARIABLE - DELETE] Variable not exists", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Variable not exists", e);
     } catch (ResponseStatusException e) {
-      logger.error("[VARIABLE - DELETE] user Not have permission for this endpoint");
+      logger.error("[VARIABLE - DELETE] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[VARIABLE - DELETE] Error deleting variable", e);
+      logger.error("[VARIABLE - DELETE] Error deleting variable {}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
@@ -189,24 +200,27 @@ public class VariableController {
       @RequestParam(value = "page") int nPage,
       @RequestParam(value = "elements") int elements, Principal principal) {
     try {
-      logger.info("[SENSORS HAVE VARIABLE - GET] Check user permission");
+      logger.info(
+          "[SENSORS HAVE VARIABLE - GET] Getting sensors contains variable {} by user \"{}\"", id,
+          principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "user Not have permission for this endpoint");
       }
-      logger.info(
-          "[SENSORS HAVE VARIABLE - GET] Get sensors contains variable from DB with variableId: "
-              + id);
 
       Page<Sensor> sensors = variableService.getSensors(id, nPage, elements);
 
+      logger.info(
+          "[SENSORS HAVE VARIABLE - GET] Request getting sensors contains variable {} finished by user \"{}\"",
+          id,
+          principal.getName());
       return new ResponseEntity<>(sensors, HttpStatus.OK);
     } catch (ResponseStatusException e) {
-      logger.error("[SENSORS HAVE VARIABLE - GET] user Not have permission for this endpoint");
+      logger.error("[SENSORS HAVE VARIABLE - GET] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (Exception e) {
-      logger.error("[SENSORS HAVE VARIABLE - GET] Error getting sensors", e);
+      logger.error("[SENSORS HAVE VARIABLE - GET] Error getting sensors with variable {}", id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
