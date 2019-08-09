@@ -79,70 +79,95 @@ public class SensorServiceImpl implements SensorService {
 
   @Override
   public Page<Sensor> getSensors(int nPage, int elements) {
-    logger.debug("[SENSOR - GET] Getting sensors");
+    logger.debug("[SENSOR - SERVICE] Service for getting sensors start");
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-    return sensorRepository.findAll(pageRequest);
+    Page<Sensor> page = sensorRepository.findAll(pageRequest);
+    logger.debug("[SENSOR - SERVICE] Service for getting sensors end. Sensors: {}",
+        page.getContent());
+    return page;
   }
 
   @Override
   public Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId, String name)
       throws EntityNotFoundException {
     logger.debug(
-        "[SENSOR - GET] Getting sensors filter by sensor type " + sensorTypeId + "and/or name "
-            + name);
+        "[SENSOR - SERVICE] Service for getting sensors filtered by type {} and/or name {} start",
+        sensorTypeId, name);
+    Page<Sensor> page;
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
     if (sensorTypeId != null && name != null) {
+      logger.debug(
+          "[SENSOR - SERVICE] filtering by type {} and name {}",
+          sensorTypeId, name);
       sensorTypeRepository.findById(sensorTypeId).orElseThrow(EntityNotFoundException::new);
-      return sensorRepository.findBySensorTypeIdAndName(sensorTypeId, name, pageRequest);
+      page = sensorRepository.findBySensorTypeIdAndName(sensorTypeId, name, pageRequest);
     } else if (sensorTypeId != null) {
-      return sensorRepository.findBySensorTypeId(sensorTypeId, pageRequest);
+      logger.debug(
+          "[SENSOR - SERVICE] filtering by type {}",
+          sensorTypeId);
+      page = sensorRepository.findBySensorTypeId(sensorTypeId, pageRequest);
     } else {
-      return sensorRepository.findByName(name, pageRequest);
+      logger.debug(
+          "[SENSOR - SERVICE] filtering by name {}", name);
+      page = sensorRepository.findByName(name, pageRequest);
     }
+
+    logger.debug(
+        "[SENSOR - SERVICE] Service for getting sensors filtered by type {} and/or name {} end. Sensors: {}",
+        sensorTypeId, name, page != null ? page.getContent() : page);
+    return page;
   }
 
   @Override
   public Sensor getSensor(long id) throws EntityNotFoundException {
-    logger.debug("[SENSOR - GET SENSOR] Searching sensor by id: " + id);
-    return sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[SENSOR - SERVICE] Service for getting sensor {} start", id);
+    Sensor sensor = sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[SENSOR - SERVICE] Service for getting sensor {} end. Sensor: {}", id, sensor);
+    return sensor;
   }
 
   @Override
   public Page<Variable> getVariables(long id, int nPage, int elements)
       throws EntityNotFoundException {
-    logger.debug("[SENSOR VARIABLES - GET] Searching variables sensor by id: " + id);
+    logger.debug("[SENSOR - SERVICE] Service for getting sensor {} variables start", id);
     sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
     List<Long> ids = variableSensorRelationRepository.findBySensorId(id).stream()
         .map(VariableSensorRelation::getVariableId).collect(
             Collectors.toList());
-
-    return variableRepository.findByIdIn(ids, pageRequest);
+    Page<Variable> page = variableRepository.findByIdIn(ids, pageRequest);
+    logger
+        .debug("[SENSOR - SERVICE] Service for getting sensor {} variables end. Variables: {}", id,
+            page.getContent());
+    return page;
   }
 
   @Override
   public Variable addVariable(long sensorId, long variableId) throws EntityNotFoundException {
     logger.debug(
-        "[SENSOR VARIABLES - ADD] Add variable " + variableId + " to variables sensor " + sensorId
-            + " list");
+        "[SENSOR - SERVICE] Service for add variable {} to sensor {} start", variableId, sensorId);
     sensorRepository.findById(sensorId).orElseThrow(EntityNotFoundException::new);
     Variable variable = variableRepository.findById(variableId)
         .orElseThrow(EntityNotFoundException::new);
-    if (variableSensorRelationRepository.findBySensorIdAndVariableId(sensorId, variableId)
+    if (!variableSensorRelationRepository.findBySensorIdAndVariableId(sensorId, variableId)
         .isPresent()) {
-      return variable;
-    } else {
+      logger.debug(
+          "[SENSOR - SERVICE] Variable {} not present yet. Adding to sensor {}", variableId,
+          sensorId);
       VariableSensorRelation relation = new VariableSensorRelation();
       relation.setSensorId(sensorId);
       relation.setVariableId(variableId);
       variableSensorRelationRepository.save(relation);
-      return variable;
     }
+    logger.debug(
+        "[SENSOR - SERVICE] Service for add variable {} to sensor {} end. Variable: {}", variableId,
+        sensorId, variable);
+    return variable;
   }
 
   @Override
   public Sensor update(Sensor sensor) throws EntityNotFoundException {
-    logger.debug("[SENSOR - REGISTER] Searching sensor on DB");
+    logger.debug("[SENSOR - SERVICE] Service for updating sensor start. Sensor: {}", sensor);
 
     Sensor entity = sensorRepository.findByMac(sensor.getMac())
         .orElseThrow(EntityNotFoundException::new);

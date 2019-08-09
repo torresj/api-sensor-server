@@ -44,70 +44,88 @@ public class HouseServiceImpl implements HouseService {
 
   @Override
   public Page<House> getHouses(int nPage, int elements) {
-    logger.debug("[HOUSE - GET] Getting houses");
+    logger.debug("[HOUSE - SERVICE] Getting house service start");
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-    return houseRepository.findAll(pageRequest);
+    Page<House> page = houseRepository.findAll(pageRequest);
+    logger.debug("[HOUSE - SERVICE] Getting house service end. Houses: {}", page.getContent());
+    return page;
   }
 
   @Override
   public House getHouse(long id) throws EntityNotFoundException {
-    logger.debug("[HOUSE - GET HOUSE] Searching house by id: " + id);
-    return houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[HOUSE - SERVICE] Service for get house {} start", id);
+    House house = houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[HOUSE - SERVICE] Service for get house {} end. House: {}", id, house);
+    return house;
   }
 
   @Override
   public Page<Sensor> getSensors(long id, int nPage, int elements) throws EntityNotFoundException {
-    logger.debug("[HOUSE - SENSOR] Searching sensors  by house id: " + id + ", nPage " + nPage
-        + " and elements "
-        + elements);
+    logger.debug("[HOUSE - SERVICE] Service for get house {} sensors start", id);
     houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-    return sensorRepository.findByHouseId(id, pageRequest);
+    Page<Sensor> page = sensorRepository.findByHouseId(id, pageRequest);
+    logger.debug("[HOUSE - SERVICE] Service for get house {} sensors end. Sensors: ", id,
+        page.getContent());
+    return page;
   }
 
   @Override
   public House update(House house) throws EntityNotFoundException {
-    logger.debug("[HOUSE - UPDATE] Updating House " + house);
+    logger.debug("[HOUSE - SERVICE] Service for update house start. House: ", house);
     House entity = houseRepository.findByName(house.getName())
         .orElseThrow(EntityNotFoundException::new);
     house.setId(entity.getId());
-    houseRepository.save(house);
+    house = houseRepository.save(house);
+    logger.debug("[HOUSE - SERVICE] Service for update house end. House: ", house);
     return house;
   }
 
   @Override
   public House register(House house) throws EntityAlreadyExists {
-    logger.debug("[HOUSE - REGISTER] Registering House " + house);
+    logger.debug("[HOUSE - SERVICE] Service for register house start. House: {}", house);
     Optional<House> entity = houseRepository.findByName(house.getName());
 
     if (entity.isPresent()) {
-      logger.error("[HOUSE - REGISTER] Error registering House " + house);
+      logger
+          .error("[HOUSE - SERVICE] Error registering House. House already exists on db {} ",
+              house);
       throw new EntityAlreadyExists();
     }
-
-    return houseRepository.save(house);
+    house = houseRepository.save(house);
+    logger.debug("[HOUSE - SERVICE] Service for register house end. House: {}", house);
+    return house;
   }
 
   @Override
   public House removeHouse(long id) throws EntityNotFoundException {
-    logger.debug("[HOUSE - REMOVE HOUSE] Searching house by id: " + id);
+    logger.debug("[HOUSE - SERVICE] Service for delete house {} start", id);
     House house = houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-    logger.debug("[HOUSE - REMOVE HOUSE] update all sensor's house");
+    logger.debug("[HOUSE - SERVICE] updating all sensor's house");
     sensorRepository.findByHouseId(id).stream().peek(sensor -> sensor.setHouseId(null))
         .forEach(sensorRepository::save);
-    logger.debug("[HOUSE - REMOVE HOUSE] Deleting all relation between User and House " + id);
+    logger.debug("[HOUSE - SERVICE] Deleting all relation user-house for house {}", id);
     userHouseRelationRepository.findByHouseId(id).stream()
         .forEach(userHouseRelationRepository::delete);
     houseRepository.delete(house);
+    logger.debug("[HOUSE - SERVICE] Service for delete house {} end", id);
     return house;
   }
 
   @Override
   public boolean hasUserVisibilityHouse(String name, long id) throws EntityNotFoundException {
+    logger.debug("[HOUSE - SERVICE] Service for check if user {} has visibility for house {} start",
+        name, id);
+    logger.debug("[HOUSE - SERVICE] Searching user {}", name);
     User user = userRepository.findByUsername(name).get();
+    logger.debug("[HOUSE - SERVICE] Searching house {}", id);
     houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-    return userHouseRelationRepository.findByUserId(user.getId()).stream()
+    boolean hasVisibility = userHouseRelationRepository.findByUserId(user.getId()).stream()
         .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
         .anyMatch(house -> house.getId() == id);
+    logger.debug(
+        "[HOUSE - SERVICE] Service for check if user {} has visibility for house {} end. Result: {}",
+        name, id, hasVisibility);
+    return hasVisibility;
   }
 }

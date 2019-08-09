@@ -1,4 +1,4 @@
-package com.torresj.apisensorserver.mqtt;
+package com.torresj.apisensorserver.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;

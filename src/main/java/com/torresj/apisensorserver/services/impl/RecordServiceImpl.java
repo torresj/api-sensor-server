@@ -57,18 +57,21 @@ public class RecordServiceImpl implements RecordService {
 
   @Override
   public Record register(Record record) throws EntityNotFoundException {
-    logger.debug("[RECORD - REGISTER] Saving new record: " + record);
+    logger.debug("[RECORD - SERVICE] Service for save new record start. {} ", record);
     // Try to find variable and sensor
+    logger.debug("[RECORD - SERVICE] Searching sensor {} ", record.getSensorId());
     sensorRepository.findById(record.getSensorId()).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[RECORD - SERVICE] Searching variable {} ", record.getVariableId());
     variableRepository.findById(record.getVariableId()).orElseThrow(EntityNotFoundException::new);
 
     Record entity = recordRespository.save(record);
 
     String destination = "/topic/station/" + record.getSensorId();
     logger.debug(
-        "[RECORD - REGISTER] Sending data to destination /topic/station/" + record.getSensorId());
+        "[RECORD - SERVICE] Sending data to destination /topic/station/" + record.getSensorId());
     template.convertAndSend(destination, record);
 
+    logger.debug("[RECORD - SERVICE] Service for save new record end. {} ", record);
     return entity;
   }
 
@@ -77,35 +80,53 @@ public class RecordServiceImpl implements RecordService {
       int numberOfElements, LocalDate from, LocalDate to) {
 
     logger.debug(
-        "[RECORD - GET] Getting records for sensor " + sensorId + " and variable " + variableId
-            + " beetween: " + from + " and " + to);
+        "[RECORD - SERVICE] Service for get records from sensor {} and variable {} start", sensorId,
+        variableId);
 
     PageRequest pageRequest = PageRequest
         .of(pageNumber, numberOfElements, Sort.by("createAt").descending());
 
-    return recordRespository
+    Page<Record> page = recordRespository
         .findBySensorIdAndVariableIdAndCreateAtBetween(sensorId, variableId, from.atStartOfDay(),
             to.atTime(23, 59),
             pageRequest);
+
+    logger.debug(
+        "[RECORD - SERVICE] Service for get records from sensor {} and variable {} end. Records: ",
+        sensorId,
+        variableId, page.getContent());
+    return page;
 
   }
 
   @Override
   public Record getRecord(long id) throws EntityNotFoundException {
 
-    logger.debug("[RECORD - GET] Getting record with id: " + id);
-    return recordRespository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[RECORD - SERVICE]  Service for get record {} start", id);
+    Record record = recordRespository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[RECORD - SERVICE]  Service for get record {} end. Record: ", id, record);
+    return record;
 
   }
 
   @Override
   public boolean hasUserVisibilityRecord(String name, long id) throws EntityNotFoundException {
+    logger
+        .debug("[RECORD - SERVICE] Service for check if user {} has visibility for record {} start",
+            name, id);
+    logger.debug("[RECORD - SERVICE] Searching user {}", name);
     User user = userRepository.findByUsername(name).get();
+    logger.debug("[RECORD - SERVICE] Searching record {}", id);
     Record record = recordRespository.findById(id).orElseThrow(EntityNotFoundException::new);
-    return userHouseRelationRepository.findByUserId(user.getId()).stream()
+    boolean hasVisibility = userHouseRelationRepository.findByUserId(user.getId()).stream()
         .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
         .flatMap(house -> sensorRepository.findByHouseId(house.getId()).stream())
         .anyMatch(sensor -> sensor.getId() == record.getSensorId());
+    logger
+        .debug(
+            "[RECORD - SERVICE] Service for check if user {} has visibility for record {} end. Result: {}",
+            name, id, hasVisibility);
+    return hasVisibility;
   }
 
 }

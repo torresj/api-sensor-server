@@ -17,6 +17,8 @@ import com.torresj.apisensorserver.repositories.UserRepository;
 import com.torresj.apisensorserver.repositories.VariableRepository;
 import com.torresj.apisensorserver.repositories.VariableSensorRelationRepository;
 import java.time.LocalDateTime;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,6 +27,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("dev")
 public class InitialData {
+
+  /* Logs */
+  private static final Logger logger = LogManager.getLogger(InitialData.class);
 
   private VariableRepository variableRepository;
 
@@ -66,6 +71,7 @@ public class InitialData {
 
   @Bean
   public void initDataBase() {
+    logger.info("[ INIT DATABASE ] Creating data base to dev profile ...");
     clearDB();
     //Create variables
     Variable variable1 = new Variable(null, "Temperature", "˚C", "Temperature sensor",
@@ -151,6 +157,7 @@ public class InitialData {
 
     userHouseRelationRepository.save(uhRelation2);
 
+    logger.info("[ INIT DATABASE ] Data base created");
   }
 
   private void clearDB() {

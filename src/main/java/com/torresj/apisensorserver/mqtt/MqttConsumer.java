@@ -3,6 +3,7 @@ package com.torresj.apisensorserver.mqtt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.models.MqttMessage;
 import com.torresj.apisensorserver.models.entities.Record;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import com.torresj.apisensorserver.services.RecordService;
@@ -39,7 +40,7 @@ public class MqttConsumer {
 
   public void messageHandler(String message) {
     try {
-      logger.info("[MQTT - MESSAGE RECEIVE] Message receive from mqtt server :" + message);
+      logger.info("[MQTT - MESSAGE RECEIVE] Message receive from mqtt server: {}", message);
 
       MqttMessage mqttMsg = objectMapper.readValue(message, MqttMessage.class);
       switch (mqttMsg.getType()) {
@@ -50,12 +51,13 @@ public class MqttConsumer {
           recordProcessor(message);
           break;
         default:
-          logger.error("Type not supported");
+          logger.error("[MQTT - MESSAGE RECEIVE] Type not supported");
       }
 
+      logger.info("[MQTT - MESSAGE RECEIVE] Message processed: {}", message);
     } catch (IOException e) {
       logger.error(e);
-      logger.info("Message not processed: " + message);
+      logger.info("[MQTT - MESSAGE RECEIVE] Message not processed: {}", message);
     }
   }
 
@@ -65,19 +67,19 @@ public class MqttConsumer {
       recordService.register(record);
     } catch (IOException e) {
       logger.error(e);
-      logger.info("Message not processed: " + message);
+      logger.info("[MQTT - MESSAGE RECEIVE] Message not processed: {}", message);
     } catch (EntityNotFoundException e) {
-      logger.error("[ERROR] Entity not found: " + message);
+      logger.error("[MQTT - MESSAGE RECEIVE] Entity not found for message {}", message, e);
     }
   }
 
   private void errorProcessor(MqttMessage message) {
     try {
       Sensor sensor = sensorService.getSensor(message.getSensorId());
-      logger.error("[ERROR] Error receive from sensor => " + sensor);
-      logger.error(message.getMsg());
+      logger.error("[MQTT - MESSAGE RECEIVE] Error receive from sensor {}", sensor.getId());
+      logger.error("[MQTT - MESSAGE RECEIVE] Error: {}", message.getMsg());
     } catch (EntityNotFoundException e) {
-      logger.error("[ERROR] Entity not found: " + message);
+      logger.error("[MQTT - MESSAGE RECEIVE] Entity not found for message {}", message, e);
     }
   }
 }
