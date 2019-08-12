@@ -172,122 +172,138 @@ public class SensorServiceImpl implements SensorService {
     Sensor entity = sensorRepository.findByMac(sensor.getMac())
         .orElseThrow(EntityNotFoundException::new);
 
-    logger.debug("[SENSOR - REGISTER] Sensor exists. Updating ...");
     sensor.setLastConnection(LocalDateTime.now());
     sensor.setId(entity.getId());
     //check for house id and sensor type id
     if (sensor.getHouseId() != null) {
+      logger.debug("[SENSOR - SERVICE] Searching if house {} exists", sensor.getHouseId());
       houseRepository.findById(sensor.getHouseId()).orElseThrow(EntityNotFoundException::new);
     }
+    logger.debug("[SENSOR - SERVICE] Searching if sensor type {} exists", sensor.getId());
     sensorTypeRepository.findById(sensor.getSensorTypeId())
         .orElseThrow(EntityNotFoundException::new);
     sensor = sensorRepository.save(sensor);
 
+    logger.debug("[SENSOR - SERVICE] Service for updating sensor end. Sensor: {}", sensor);
     return sensor;
   }
 
   @Override
   public Sensor register(Sensor sensor) throws EntityNotFoundException, EntityAlreadyExists {
-    logger.debug("[SENSOR - REGISTER] Searching sensor on DB");
+    logger.debug("[SENSOR - SERVICE] Service for register sensor start. Sensor: {}", sensor);
     Optional<Sensor> entity = sensorRepository.findByMac(sensor.getMac());
 
     if (entity.isPresent()) {
-      logger.debug("[SENSOR - REGISTER] Sensor exists");
+      logger.debug("[SENSOR - SERVICE] Service for register sensor end. Sensor {} exists",
+          sensor.getId());
       throw new EntityAlreadyExists(entity.get());
     } else {
-      logger.info("[SENSOR - REGISTER] Registering new sensor ...");
       //check for house id and sensor type id
       if (sensor.getHouseId() != null) {
+        logger.debug("[SENSOR - SERVICE] Searching if house {} exists", sensor.getHouseId());
         houseRepository.findById(sensor.getHouseId()).orElseThrow(EntityNotFoundException::new);
       }
+      logger.debug("[SENSOR - SERVICE] Searching if sensor type {} exists", sensor.getId());
       sensorTypeRepository.findById(sensor.getSensorTypeId())
           .orElseThrow(EntityNotFoundException::new);
       sensor.setLastConnection(LocalDateTime.now());
       sensor = sensorRepository.save(sensor);
 
+      logger.debug("[SENSOR - SERVICE] Service for register sensor end. Sensor: {}", sensor);
       return sensor;
     }
   }
 
   @Override
   public Sensor removeSensor(long id) throws EntityNotFoundException {
-    logger.debug("[SENSOR - REMOVE SENSOR] Searching sensor by id: " + id);
+    logger.debug("[SENSOR - SERVICE] Service for remove sensor {} start", id);
     Sensor sensor = sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     sensorRepository.delete(sensor);
 
-    logger.debug("[SENSOR - REGISTER] Remove relations variable - sensor");
+    logger.debug("[SENSOR - SERVICE] Removing relations variable - sensor");
     variableSensorRelationRepository.findBySensorId(id).stream()
         .forEach(variableSensorRelationRepository::delete);
 
+    logger.debug("[SENSOR - SERVICE] Service for remove sensor {} end", id);
     return sensor;
   }
 
   @Override
   public Variable removeVariable(long sensorId, long variableId) throws EntityNotFoundException {
     logger.debug(
-        "[SENSOR VARIABLES - REMOVE] Remove variable " + variableId + " from variables sensor "
-            + sensorId
-            + " list");
+        "[SENSOR - SERVICE] Service for remove variable {} from sensor {} start", variableId,
+        sensorId);
+    logger.debug("[SENSOR - SERVICE] Searching if sensor {} exists", sensorId);
     sensorRepository.findById(sensorId).orElseThrow(EntityNotFoundException::new);
+
+    logger.debug("[SENSOR - SERVICE] Searching if variable {} exists", variableId);
     Variable variable = variableRepository.findById(variableId)
         .orElseThrow(EntityNotFoundException::new);
     variableSensorRelationRepository
         .delete(variableSensorRelationRepository.findBySensorIdAndVariableId(sensorId, variableId)
             .orElseThrow(EntityNotFoundException::new));
+    logger.debug(
+        "[SENSOR - SERVICE] Service for remove variable {} from sensor {} end", variableId,
+        sensorId);
     return variable;
   }
 
   @Override
   public boolean hasUserVisibilitySensor(String name, long id) throws EntityNotFoundException {
+    logger
+        .debug("[SENSOR - SERVICE] Service for check if user {} has visibility for sensor {} start",
+            name, id);
+    logger.debug("[SENSOR - SERVICE] Searching user {}", name);
     User user = userRepository.findByUsername(name).get();
+    logger.debug("[SENSOR - SERVICE] Searching if sensor {} exists", id);
     sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-    return userHouseRelationRepository.findByUserId(user.getId()).stream()
+    boolean hasVisibility = userHouseRelationRepository.findByUserId(user.getId()).stream()
         .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
         .flatMap(house -> sensorRepository.findByHouseId(house.getId()).stream())
         .anyMatch(sensor -> sensor.getId() == id);
+
+    logger.debug(
+        "[SENSOR - SERVICE] Service for check if user {} has visibility for user {} end. Result: {}",
+        name, id, hasVisibility);
+    return hasVisibility;
   }
 
   @Override
   public void reset(long id) throws EntityNotFoundException, JsonProcessingException {
-    logger.debug("[SENSOR - RESET] Searching sensor by id: " + id);
+    logger.debug("[SENSOR - SERVICE] Service for send reset action to sensor {} start", id);
     Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
-    String socketMessage = new ObjectMapper()
-        .writeValueAsString(new SocketMessage(sensor.getPrivateIp(), RESET));
-    ExecutorService executor = Executors.newSingleThreadExecutor();
-    executor.submit(() -> {
-      try {
-        InetAddress ip = InetAddress.getByName(sensor.getPrivateIp());
-        Socket socket = new Socket(ip, socketPort);
-        OutputStream output = socket.getOutputStream();
-        PrintWriter writer = new PrintWriter(output, true);
-        writer.println(socketMessage);
-        socket.close();
-      } catch (IOException e) {
-        logger
-            .error("[SENSOR - RESET] error reset sensor {}. Message: {}", id, socketMessage, e);
-      }
-    });
+    sendAsyncMessage(sensor, RESET);
+    logger.debug("[SENSOR - SERVICE] Service for send reset action to sensor {} end", id);
   }
 
   @Override
   public void sendAction(long id, String action)
       throws EntityNotFoundException, JsonProcessingException {
-    logger.debug("[SENSOR - SEND ACTION] Searching sensor by id: " + id);
+    logger.debug("[SENSOR - SERVICE] Service for send {} action to sensor {} start", action, id);
     Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+    sendAsyncMessage(sensor, action);
+    logger.debug("[SENSOR - SERVICE] Service for send {} action to sensor {} end", action, id);
+  }
+
+  private void sendAsyncMessage(Sensor sensor, String action) throws JsonProcessingException {
     String socketMessage = new ObjectMapper()
         .writeValueAsString(new SocketMessage(sensor.getPrivateIp(), action));
     ExecutorService executor = Executors.newSingleThreadExecutor();
     executor.submit(() -> {
       try {
-        InetAddress ip = InetAddress.getByName(sensor.getPrivateIp());
+        logger
+            .debug("[SENSOR - SERVICE] Opening socket to {}:{}", sensor.getPublicIp(), socketPort);
+        InetAddress ip = InetAddress.getByName(sensor.getPublicIp());
         Socket socket = new Socket(ip, socketPort);
         OutputStream output = socket.getOutputStream();
         PrintWriter writer = new PrintWriter(output, true);
+        logger.debug("[SENSOR - SERVICE] Sending message: {}", socketMessage);
         writer.println(socketMessage);
         socket.close();
       } catch (IOException e) {
         logger
-            .error("[SENSOR - ACTION] error sending action {} to sensor {}", action, id, e);
+            .error("[SENSOR - ACTION] error sending action {} to sensor {}", action, sensor.getId(),
+                e);
       }
     });
   }
