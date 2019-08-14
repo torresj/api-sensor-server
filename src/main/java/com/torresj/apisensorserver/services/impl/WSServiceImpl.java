@@ -32,7 +32,7 @@ public class WSServiceImpl implements WSService {
 
   @Override
   public WSResponse validateConnection(long stationId, Principal user) {
-    logger.debug("[WSService - VALIDATE] Validating request");
+    logger.debug("[WSService - SERVICE] Validating request");
     WSResponse response = new WSResponse();
     try {
       sensorService.getSensor(stationId);
