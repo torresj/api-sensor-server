@@ -44,10 +44,10 @@ public class HouseServiceImpl implements HouseService {
 
   @Override
   public Page<House> getHouses(int nPage, int elements) {
-    logger.debug("[HOUSE - SERVICE] Getting house service start");
+    logger.debug("[HOUSE - SERVICE] Service for getting house start");
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
     Page<House> page = houseRepository.findAll(pageRequest);
-    logger.debug("[HOUSE - SERVICE] Getting house service end. Houses: {}", page.getContent());
+    logger.debug("[HOUSE - SERVICE] Service for getting house end. Houses: {}", page.getContent());
     return page;
   }
 

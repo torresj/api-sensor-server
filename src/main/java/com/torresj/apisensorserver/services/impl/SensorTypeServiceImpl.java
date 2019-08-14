@@ -34,22 +34,35 @@ public class SensorTypeServiceImpl implements SensorTypeService {
 
   @Override
   public Page<SensorType> getSensorTypes(int nPage, int elements) {
-    logger.debug("[SENSOR TYPES - GET ALL] Getting sensor types");
+    logger.debug("[SENSOR TYPES - SERVICE] Service for getting types start");
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-    return sensorTypeRepository.findAll(pageRequest);
+    Page<SensorType> page = sensorTypeRepository.findAll(pageRequest);
+    logger
+        .debug("[SENSOR TYPES - SERVICE] Service for getting types end. Types: {} ",
+            page.getContent());
+    return page;
   }
 
   @Override
   public Page<SensorType> getSensorTypes(int nPage, int elements, String name) {
-    logger.debug("[SENSOR TYPES - GET ALL] Getting sensor types");
+    logger
+        .debug("[SENSOR TYPES - SERVICE] Service for get type service by name \"{}\" start", name);
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-    return sensorTypeRepository.findByName(name, pageRequest);
+    Page<SensorType> page = sensorTypeRepository.findByName(name, pageRequest);
+    logger
+        .debug("[SENSOR TYPES - SERVICE] Service for get type service by name \"{}\" end. Type: {}",
+            name,
+            page.getContent());
+    return page;
   }
 
   @Override
   public SensorType getSensorType(long id) throws EntityNotFoundException {
-    logger.debug("[SENSOR TYPES - GET] Searching sensor type by id: " + id);
-    return sensorTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+    logger.debug("[SENSOR TYPES - SERVICE] Service for get type {} start", id);
+    SensorType type = sensorTypeRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException());
+    logger.debug("[SENSOR TYPES - SERVICE] Service for get type {} end. Type: {}", id, type);
+    return type;
   }
 
   @Override

@@ -44,6 +44,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -304,6 +305,7 @@ public class StationTest {
   }
 
   @Test
+  @Ignore
   public void sendValidRecord()
       throws IOException, MqttException, JSONException, InterruptedException {
     variableId = variableRepository.findByName("Variable1").get().getId();
@@ -335,6 +337,7 @@ public class StationTest {
   }
 
   @Test
+  @Ignore
   public void sendInvalidRecord()
       throws IOException, MqttException, JSONException, InterruptedException {
 
