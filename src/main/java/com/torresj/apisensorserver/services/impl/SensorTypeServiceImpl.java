@@ -67,30 +67,34 @@ public class SensorTypeServiceImpl implements SensorTypeService {
 
   @Override
   public SensorType register(SensorType type) throws EntityAlreadyExists {
-    logger.debug("[SENSOR TYPES - REGISTER] Register new sensor type " + type);
+    logger.debug("[SENSOR TYPES - SERVICE] Service for register type start. type: {}", type);
     Optional<SensorType> sensorType = sensorTypeRepository.findByName(type.getName());
     if (sensorType.isPresent()) {
       throw new EntityAlreadyExists();
     } else {
-      return sensorTypeRepository.save(type);
+      SensorType typeSaved = sensorTypeRepository.save(type);
+      logger.debug("[SENSOR TYPES - SERVICE] Service for register type end. type: {}", typeSaved);
+      return typeSaved;
     }
   }
 
   @Override
   public SensorType update(SensorType type) throws EntityNotFoundException {
-    logger.debug("[SENSOR TYPES - UPDATE] Update new sensor type " + type);
+    logger.debug("[SENSOR TYPES - SERVICE] Service for update type start. type: {}", type);
     SensorType sensorTypeEntity = sensorTypeRepository.findByName(type.getName())
         .orElseThrow(EntityNotFoundException::new);
     type.setId(sensorTypeEntity.getId());
-    return sensorTypeRepository.save(type);
+    SensorType typeSaved = sensorTypeRepository.save(type);
+    logger.debug("[SENSOR TYPES - SERVICE] Service for update type end. type: {}", typeSaved);
+    return typeSaved;
   }
 
   @Override
   public SensorType remove(long id) throws EntityNotFoundException, EntityHasRelationsException {
-    logger.debug("[SENSOR TYPES - REMOVE] Searching sensor type by " + id);
+    logger.debug("[SENSOR TYPES - SERVICE] Service for delete type {} start", id);
     SensorType sensorTypeEntity = sensorTypeRepository.findById(id)
         .orElseThrow(EntityNotFoundException::new);
-    logger.debug("[SENSOR TYPES - REMOVE] Searching if exists sensors with this sensor type");
+    logger.debug("[SENSOR TYPES - SERVICE] Searching if exists sensors with type {}", id);
     PageRequest pageRequest = PageRequest.of(0, 1);
     Page response = sensorRepository.findBySensorTypeId(id, pageRequest);
     if (response != null && !response.getContent().isEmpty()) {
@@ -98,6 +102,7 @@ public class SensorTypeServiceImpl implements SensorTypeService {
     } else {
       sensorTypeRepository.delete(sensorTypeEntity);
     }
+    logger.debug("[SENSOR TYPES - SERVICE] Service for delete type {} end", id);
     return sensorTypeEntity;
   }
 }
