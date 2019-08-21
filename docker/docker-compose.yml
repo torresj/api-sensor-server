@@ -3,6 +3,7 @@ version: '3'
 services:
   rabbitmq-mqtt:
     image: "rabbitmq"
+    restart: "always"
     environment:
       RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
       RABBITMQ_DEFAULT_USER: "mqtt-user"
@@ -16,6 +17,8 @@ services:
       - "./enabled_plugins:/etc/rabbitmq/enabled_plugins"
   mysql:
     image: "mysql"
+    restart: "always"
+    command: "mysqld --default-authentication-plugin=mysql_native_password"
     environment:
       MYSQL_ROOT_PASSWORD: "test"
       MYSQL_DATABASE: "api_sensor"
@@ -24,13 +27,27 @@ services:
     ports:
       - "3306:3306"
 
+  phpmyadmin:
+    image: "phpmyadmin/phpmyadmin"
+    restart: "always"
+    links:
+      - mysql
+    depends_on:
+      - "mysql"
+    environment:
+      PMA_HOST: "mysql"
+      PMA_PORT: "3306"
+    ports:
+      - "8081:80"
+
   sensor-server:
     image: "api-sensor-server"
+    restart: "always"
+    environment:
+      SPRING_PROFILES_ACTIVE: "dev-docker"
     depends_on:
       - "mysql"
       - "rabbitmq-mqtt"
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
     ports:
       - "8080:8080"
 
