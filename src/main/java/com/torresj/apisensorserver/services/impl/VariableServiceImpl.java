@@ -57,85 +57,109 @@ public class VariableServiceImpl implements VariableService {
 
   @Override
   public Page<Variable> getVariables(int nPage, int elements) {
-    logger.debug("[VARIABLE - GET] Getting variables");
+    logger.debug("[VARIABLE - SERVICE] Service for getting variables start");
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-
-    return variableRepository.findAll(pageRequest);
+    Page<Variable> page = variableRepository.findAll(pageRequest);
+    logger.debug("[VARIABLE - SERVICE] Service for getting variables end. Variables: {}",
+        page.getContent());
+    return page;
   }
 
   @Override
   public Page<Variable> getVariables(int nPage, int elements, String name) {
-    logger.debug("[VARIABLE - GET] Getting variables");
+    logger.debug("[VARIABLE - SERVICE] Service for getting variables by name {} start", name);
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-
-    return variableRepository.findByName(name, pageRequest);
+    Page<Variable> page = variableRepository.findByName(name, pageRequest);
+    logger.debug("[VARIABLE - SERVICE] Service for getting variables by name {} end. Variables: {}",
+        name, page.getContent());
+    return page;
   }
 
   @Override
   public Variable getVariable(long id) throws EntityNotFoundException {
-    logger.debug("[VARIABLE - GET VARIABLE] Searching variable by id: " + id);
-
-    return variableRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[VARIABLE - SERVICE] Service for getting variable {} start", id);
+    Variable variable = variableRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[VARIABLE - SERVICE] Service for getting variable {} end. Variable:{}", id,
+        variable);
+    return variable;
   }
 
   @Override
   public Variable update(Variable variable) throws EntityNotFoundException {
-    logger.debug("[VARIABLE - UPDATE] Updating variable: " + variable);
+    logger.debug("[VARIABLE - SERVICE] Service for update variable start. Variable: {}", variable);
     Variable entity = variableRepository.findByName(variable.getName())
         .orElseThrow(EntityNotFoundException::new);
 
     logger.debug("[VARIABLE - UPDATE] Variable exists. Updating ...");
     variable.setId(entity.getId());
-    variableRepository.save(variable);
-    return variable;
+    Variable variableUpdated = variableRepository.save(variable);
+    logger.debug("[VARIABLE - SERVICE] Service for update variable end. Variable: {}",
+        variableUpdated);
+    return variableUpdated;
   }
 
   @Override
   public Variable register(Variable variable) throws EntityAlreadyExists {
-    logger.debug("[VARIABLE - REGISTER] Registering variable: " + variable);
+    logger
+        .debug("[VARIABLE - SERVICE] Service for register variable start. Variable: {}", variable);
     Optional<Variable> entity = variableRepository.findByName(variable.getName());
     if (entity.isPresent()) {
       throw new EntityAlreadyExists();
     } else {
       Variable variableSaved = variableRepository.save(variable);
+      logger.debug("[VARIABLE - SERVICE] Service for register variable end. Variable: {}",
+          variableSaved);
       return variableSaved;
     }
   }
 
   @Override
   public Variable deleteVariable(long id) throws EntityNotFoundException {
-    logger.debug("[VARIABLE - DELETE] Searching variable by id: " + id);
+    logger.debug("[VARIABLE - SERVICE] Service for delete variable {} start", id);
 
     Variable variable = variableRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     variableRepository.delete(variable);
 
-    logger.debug("[VARIABLE - DELETE] Delete sensor - variable relation");
+    logger.debug("[VARIABLE - SERVICE] Delete sensor - variable relation");
     variableSensorRelationRepository.findByVariableId(id).stream()
         .forEach(variableSensorRelationRepository::delete);
 
+    logger.debug("[VARIABLE - SERVICE] Service for delete variable {} end. Variable: {}", id,
+        variable);
     return variable;
   }
 
   @Override
   public Page<Sensor> getSensors(long id, int nPage, int elements) {
-
-    logger.debug("[SENSORS HAVE VARIABLE - GET] Searching sensors whit variable by id: " + id);
+    logger.debug("[VARIABLE - SERVICE] Service for getting variable {} sensors start", id);
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
     List<Long> ids = variableSensorRelationRepository.findByVariableId(id).stream()
         .map(VariableSensorRelation::getSensorId).collect(
             Collectors.toList());
-
-    return sensorRepository.findByIdIn(ids, pageRequest);
+    Page<Sensor> page = sensorRepository.findByIdIn(ids, pageRequest);
+    logger
+        .debug("[VARIABLE - SERVICE] Service for getting variable {} sensors end. Sensors: {}", id,
+            page.getContent());
+    return page;
   }
 
   @Override
   public boolean hasUserVisibilityVariable(String name, long id) throws EntityNotFoundException {
+    logger
+        .debug("[USER - SERVICE] Service for check if user {} has visibility for variable {} start",
+            name, id);
+    logger.debug("[USER - SERVICE] Searching user {}", name);
     User user = userRepository.findByUsername(name).get();
+    logger.debug("[USER - SERVICE] Searching variable {}", id);
     variableRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-    return userHouseRelationRepository.findByUserId(user.getId()).stream()
+    boolean hasVisibility = userHouseRelationRepository.findByUserId(user.getId()).stream()
         .map(userHouseRelation -> houseRepository.findById(userHouseRelation.getHouseId()).get())
         .flatMap(house -> sensorRepository.findByHouseId(house.getId()).stream())
         .flatMap(sensor -> variableSensorRelationRepository.findBySensorId(sensor.getId()).stream())
         .anyMatch(relation -> relation.getVariableId() == id);
+    logger.debug(
+        "[USER - SERVICE] Service for check if user {} has visibility for variable {} end. Result: {}",
+        name, id, hasVisibility);
+    return hasVisibility;
   }
 }
