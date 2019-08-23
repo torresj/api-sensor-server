@@ -22,28 +22,27 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String DEFAULT_INCLUDE_PATTERN = "/services/api/.*";
+  @Bean
+  public Docket api() {
+    ParameterBuilder parameterBuilder = new ParameterBuilder();
+    Parameter param = parameterBuilder.name("Authorization").modelRef(new ModelRef("string"))
+        .parameterType("header").required(true).build();
+    List<Parameter> parameters = new ArrayList<>();
+    parameters.add(param);
 
-    @Bean
-    public Docket api() {
-        ParameterBuilder parameterBuilder = new ParameterBuilder();
-        Parameter param = parameterBuilder.name("Authorization").modelRef(new ModelRef("string"))
-                .parameterType("header").required(true).build();
-        List<Parameter> parameters = new ArrayList<>();
-        parameters.add(param);
+    return new Docket(DocumentationType.SWAGGER_2).select()
+        .apis(RequestHandlerSelectors.basePackage("com.torresj.apisensorserver.controller"))
+        .paths(PathSelectors.any()).build().apiInfo((apiInfo()))
+        .globalOperationParameters(parameters);
 
-        return new Docket(DocumentationType.SWAGGER_2).select()
-                .apis(RequestHandlerSelectors.basePackage("com.torresj.apisensorserver.controller"))
-                .paths(PathSelectors.any()).build().apiInfo((apiInfo())).globalOperationParameters(parameters);
+  }
 
-    }
-
-    private ApiInfo apiInfo() {
-        return new ApiInfo("Api Sensor", "Api for manage sensor information", "1.0.0",
-                "https://raw.githubusercontent.com/torresj/api-sensor-server/master/LICENSE",
-                new Contact("Jaime Torres", "https://github.com/torresj", "jtbenavente@gmail.com"),
-                "GNU General Public License v3.0",
-                "https://raw.githubusercontent.com/torresj/api-sensor-server/master/LICENSE", Collections.emptyList());
-    }
+  private ApiInfo apiInfo() {
+    return new ApiInfo("Api Sensor", "Api for manage sensor information", "1.0.0",
+        "https://raw.githubusercontent.com/torresj/api-sensor-server/master/LICENSE",
+        new Contact("Jaime Torres", "https://github.com/torresj", "jtbenavente@gmail.com"),
+        "GNU General Public License v3.0",
+        "https://raw.githubusercontent.com/torresj/api-sensor-server/master/LICENSE",
+        Collections.emptyList());
+  }
 }
