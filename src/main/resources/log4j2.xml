@@ -2,7 +2,7 @@
 <Configuration status="info" monitorInterval="30">
   <Properties>
     <Property name="LOG_PATTERN">
-      %d{yyyy-MM-dd HH:mm:ss.SSS} [%X{uuid}] %5p : %m%n%ex
+      %d{yyyy-MM-dd HH:mm:ss.SSS} [%-36X{uuid}] %5p : %m%n%ex
     </Property>
   </Properties>
   <Appenders>

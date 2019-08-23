@@ -48,51 +48,61 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public Page<User> getUsers(int nPage, int elements) {
-    logger.debug("[USER - GET] Getting users");
+    logger.debug("[USER - SERVICE] Service for getting users start");
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-    return userRepository.findAll(pageRequest);
+    Page<User> page = userRepository.findAll(pageRequest);
+    logger.debug("[USER - SERVICE] Service for getting users end. Users: {}", page.getContent());
+    return page;
   }
 
   @Override
   public User getUser(long id) throws EntityNotFoundException {
-    logger.debug("[USER - GET USER] Searching user by id: " + id);
-    return userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[USER - SERVICE] Service for getting user {} start", id);
+    User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[USER - SERVICE] Service for getting user {} end. User: {}", user);
+    return user;
   }
 
   @Override
   public User getUser(String name) throws EntityNotFoundException {
-    logger.debug("[USER - GET USER] Searching user by name: " + name);
-    return userRepository.findByUsername(name).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[USER - SERVICE] Service for getting user {} start", name);
+    User user = userRepository.findByUsername(name).orElseThrow(EntityNotFoundException::new);
+    logger.debug("[USER - SERVICE] Service for getting user {} end. User: {}", user);
+    return user;
   }
 
   @Override
   public User register(User user) throws EntityAlreadyExists {
-    logger.debug("[USER - REGISTER] Registering user ");
+    logger.debug("[USER - SERVICE] Service for register user start. User: {}", user);
     Optional<User> entity = userRepository.findByUsername(user.getUsername());
 
     if (entity.isPresent()) {
-      logger.error("[USER - REGISTER] Error registering user");
+      logger.error("[USER - SERVICE] Error registering user {}", user);
       throw new EntityAlreadyExists();
     }
-
-    return userRepository.save(user);
+    User userRegstered = userRepository.save(user);
+    logger.debug("[USER - SERVICE] Service for register user end. User: {}", userRegstered);
+    return userRegstered;
   }
 
   @Override
   public Page<House> getHouses(long id, int nPage, int elements) throws EntityNotFoundException {
-    logger.debug("[USER HOUSES - GET] Getting user houses ");
+    logger.debug("[USER - SERVICES] Service for get user {} houses start", id);
     userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
     List<Long> ids = userHouseRelationRepository.findByUserId(id).stream()
         .map(UserHouseRelation::getHouseId).collect(
             Collectors.toList());
-    return houseRepository.findByIdIn(ids, pageRequest);
+    Page<House> page = houseRepository.findByIdIn(ids, pageRequest);
+    logger.debug("[USER - SERVICES] Service for get user {} houses end. Houses: {}", id,
+        page.getContent());
+    return page;
   }
 
   @Override
   public House addHouse(long userId, long houseId) throws EntityNotFoundException {
     logger.debug(
-        "[USER HOUSE - ADD] Add house " + houseId + " to User houses " + userId + " list");
+        "[USER - SERVICE] Service for adding house {} to user {} start", houseId, userId);
     userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
     House house = houseRepository.findById(houseId)
         .orElseThrow(EntityNotFoundException::new);
@@ -100,45 +110,60 @@ public class UserServiceImpl implements UserService {
     relation.setUserId(userId);
     relation.setHouseId(houseId);
     userHouseRelationRepository.save(relation);
+    logger.debug(
+        "[USER - SERVICE] Service for adding house {} to user {} end", houseId, userId);
     return house;
   }
 
   @Override
   public User update(User user) throws EntityNotFoundException {
-    logger.debug("[USER - UPDATE] Updating user ");
+    logger.debug("[USER - SERVICE] Service for update user start. User: {}", user);
     User entity = userRepository.findByUsername(user.getUsername())
         .orElseThrow(EntityNotFoundException::new);
     user.setId(entity.getId());
-    return userRepository.save(user);
+    User userUpdated = userRepository.save(user);
+    logger.debug("[USER - SERVICE] Service for update user end. User: {}", userUpdated);
+    return userUpdated;
   }
 
   @Override
   public House removeHouse(long userId, long houseId) throws EntityNotFoundException {
     logger.debug(
-        "[USER HOUSE - REMOVE] Remove house " + houseId + " from User houses " + userId + " list");
+        "[USER - SERVICE] Service for remove house {} from user {} start", houseId, userId);
     userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
     House house = houseRepository.findById(houseId)
         .orElseThrow(EntityNotFoundException::new);
     userHouseRelationRepository.delete(
         userHouseRelationRepository.findByUserIdAndHouseId(userId, houseId)
             .orElseThrow(EntityNotFoundException::new));
+    logger.debug(
+        "[USER - SERVICE] Service for remove house {} from user {} end", houseId, userId);
     return house;
   }
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    logger.debug(
+        "[USER - SERVICE] Service for find user {} start", username);
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException(username));
     CustomUserDetails userDetails = new CustomUserDetails(user);
-
+    logger.debug(
+        "[USER - SERVICE] Service for find user {} end. User found", username);
     return userDetails;
   }
 
   @Override
   public User getLogginUser() throws EntityNotFoundException {
+    logger.debug(
+        "[USER - SERVICE] Service for find  loggin user {} start");
     Principal principal = SecurityContextHolder.getContext().getAuthentication();
-    return userRepository.findByUsername(principal.getName())
+    User user = userRepository.findByUsername(principal.getName())
         .orElseThrow(EntityNotFoundException::new);
+    logger.debug(
+        "[USER - SERVICE] Service for find  loggin user {} end. User logged {}",
+        user.getUsername());
+    return user;
   }
 
   @Override
@@ -163,13 +188,15 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User remove(long id) throws EntityNotFoundException {
-    logger.debug("[USER - REMOVE] Removing user ");
+    logger.debug(
+        "[USER - SERVICE] Service for remove user {} start");
     User entity = userRepository.findById(id)
         .orElseThrow(EntityNotFoundException::new);
     userHouseRelationRepository.findByUserId(id).stream()
         .forEach(userHouseRelationRepository::delete);
     userRepository.delete(entity);
-
+    logger.debug(
+        "[USER - SERVICE] Service for remove user {} end");
     return entity;
   }
 }
