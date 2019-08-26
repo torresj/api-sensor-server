@@ -19,13 +19,13 @@ import com.torresj.apisensorserver.repositories.VariableSensorRelationRepository
 import java.time.LocalDateTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({"dev-docker", "dev"})
 public class InitialData {
 
   /* Logs */
@@ -70,6 +70,7 @@ public class InitialData {
   }
 
   @Bean
+  @Profile({"dev-docker", "dev"})
   public void initDataBase() {
     logger.info("[ INIT DATABASE ] Creating data base to dev profile ...");
     clearDB();
@@ -158,6 +159,17 @@ public class InitialData {
     userHouseRelationRepository.save(uhRelation2);
 
     logger.info("[ INIT DATABASE ] Data base created");
+  }
+
+  @Bean
+  @Profile("prod")
+  public void createProductionUserRoot(@Value("${db.user.admin.username}") String username,
+      @Value("${db.user.admin.password}") String password) {
+    //Create User
+    User user = new User(null, username, bCryptPasswordEncoder.encode(password),
+        Role.ADMIN,
+        null, null);
+    userRepository.save(user);
   }
 
   private void clearDB() {
