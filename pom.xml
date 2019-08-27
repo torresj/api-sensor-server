@@ -10,11 +10,12 @@
   </parent>
   <groupId>com.torresj</groupId>
   <artifactId>api-sensor-server</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>Api Sensor Server</name>
   <description>Api Sensor Server project for connect sensor and frontend</description>
   <properties>
     <java.version>1.8</java.version>
+    <docker.image.prefix>torresjb</docker.image.prefix>
   </properties>
   <dependencies>
     <dependency>
@@ -149,7 +150,7 @@
         <artifactId>dockerfile-maven-plugin</artifactId>
         <version>1.4.12</version>
         <configuration>
-          <repository>${project.artifactId}</repository>
+          <repository>${docker.image.prefix}/${project.artifactId}</repository>
         </configuration>
       </plugin>
       <!-- end::plugin[] -->
