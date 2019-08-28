@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
   public User getUser(long id) throws EntityNotFoundException {
     logger.debug("[USER - SERVICE] Service for getting user {} start", id);
     User user = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-    logger.debug("[USER - SERVICE] Service for getting user {} end. User: {}", user);
+    logger.debug("[USER - SERVICE] Service for getting user {} end. User: {}", id, user);
     return user;
   }
 
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
   public User getUser(String name) throws EntityNotFoundException {
     logger.debug("[USER - SERVICE] Service for getting user {} start", name);
     User user = userRepository.findByUsername(name).orElseThrow(EntityNotFoundException::new);
-    logger.debug("[USER - SERVICE] Service for getting user {} end. User: {}", user);
+    logger.debug("[USER - SERVICE] Service for getting user {} end. User: {}", name, user);
     return user;
   }
 
