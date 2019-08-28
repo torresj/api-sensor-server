@@ -1,7 +1,8 @@
 package com.torresj.apisensorserver.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.ActionException;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import com.torresj.apisensorserver.models.entities.Variable;
@@ -22,7 +23,7 @@ public interface SensorService {
 
   Sensor update(Sensor sensor) throws EntityNotFoundException;
 
-  Sensor register(Sensor sensor) throws EntityNotFoundException, EntityAlreadyExists;
+  Sensor register(Sensor sensor) throws EntityNotFoundException, EntityAlreadyExistsException;
 
   Sensor removeSensor(long id) throws EntityNotFoundException;
 
@@ -32,5 +33,6 @@ public interface SensorService {
 
   void reset(long id) throws EntityNotFoundException, JsonProcessingException;
 
-  void sendAction(long id, String action) throws EntityNotFoundException, JsonProcessingException;
+  void sendAction(long id, String action)
+      throws EntityNotFoundException, JsonProcessingException, ActionException;
 }

@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.services.impl;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
@@ -82,7 +82,7 @@ public class HouseServiceImpl implements HouseService {
   }
 
   @Override
-  public House register(House house) throws EntityAlreadyExists {
+  public House register(House house) throws EntityAlreadyExistsException {
     logger.debug("[HOUSE - SERVICE] Service for register house start. House: {}", house);
     Optional<House> entity = houseRepository.findByName(house.getName());
 
@@ -90,7 +90,7 @@ public class HouseServiceImpl implements HouseService {
       logger
           .error("[HOUSE - SERVICE] Error registering House. House already exists on db {} ",
               house);
-      throw new EntityAlreadyExists();
+      throw new EntityAlreadyExistsException();
     }
     house = houseRepository.save(house);
     logger.debug("[HOUSE - SERVICE] Service for register house end. House: {}", house);

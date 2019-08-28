@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.services.impl;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import com.torresj.apisensorserver.models.entities.User;
@@ -99,12 +99,12 @@ public class VariableServiceImpl implements VariableService {
   }
 
   @Override
-  public Variable register(Variable variable) throws EntityAlreadyExists {
+  public Variable register(Variable variable) throws EntityAlreadyExistsException {
     logger
         .debug("[VARIABLE - SERVICE] Service for register variable start. Variable: {}", variable);
     Optional<Variable> entity = variableRepository.findByName(variable.getName());
     if (entity.isPresent()) {
-      throw new EntityAlreadyExists();
+      throw new EntityAlreadyExistsException();
     } else {
       Variable variableSaved = variableRepository.save(variable);
       logger.debug("[VARIABLE - SERVICE] Service for register variable end. Variable: {}",

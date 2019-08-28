@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.Sensor;
@@ -96,7 +96,7 @@ public class SensorTypeServiceTest {
   }
 
   @Test
-  public void register() throws EntityAlreadyExists {
+  public void register() throws EntityAlreadyExistsException {
     //Given
     SensorType sensorType = TestUtils.getExampleSensorType(1);
     SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
@@ -112,8 +112,8 @@ public class SensorTypeServiceTest {
     assertEquals(sensorTypeExpected.getActions(), sensorTypeActual.getActions());
   }
 
-  @Test(expected = EntityAlreadyExists.class)
-  public void registerEntityAlreadyExists() throws EntityAlreadyExists {
+  @Test(expected = EntityAlreadyExistsException.class)
+  public void registerEntityAlreadyExists() throws EntityAlreadyExistsException {
     //Given
     SensorType sensorType = TestUtils.getExampleSensorType(1);
     SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);

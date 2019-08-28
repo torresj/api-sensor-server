@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.controller;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
@@ -182,7 +182,7 @@ public class HouseController {
       logger.error("[HOUSE - REGISTER] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
-    } catch (EntityAlreadyExists e) {
+    } catch (EntityAlreadyExistsException e) {
       logger.error("[HOUSE - REGISTER] House already exists", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "House already exists", e);
     } catch (Exception e) {

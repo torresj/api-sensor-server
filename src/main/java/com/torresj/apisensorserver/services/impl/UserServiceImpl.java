@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.services.impl;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.User;
@@ -72,13 +72,13 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User register(User user) throws EntityAlreadyExists {
+  public User register(User user) throws EntityAlreadyExistsException {
     logger.debug("[USER - SERVICE] Service for register user start. User: {}", user);
     Optional<User> entity = userRepository.findByUsername(user.getUsername());
 
     if (entity.isPresent()) {
       logger.error("[USER - SERVICE] Error registering user {}", user);
-      throw new EntityAlreadyExists();
+      throw new EntityAlreadyExistsException();
     }
     User userRegstered = userRepository.save(user);
     logger.debug("[USER - SERVICE] Service for register user end. User: {}", userRegstered);

@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.services;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
@@ -16,7 +16,7 @@ public interface HouseService {
 
   House update(House house) throws EntityNotFoundException;
 
-  House register(House house) throws EntityAlreadyExists;
+  House register(House house) throws EntityAlreadyExistsException;
 
   House removeHouse(long id) throws EntityNotFoundException;
 

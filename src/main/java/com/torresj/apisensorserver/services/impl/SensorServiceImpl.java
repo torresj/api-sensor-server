@@ -2,10 +2,12 @@ package com.torresj.apisensorserver.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.ActionException;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.SocketMessage;
 import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.SensorType;
 import com.torresj.apisensorserver.models.entities.User;
 import com.torresj.apisensorserver.models.entities.Variable;
 import com.torresj.apisensorserver.models.entities.VariableSensorRelation;
@@ -23,6 +25,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -189,14 +192,15 @@ public class SensorServiceImpl implements SensorService {
   }
 
   @Override
-  public Sensor register(Sensor sensor) throws EntityNotFoundException, EntityAlreadyExists {
+  public Sensor register(Sensor sensor)
+      throws EntityNotFoundException, EntityAlreadyExistsException {
     logger.debug("[SENSOR - SERVICE] Service for register sensor start. Sensor: {}", sensor);
     Optional<Sensor> entity = sensorRepository.findByMac(sensor.getMac());
 
     if (entity.isPresent()) {
       logger.debug("[SENSOR - SERVICE] Service for register sensor end. Sensor {} exists",
           sensor.getId());
-      throw new EntityAlreadyExists(entity.get());
+      throw new EntityAlreadyExistsException(entity.get());
     } else {
       //check for house id and sensor type id
       if (sensor.getHouseId() != null) {
@@ -278,14 +282,28 @@ public class SensorServiceImpl implements SensorService {
 
   @Override
   public void sendAction(long id, String action)
-      throws EntityNotFoundException, JsonProcessingException {
+      throws EntityNotFoundException, JsonProcessingException, ActionException {
     logger.debug("[SENSOR - SERVICE] Service for send {} action to sensor {} start", action, id);
     Sensor sensor = sensorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+    checkAction(action, sensor.getSensorTypeId());
     sendAsyncMessage(sensor, action);
     logger.debug("[SENSOR - SERVICE] Service for send {} action to sensor {} end", action, id);
   }
 
-  private void sendAsyncMessage(Sensor sensor, String action) throws JsonProcessingException {
+  private void checkAction(String action, Long typeId)
+      throws EntityNotFoundException, ActionException {
+    if (!action.equals(RESET)) {
+      SensorType type = sensorTypeRepository.findById(typeId)
+          .orElseThrow(EntityNotFoundException::new);
+      List<String> actions = Arrays.asList(type.getActions().split(","));
+      if (!actions.contains(action)) {
+        throw new ActionException();
+      }
+    }
+  }
+
+  private void sendAsyncMessage(Sensor sensor, String action)
+      throws JsonProcessingException {
     String socketMessage = new ObjectMapper()
         .writeValueAsString(new SocketMessage(sensor.getPrivateIp(), action));
     ExecutorService executor = Executors.newSingleThreadExecutor();

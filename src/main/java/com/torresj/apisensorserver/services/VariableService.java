@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.services;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import com.torresj.apisensorserver.models.entities.Variable;
@@ -14,7 +14,7 @@ public interface VariableService {
 
   Variable update(Variable variable) throws EntityNotFoundException;
 
-  Variable register(Variable variable) throws EntityAlreadyExists;
+  Variable register(Variable variable) throws EntityAlreadyExistsException;
 
   Variable deleteVariable(long id) throws EntityNotFoundException;
 

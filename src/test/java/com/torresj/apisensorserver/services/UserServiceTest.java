@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.User;
@@ -91,7 +91,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void register() throws EntityAlreadyExists {
+  public void register() throws EntityAlreadyExistsException {
     //Given
     User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
 
@@ -103,8 +103,8 @@ public class UserServiceTest {
     assertEquals(user, userActual);
   }
 
-  @Test(expected = EntityAlreadyExists.class)
-  public void registerEntityAlreadyExists() throws EntityAlreadyExists {
+  @Test(expected = EntityAlreadyExistsException.class)
+  public void registerEntityAlreadyExists() throws EntityAlreadyExistsException {
     //Given
     User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
 

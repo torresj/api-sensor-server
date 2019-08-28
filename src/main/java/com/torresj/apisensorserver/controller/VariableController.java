@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.controller;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import com.torresj.apisensorserver.models.entities.User.Role;
@@ -152,7 +152,7 @@ public class VariableController {
           variable,
           principal.getName());
       return new ResponseEntity<>(variableRegister, HttpStatus.CREATED);
-    } catch (EntityAlreadyExists e) {
+    } catch (EntityAlreadyExistsException e) {
       logger.error("[VARIABLE - REGISTER] Variable already exists", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Variable already exists", e);
     } catch (ResponseStatusException e) {
