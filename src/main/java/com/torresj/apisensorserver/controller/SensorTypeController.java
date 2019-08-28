@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.controller;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.SensorType;
@@ -106,7 +106,7 @@ public class SensorTypeController {
           type,
           principal.getName());
       return new ResponseEntity<>(sensorType, HttpStatus.CREATED);
-    } catch (EntityAlreadyExists e) {
+    } catch (EntityAlreadyExistsException e) {
       logger.error("[SENSOR TYPE - REGISTER] Sensor type already exists", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     } catch (ResponseStatusException e) {

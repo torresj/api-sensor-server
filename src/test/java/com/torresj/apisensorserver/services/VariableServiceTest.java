@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import com.torresj.apisensorserver.models.entities.Variable;
@@ -134,7 +134,7 @@ public class VariableServiceTest {
   }
 
   @Test
-  public void register() throws EntityAlreadyExists {
+  public void register() throws EntityAlreadyExistsException {
     //Given
     Variable variable = TestUtils.getExampleVariable(1);
     Variable variableExpected = TestUtils.getExampleVariable(1);
@@ -150,8 +150,8 @@ public class VariableServiceTest {
     assertEquals(variableExpected.getUnits(), variableActual.getUnits());
   }
 
-  @Test(expected = EntityAlreadyExists.class)
-  public void registerEntityAlreadyExists() throws EntityAlreadyExists {
+  @Test(expected = EntityAlreadyExistsException.class)
+  public void registerEntityAlreadyExists() throws EntityAlreadyExistsException {
     //Given
     Variable variable = TestUtils.getExampleVariable(1);
 

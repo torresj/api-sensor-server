@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.services.impl;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.SensorType;
@@ -66,11 +66,11 @@ public class SensorTypeServiceImpl implements SensorTypeService {
   }
 
   @Override
-  public SensorType register(SensorType type) throws EntityAlreadyExists {
+  public SensorType register(SensorType type) throws EntityAlreadyExistsException {
     logger.debug("[SENSOR TYPES - SERVICE] Service for register type start. type: {}", type);
     Optional<SensorType> sensorType = sensorTypeRepository.findByName(type.getName());
     if (sensorType.isPresent()) {
-      throw new EntityAlreadyExists();
+      throw new EntityAlreadyExistsException();
     } else {
       SensorType typeSaved = sensorTypeRepository.save(type);
       logger.debug("[SENSOR TYPES - SERVICE] Service for register type end. type: {}", typeSaved);

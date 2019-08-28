@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.services;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.User;
@@ -16,7 +16,7 @@ public interface UserService extends UserDetailsService {
 
   User getUser(String name) throws EntityNotFoundException;
 
-  User register(User user) throws EntityAlreadyExists;
+  User register(User user) throws EntityAlreadyExistsException;
 
   User getLogginUser() throws EntityNotFoundException;
 

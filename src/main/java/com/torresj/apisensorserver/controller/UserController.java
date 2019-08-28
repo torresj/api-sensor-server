@@ -1,6 +1,6 @@
 package com.torresj.apisensorserver.controller;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.User;
@@ -174,7 +174,7 @@ public class UserController {
       logger.info("[USER - REGISTER] Request for registering user {} finished by user \"{}\"", user,
           principal.getName());
       return new ResponseEntity<>(userRegister, HttpStatus.CREATED);
-    } catch (EntityAlreadyExists e) {
+    } catch (EntityAlreadyExistsException e) {
       logger.error("[USER - REGISTER] user already exists", e);
       throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "User already exists", e);
     } catch (ResponseStatusException e) {

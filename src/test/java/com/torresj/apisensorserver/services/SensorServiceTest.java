@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
@@ -220,7 +220,7 @@ public class SensorServiceTest {
   }
 
   @Test
-  public void register() throws EntityNotFoundException, EntityAlreadyExists {
+  public void register() throws EntityNotFoundException, EntityAlreadyExistsException {
     //Given
     Sensor sensor = TestUtils.getExampleSensor(1, 1, 1);
     Sensor sensorExpected = TestUtils.getExampleSensor(1, 1, 1);

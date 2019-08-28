@@ -1,6 +1,7 @@
 package com.torresj.apisensorserver.controller;
 
-import com.torresj.apisensorserver.exceptions.EntityAlreadyExists;
+import com.torresj.apisensorserver.exceptions.ActionException;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import com.torresj.apisensorserver.models.entities.User.Role;
@@ -259,7 +260,7 @@ public class SensorController {
               sensor,
               principal.getName());
       return new ResponseEntity<>(sensorRegister, HttpStatus.CREATED);
-    } catch (EntityAlreadyExists e) {
+    } catch (EntityAlreadyExistsException e) {
       logger.info("[SENSOR - REGISTER] Entity already exists and it hasn't been modified/created");
       return new ResponseEntity<>((Sensor) e.getObject(), HttpStatus.ACCEPTED);
     } catch (ResponseStatusException e) {
@@ -334,7 +335,7 @@ public class SensorController {
   }
 
   @GetMapping(value = "/{id}/actions/{action}")
-  @ApiOperation(value = "Reset sensor by id", response = Void.class)
+  @ApiOperation(value = "Send action to sensor by id", response = Void.class)
   public ResponseEntity<Void> sendResetToSensor(@PathVariable("id") long id,
       @PathVariable("action") String action,
       Principal principal) {
@@ -359,10 +360,13 @@ public class SensorController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
     } catch (EntityNotFoundException e) {
-      logger.error("[[SENSOR ACTIONS] - GET] Sensor not found", e);
+      logger.error("[SENSOR ACTIONS] Error sending action \"{}\"", action, e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
+    } catch (ActionException e) {
+      logger.error("[SENSOR ACTIONS] Sensor not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor not found", e);
     } catch (Exception e) {
-      logger.error("[[SENSOR ACTIONS]] Error sending {} action to sensor {}", action, id, e);
+      logger.error("[SENSOR ACTIONS] Error sending {} action to sensor {}", action, id, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
     }
   }
