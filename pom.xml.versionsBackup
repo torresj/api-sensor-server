@@ -12,7 +12,7 @@
   </parent>
   <groupId>com.torresj</groupId>
   <artifactId>api-sensor-server</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.4-SNAPSHOT</version>
   <name>Api Sensor Server</name>
   <description>Api Sensor Server project for connect sensor and frontend</description>
   <properties>
