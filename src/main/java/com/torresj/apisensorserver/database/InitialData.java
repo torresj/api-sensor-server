@@ -173,7 +173,7 @@ public class InitialData {
     //Create/update User
     if (maybeUser.isPresent()) {
       User user = maybeUser.get();
-      user.setPassword(password);
+      user.setPassword(bCryptPasswordEncoder.encode(password));
       return userRepository.save(user);
     } else {
       User user = new User(null, username, bCryptPasswordEncoder.encode(password),
