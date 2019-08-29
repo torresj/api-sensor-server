@@ -43,6 +43,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -51,6 +52,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2, replace = Replace.ANY)
 @TestPropertySource(locations =
     "classpath:application-test.properties")
+@ActiveProfiles("test")
 public class BasicRestTest {
 
   protected static boolean SETUP = false;
