@@ -64,6 +64,11 @@ public class MqttConsumer {
   private void recordProcessor(String message) {
     try {
       Record record = objectMapper.readValue(message, Record.class);
+      if (record.getDate() == null) {
+        logger
+            .error("[MQTT - MESSAGE RECEIVE] Message not processed. Date not valid for message {}",
+                message);
+      }
       recordService.register(record);
     } catch (IOException e) {
       logger.error(e);
