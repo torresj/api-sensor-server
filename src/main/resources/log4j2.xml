@@ -4,19 +4,34 @@
     <Property name="LOG_PATTERN">
       %d{yyyy-MM-dd HH:mm:ss.SSS} [%-36X{uuid}] %5p : %m%n%ex
     </Property>
+    <property name="name">
+      sensor-server
+    </property>
   </Properties>
   <Appenders>
     <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
       <PatternLayout pattern="${LOG_PATTERN}"/>
     </Console>
+    <RollingFile name="RollingFile" fileName="logs/${name}.log"
+      filePattern="logs/$${date:yyyy-MM}/${name}-%d{yyyy-MM-dd}-%i.log.gz">
+      <PatternLayout>
+        <pattern>${LOG_PATTERN}</pattern>
+      </PatternLayout>
+      <Policies>
+        <TimeBasedTriggeringPolicy/><!-- Rotated everyday -->
+        <SizeBasedTriggeringPolicy size="100 MB"/> <!-- Or every 100 MB -->
+      </Policies>
+    </RollingFile>
   </Appenders>
   <Loggers>
     <Logger name="com.torresj" level="debug" additivity="false">
       <AppenderRef ref="ConsoleAppender"/>
+      <appender-ref ref="RollingFile"/>
     </Logger>
 
     <Root level="info">
       <AppenderRef ref="ConsoleAppender"/>
+      <appender-ref ref="RollingFile"/>
     </Root>
   </Loggers>
 </Configuration>
