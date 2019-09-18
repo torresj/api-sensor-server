@@ -12,8 +12,8 @@
     <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
       <PatternLayout pattern="${LOG_PATTERN}"/>
     </Console>
-    <RollingFile name="RollingFile" fileName="logs/${name}.log"
-      filePattern="logs/$${date:yyyy-MM}/${name}-%d{yyyy-MM-dd}-%i.log.gz">
+    <RollingFile name="RollingFile" fileName="/app/logs/${name}.log"
+      filePattern="/app/logs/$${date:yyyy-MM}/${name}-%d{yyyy-MM-dd}-%i.log.gz">
       <PatternLayout>
         <pattern>${LOG_PATTERN}</pattern>
       </PatternLayout>
