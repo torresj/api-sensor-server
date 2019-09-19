@@ -11,6 +11,8 @@ import com.torresj.apisensorserver.repositories.UserRepository;
 import com.torresj.apisensorserver.repositories.VariableRepository;
 import com.torresj.apisensorserver.services.RecordService;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -63,7 +65,9 @@ public class RecordServiceImpl implements RecordService {
     sensorRepository.findById(record.getSensorId()).orElseThrow(EntityNotFoundException::new);
     logger.debug("[RECORD - SERVICE] Searching variable {} ", record.getVariableId());
     variableRepository.findById(record.getVariableId()).orElseThrow(EntityNotFoundException::new);
-
+    if (record.getDate() == null){
+      record.setDate(LocalDateTime.now());
+    }
     Record entity = recordRespository.save(record);
 
     String destination = "/topic/station/" + record.getSensorId();
