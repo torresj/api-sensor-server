@@ -301,7 +301,7 @@ public class SensorController {
     }
   }
 
-  @GetMapping(value = "/{id}/reset")
+  @PostMapping(value = "/{id}/reset")
   @ApiOperation(value = "Reset sensor by id", response = Void.class)
   public ResponseEntity<Void> sendResetToSensor(@PathVariable("id") long id,
       Principal principal) {
@@ -334,9 +334,9 @@ public class SensorController {
     }
   }
 
-  @GetMapping(value = "/{id}/actions/{action}")
+  @PostMapping(value = "/{id}/actions/{action}")
   @ApiOperation(value = "Send action to sensor by id", response = Void.class)
-  public ResponseEntity<Void> sendResetToSensor(@PathVariable("id") long id,
+  public ResponseEntity<Void> sendActionToSensor(@PathVariable("id") long id,
       @PathVariable("action") String action,
       Principal principal) {
     try {
