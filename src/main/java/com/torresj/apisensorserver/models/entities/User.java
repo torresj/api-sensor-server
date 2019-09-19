@@ -50,4 +50,16 @@ public class User implements Serializable {
   @Column(nullable = false, updatable = false)
   @UpdateTimestamp
   private LocalDateTime lastConnection;
+
+  @Column
+  private String name;
+
+  @Column
+  private String lastName;
+
+  @Column
+  private String phoneNumber;
+
+  @Column
+  private String email;
 }
