@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.torresj.apisensorserver.jackson.RestPage;
+import com.torresj.apisensorserver.models.entities.GPSPosition;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import java.io.IOException;
@@ -258,6 +259,10 @@ public class HouseTest extends BasicRestTest {
     httpPut.setHeader("Authorization", authorizationAdmin);
 
     House house = houseRepository.findByName("House2").get();
+    GPSPosition position = new GPSPosition();
+    position.setLatitude(1L);
+    position.setLongitude(2L);
+    house.setPosition(position);
 
     StringEntity entity = new StringEntity(objectMapper.writeValueAsString(house));
 
@@ -339,7 +344,7 @@ public class HouseTest extends BasicRestTest {
       getAdminAuthorization();
     }
 
-    House house = new House(null, "House4", LocalDateTime.now());
+    House house = new House(null, "House4", LocalDateTime.now(), null, null, null);
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpPost httpPost = new HttpPost(
@@ -372,7 +377,7 @@ public class HouseTest extends BasicRestTest {
       getUserAuthorization();
     }
 
-    House house = new House(null, "House4", LocalDateTime.now());
+    House house = new House(null, "House4", LocalDateTime.now(), null, null, null);
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpPost httpPost = new HttpPost(

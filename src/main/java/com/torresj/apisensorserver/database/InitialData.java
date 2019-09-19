@@ -101,8 +101,8 @@ public class InitialData {
     type2 = sensorTypeRepository.save(type2);
 
     //Create House
-    House house1 = new House(null, "House1", LocalDateTime.now());
-    House house2 = new House(null, "House2", LocalDateTime.now());
+    House house1 = new House(null, "House1", LocalDateTime.now(), null, null, null);
+    House house2 = new House(null, "House2", LocalDateTime.now(), null, null, null);
 
     house1 = houseRepository.save(house1);
     house2 = houseRepository.save(house2);
@@ -143,13 +143,13 @@ public class InitialData {
     //Create User
     User user1 = new User(null, "Administrator", bCryptPasswordEncoder.encode("admin"), Role.ADMIN,
         LocalDateTime.now(),
-        LocalDateTime.now());
+        LocalDateTime.now(), null, null, null, null);
     User user2 = new User(null, "Jaime", bCryptPasswordEncoder.encode("test"), Role.USER,
         LocalDateTime.now(),
-        LocalDateTime.now());
+        LocalDateTime.now(), null, null, null, null);
     User user3 = new User(null, "Station", bCryptPasswordEncoder.encode("station"), Role.STATION,
         LocalDateTime.now(),
-        LocalDateTime.now());
+        LocalDateTime.now(), null, null, null, null);
 
     user1 = userRepository.save(user1);
     user2 = userRepository.save(user2);
@@ -178,7 +178,7 @@ public class InitialData {
     } else {
       User user = new User(null, username, bCryptPasswordEncoder.encode(password),
           Role.ADMIN,
-          null, null);
+          null, null, null, null, null, null);
       return userRepository.save(user);
     }
   }
