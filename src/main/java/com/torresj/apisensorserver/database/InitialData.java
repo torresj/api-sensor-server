@@ -166,20 +166,34 @@ public class InitialData {
   @Bean
   @Profile("prod")
   @RefreshScope
-  public User createProductionUserRoot(@Value("${db.user.admin.username}") String username,
-      @Value("${db.user.admin.password}") String password) {
-    //find User
-    Optional<User> maybeUser = userRepository.findByUsername(username);
+  public void createProductionUsers(
+          @Value("${db.user.admin.username}") String rootUsername,
+          @Value("${db.user.admin.password}") String rootPassword,
+          @Value("${db.user.station.username}") String stationUsername,
+          @Value("${db.user.station.password}") String stationPassword) {
+    //find Users
+    Optional<User> maybeRoot = userRepository.findByUsername(rootUsername);
+    Optional<User> maybeStation= userRepository.findByUsername(stationUsername);
     //Create/update User
-    if (maybeUser.isPresent()) {
-      User user = maybeUser.get();
-      user.setPassword(bCryptPasswordEncoder.encode(password));
-      return userRepository.save(user);
+    if (maybeRoot.isPresent()) {
+      User user = maybeRoot.get();
+      user.setPassword(bCryptPasswordEncoder.encode(rootPassword));
+      userRepository.save(user);
     } else {
-      User user = new User(null, username, bCryptPasswordEncoder.encode(password),
+      User user = new User(null, rootUsername, bCryptPasswordEncoder.encode(rootPassword),
           Role.ADMIN,
           null, null, null, null, null, null);
-      return userRepository.save(user);
+      userRepository.save(user);
+    }
+    if (maybeStation.isPresent()) {
+      User user = maybeStation.get();
+      user.setPassword(bCryptPasswordEncoder.encode(stationPassword));
+      userRepository.save(user);
+    } else {
+      User user = new User(null, stationUsername, bCryptPasswordEncoder.encode(stationPassword),
+              Role.ADMIN,
+              null, null, null, null, null, null);
+      userRepository.save(user);
     }
   }
 
