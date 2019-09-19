@@ -192,7 +192,7 @@ public class InitialData {
       userRepository.save(user);
     } else {
       User user = new User(null, stationUsername, bCryptPasswordEncoder.encode(stationPassword),
-              Role.ADMIN,
+              Role.STATION,
               null, null, null, null, null, null);
       userRepository.save(user);
     }
