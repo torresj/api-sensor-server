@@ -166,24 +166,25 @@ public class InitialData {
   @Bean
   @Profile("prod")
   @RefreshScope
-  public void createProductionUsers(
+  public User createProductionUsers(
           @Value("${db.user.admin.username}") String rootUsername,
           @Value("${db.user.admin.password}") String rootPassword,
           @Value("${db.user.station.username}") String stationUsername,
           @Value("${db.user.station.password}") String stationPassword) {
     //find Users
+    User responseUser = null;
     Optional<User> maybeRoot = userRepository.findByUsername(rootUsername);
     Optional<User> maybeStation= userRepository.findByUsername(stationUsername);
     //Create/update User
     if (maybeRoot.isPresent()) {
       User user = maybeRoot.get();
       user.setPassword(bCryptPasswordEncoder.encode(rootPassword));
-      userRepository.save(user);
+      responseUser = userRepository.save(user);
     } else {
       User user = new User(null, rootUsername, bCryptPasswordEncoder.encode(rootPassword),
           Role.ADMIN,
           null, null, null, null, null, null);
-      userRepository.save(user);
+      responseUser = userRepository.save(user);
     }
     if (maybeStation.isPresent()) {
       User user = maybeStation.get();
@@ -195,6 +196,7 @@ public class InitialData {
               null, null, null, null, null, null);
       userRepository.save(user);
     }
+    return responseUser;
   }
 
   private void clearDB() {
