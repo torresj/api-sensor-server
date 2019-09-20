@@ -68,8 +68,9 @@ public class MqttConsumer {
         logger
             .error("[MQTT - MESSAGE RECEIVE] Message not processed. Date not valid for message {}",
                 message);
+      } else {
+        recordService.register(record);
       }
-      recordService.register(record);
     } catch (IOException e) {
       logger.error(e);
       logger.info("[MQTT - MESSAGE RECEIVE] Message not processed: {}", message);
