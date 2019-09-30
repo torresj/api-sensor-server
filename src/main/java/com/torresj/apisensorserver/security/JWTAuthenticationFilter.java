@@ -66,7 +66,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     res.addHeader(HEADER_STRING, TOKEN_PREFIX + " " + token);
     LoginResponse userData = new LoginResponse();
     userData.setToken(token);
-    userData.setUserName(userName);
+    userData.setUsername(userName);
     try {
       String json = new ObjectMapper().writeValueAsString(userData);
       PrintWriter out = res.getWriter();
