@@ -2,6 +2,7 @@ package com.torresj.apisensorserver.security;
 
 
 import com.torresj.apisensorserver.services.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,6 +16,21 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
   /* Services */
   private UserService userService;
+
+  @Value("${jwt.token.secret}")
+  private String secret;
+
+  @Value("${jwt.token.expiration}")
+  private String expiration;
+
+  @Value("${jwt.token.prefix}")
+  private String prefix;
+
+  @Value("${jwt.token.header}")
+  private String header;
+
+  @Value("${jwt.token.issuer.info}")
+  public String issuer;
 
   public WebSecurity(UserService userService) {
     this.userService = userService;
@@ -33,8 +49,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
             "/actuator/**",
             "/ws/**")
         .permitAll().anyRequest().authenticated().and()
-        .addFilter(new JWTAuthenticationFilter(authenticationManager()))
-        .addFilter(new JWTAuthorizationFilter(authenticationManager()))
+        .addFilter(new JWTAuthenticationFilter(authenticationManager(), secret, expiration, prefix, header, issuer))
+        .addFilter(new JWTAuthorizationFilter(authenticationManager(), secret, prefix, header))
         // this disables session creation on Spring Security
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
   }

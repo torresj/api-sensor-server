@@ -15,21 +15,29 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import io.jsonwebtoken.Jwts;
 
-import static com.torresj.apisensorserver.security.SecurityConstants.*;
-
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
-  public JWTAuthorizationFilter(AuthenticationManager authManager) {
+  private String secret;
+
+  private String prefix;
+
+  private String header;
+
+
+  public JWTAuthorizationFilter(AuthenticationManager authManager, String secret, String prefix, String header) {
     super(authManager);
+    this.secret = secret;
+    this.prefix = prefix;
+    this.header = header;
   }
 
   @Override
   protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
       FilterChain chain)
       throws IOException, ServletException {
-    String header = req.getHeader(HEADER_STRING);
+    String jwt_header = req.getHeader(header);
 
-    if (header == null || !header.startsWith(TOKEN_PREFIX)) {
+    if (jwt_header == null || !jwt_header.startsWith(prefix)) {
       chain.doFilter(req, res);
       return;
     }
@@ -41,11 +49,11 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
   }
 
   private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-    String token = request.getHeader(HEADER_STRING);
+    String token = request.getHeader(header);
     if (token != null) {
       // parse the token.
-      String user = Jwts.parser().setSigningKey(SECRET)
-          .parseClaimsJws(token.replace(TOKEN_PREFIX, "")).getBody()
+      String user = Jwts.parser().setSigningKey(secret)
+          .parseClaimsJws(token.replace(prefix, "")).getBody()
           .getSubject();
 
       if (user != null) {

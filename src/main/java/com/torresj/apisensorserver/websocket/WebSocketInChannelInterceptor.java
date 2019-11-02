@@ -1,7 +1,5 @@
 package com.torresj.apisensorserver.websocket;
 
-import static com.torresj.apisensorserver.security.SecurityConstants.SECRET;
-import static com.torresj.apisensorserver.security.SecurityConstants.TOKEN_PREFIX;
 
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.exceptions.WSConnectionException;
@@ -11,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -25,6 +24,12 @@ public class WebSocketInChannelInterceptor implements ChannelInterceptor {
 
   /* Logs */
   private static final Logger logger = LogManager.getLogger(WebSocketInChannelInterceptor.class);
+
+  @Value("${jwt.token.secret}")
+  private String secret;
+
+  @Value("${jwt.token.prefix}")
+  private String prefix;
 
   private WSService wsService;
 
@@ -57,8 +62,8 @@ public class WebSocketInChannelInterceptor implements ChannelInterceptor {
     List<String> headers = accessor.getNativeHeader("Authorization");
     if (headers != null && !headers.isEmpty()) {
       String token = headers.get(0);
-      String user = Jwts.parser().setSigningKey(SECRET)
-          .parseClaimsJws(token.replace(TOKEN_PREFIX, "")).getBody()
+      String user = Jwts.parser().setSigningKey(secret)
+          .parseClaimsJws(token.replace(prefix, "")).getBody()
           .getSubject();
       if (user != null) {
         UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(

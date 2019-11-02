@@ -1,16 +1,8 @@
 package com.torresj.apisensorserver.security;
 
-import static com.torresj.apisensorserver.security.SecurityConstants.EXPIRATION_TIME;
-import static com.torresj.apisensorserver.security.SecurityConstants.HEADER_STRING;
-import static com.torresj.apisensorserver.security.SecurityConstants.ISSUER_INFO;
-import static com.torresj.apisensorserver.security.SecurityConstants.SECRET;
-import static com.torresj.apisensorserver.security.SecurityConstants.TOKEN_PREFIX;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.torresj.apisensorserver.models.LoginResponse;
 import com.torresj.apisensorserver.models.entities.User;
-import com.torresj.apisensorserver.services.impl.RecordServiceImpl;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -34,9 +26,24 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   /* Logs */
   private static final Logger logger = LogManager.getLogger(JWTAuthenticationFilter.class);
 
+  private String secret;
+
+  private String expiration;
+
+  private String prefix;
+
+  private String header;
+
+  private String issuer;
+
   private final AuthenticationManager authenticationManager;
 
-  public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+  public JWTAuthenticationFilter(AuthenticationManager authenticationManager, String secret, String expiration, String prefix, String header, String issuer) {
+    this.secret = secret;
+    this.expiration = expiration;
+    this.prefix = prefix;
+    this.header = header;
+    this.issuer = issuer;
     this.authenticationManager = authenticationManager;
   }
 
@@ -59,11 +66,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       Authentication auth) {
     String userName = ((CustomUserDetails) auth.getPrincipal())
             .getUsername();
-    String token = Jwts.builder().setIssuedAt(new Date()).setIssuer(ISSUER_INFO)
+    String token = Jwts.builder().setIssuedAt(new Date()).setIssuer(issuer)
         .setSubject(userName)
-        .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-        .signWith(SignatureAlgorithm.HS512, SECRET).compact();
-    res.addHeader(HEADER_STRING, TOKEN_PREFIX + " " + token);
+        .setExpiration(new Date(System.currentTimeMillis() + Long.parseLong(expiration)))
+        .signWith(SignatureAlgorithm.HS512, secret).compact();
+    res.addHeader(header, prefix + " " + token);
     LoginResponse userData = new LoginResponse();
     userData.setToken(token);
     userData.setUsername(userName);
