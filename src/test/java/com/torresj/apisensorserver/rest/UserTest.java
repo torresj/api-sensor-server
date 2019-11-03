@@ -120,6 +120,33 @@ public class UserTest extends BasicRestTest {
   }
 
   @Test
+  public void getAllUserAsAdminWithFilters() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+            BASE_URL + port + PATH + USERS + "?filter=" + "2" + "&role=" + Role.USER + "&page=" + nPage + "&elements=" + elements);
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    Page<User> page = objectMapper
+            .readValue(jsonFromResponse, new TypeReference<RestPage<User>>() {
+            });
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(page.getContent().size(), equalTo(1));
+
+    client.close();
+  }
+
+  @Test
   public void getAllUserAsUser() throws IOException {
     if (authorizationUser == null) {
       getUserAuthorization();

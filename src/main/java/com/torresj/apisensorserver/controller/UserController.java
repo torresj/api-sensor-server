@@ -47,22 +47,26 @@ public class UserController {
 
   @GetMapping
   @ApiOperation(value = "Retrieve Users", notes = "Pageable data are required and de maximum records per page are 100", response = User.class, responseContainer = "List")
-  public ResponseEntity<Page<User>> getUsers(@RequestParam(value = "page") int nPage,
-      @RequestParam(value = "elements") int elements, Principal principal) {
+  public ResponseEntity<Page<User>> getUsers(
+          @RequestParam(value = "page") int nPage,
+          @RequestParam(value = "elements") int elements,
+          @RequestParam(value = "filter", required = false) String filter,
+          @RequestParam(value = "role", required = false) Role role,
+          Principal principal) {
     try {
       logger
-          .info("[USER - GET ALL] Getting users with page {}, elements {} by user \"{}\"", nPage,
+          .info("[USER - GET ALL] Getting users with filter {}, role{}, page {}, elements {} by user \"{}\"",filter, role, nPage,
               elements, principal.getName());
       if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "User does not have permission for this endpoint");
       }
 
-      Page<User> page = userService.getUsers(nPage, elements);
+      Page<User> page = userService.getUsers(filter,role,nPage, elements);
 
       logger
           .info(
-              "[USER - GET ALL] Request for getting users with page {}, elements {} finished by user \"{}\"",
+              "[USER - GET ALL] Request for getting users with filter {}, role {}, page {}, elements {} finished by user \"{}\"", filter, role,
               nPage,
               elements, principal.getName());
       return new ResponseEntity<>(page, HttpStatus.OK);

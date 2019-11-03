@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
 
-  Page<User> getUsers(int nPage, int elements);
+  Page<User> getUsers(String filter, Role role, int nPage, int elements);
 
   User getUser(long id) throws EntityNotFoundException;
 

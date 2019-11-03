@@ -12,6 +12,7 @@ import com.torresj.apisensorserver.repositories.UserRepository;
 import com.torresj.apisensorserver.security.CustomUserDetails;
 import com.torresj.apisensorserver.services.UserService;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -47,10 +48,19 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Page<User> getUsers(int nPage, int elements) {
+  public Page<User> getUsers(String filter, Role role, int nPage, int elements) {
     logger.debug("[USER - SERVICE] Service for getting users start");
     PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-    Page<User> page = userRepository.findAll(pageRequest);
+    Page<User> page = null;
+    if(filter == null && role == null){
+      page = userRepository.findAll(pageRequest);
+    }else if(filter != null && role == null){
+      page = userRepository.findByUsernameContaining(filter,pageRequest);
+    }else if(filter != null && role != null){
+      page = userRepository.findByUsernameContainingAndRole(filter,role,pageRequest);
+    }else if(filter == null && role != null){
+      page = userRepository.findByRole(role,pageRequest);
+    }
     logger.debug("[USER - SERVICE] Service for getting users end. Users: {}", page.getContent());
     return page;
   }
@@ -148,6 +158,8 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException(username));
     CustomUserDetails userDetails = new CustomUserDetails(user);
+    user.setLastConnection(LocalDateTime.now());
+    userRepository.save(user);
     logger.debug(
         "[USER - SERVICE] Service for find user {} end. User found", username);
     return userDetails;

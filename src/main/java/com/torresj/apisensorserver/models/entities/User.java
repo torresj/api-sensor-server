@@ -47,7 +47,7 @@ public class User implements Serializable {
   @CreationTimestamp
   private LocalDateTime createAt;
 
-  @Column(nullable = false, updatable = false)
+  @Column(nullable = false)
   @UpdateTimestamp
   private LocalDateTime lastConnection;
 

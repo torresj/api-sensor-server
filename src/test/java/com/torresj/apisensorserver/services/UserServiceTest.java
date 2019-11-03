@@ -58,7 +58,7 @@ public class UserServiceTest {
 
     //When
     when(userRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(users));
-    List<User> usersActual = userService.getUsers(0, 20).getContent();
+    List<User> usersActual = userService.getUsers(null,null,0, 20).getContent();
 
     //Then
     assertEquals(users, usersActual);
