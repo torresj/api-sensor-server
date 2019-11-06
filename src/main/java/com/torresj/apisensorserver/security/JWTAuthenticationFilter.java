@@ -1,8 +1,11 @@
 package com.torresj.apisensorserver.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
+import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.LoginResponse;
 import com.torresj.apisensorserver.models.entities.User;
+import com.torresj.apisensorserver.services.UserService;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -38,13 +41,17 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
   private final AuthenticationManager authenticationManager;
 
-  public JWTAuthenticationFilter(AuthenticationManager authenticationManager, String secret, String expiration, String prefix, String header, String issuer) {
+  private final UserService userService;
+
+  public JWTAuthenticationFilter(AuthenticationManager authenticationManager, UserService userService, String secret, String expiration, String prefix,
+          String header, String issuer) {
     this.secret = secret;
     this.expiration = expiration;
     this.prefix = prefix;
     this.header = header;
     this.issuer = issuer;
     this.authenticationManager = authenticationManager;
+    this.userService = userService;
   }
 
   @Override
@@ -74,13 +81,20 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     LoginResponse userData = new LoginResponse();
     userData.setToken(token);
     userData.setUsername(userName);
+
     try {
+      User user = userService.getUser(userName);
+      user.setNumLogins(user.getNumLogins() == null ? 0:user.getNumLogins()+1);
+      userService.update(user);
+
       String json = new ObjectMapper().writeValueAsString(userData);
       PrintWriter out = res.getWriter();
       out.print(json);
       out.flush();
     } catch (IOException e) {
       logger.error("[JWTAuthenticationFilter] Error generating user data response in login request", e);
+    } catch (EntityNotFoundException e) {
+      logger.error("[JWTAuthenticationFilter] Error saving user login numbers login request", e);
     }
   }
 }

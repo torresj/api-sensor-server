@@ -62,4 +62,7 @@ public class User implements Serializable {
 
   @Column
   private String email;
+
+  @Column
+  private Long numLogins;
 }

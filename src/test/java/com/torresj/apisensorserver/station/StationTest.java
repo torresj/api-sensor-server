@@ -150,7 +150,7 @@ public class StationTest {
     //Create User
     User user = new User(null, "Station", bCryptPasswordEncoder.encode("test"), Role.STATION,
         LocalDateTime.now(),
-        LocalDateTime.now(), null, null, null, null);
+        LocalDateTime.now(), null, null, null, null, null);
 
     userRepository.save(user);
 

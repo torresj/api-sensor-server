@@ -49,8 +49,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
             "/actuator/**",
             "/ws/**")
         .permitAll().anyRequest().authenticated().and()
-        .addFilter(new JWTAuthenticationFilter(authenticationManager(), secret, expiration, prefix, header, issuer))
-        .addFilter(new JWTAuthorizationFilter(authenticationManager(), secret, prefix, header))
+        .addFilter(new JWTAuthenticationFilter(authenticationManager(), userService , secret, expiration, prefix, header, issuer))
+        .addFilter(new JWTAuthorizationFilter(authenticationManager(), userService, secret, prefix, header))
         // this disables session creation on Spring Security
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
   }

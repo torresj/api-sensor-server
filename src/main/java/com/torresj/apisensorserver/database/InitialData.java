@@ -143,13 +143,13 @@ public class InitialData {
     //Create User
     User user1 = new User(null, "Administrator", bCryptPasswordEncoder.encode("admin"), Role.ADMIN,
         LocalDateTime.now(),
-        LocalDateTime.now(), null, null, null, null);
+        LocalDateTime.now(), null, null, null, null, null);
     User user2 = new User(null, "Jaime", bCryptPasswordEncoder.encode("test"), Role.USER,
         LocalDateTime.now(),
-        LocalDateTime.now(), null, null, null, null);
+        LocalDateTime.now(), null, null, null, null, null);
     User user3 = new User(null, "Station", bCryptPasswordEncoder.encode("station"), Role.STATION,
         LocalDateTime.now(),
-        LocalDateTime.now(), null, null, null, null);
+        LocalDateTime.now(), null, null, null, null, null);
 
     user1 = userRepository.save(user1);
     user2 = userRepository.save(user2);
@@ -183,7 +183,7 @@ public class InitialData {
     } else {
       User user = new User(null, rootUsername, bCryptPasswordEncoder.encode(rootPassword),
           Role.ADMIN,
-          null, null, null, null, null, null);
+          null, null, null, null, null, null, null);
       responseUser = userRepository.save(user);
     }
     if (maybeStation.isPresent()) {
@@ -193,7 +193,7 @@ public class InitialData {
     } else {
       User user = new User(null, stationUsername, bCryptPasswordEncoder.encode(stationPassword),
               Role.STATION,
-              null, null, null, null, null, null);
+              null, null, null, null, null, null, null);
       userRepository.save(user);
     }
     return responseUser;

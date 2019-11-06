@@ -158,8 +158,6 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException(username));
     CustomUserDetails userDetails = new CustomUserDetails(user);
-    user.setLastConnection(LocalDateTime.now());
-    userRepository.save(user);
     logger.debug(
         "[USER - SERVICE] Service for find user {} end. User found", username);
     return userDetails;

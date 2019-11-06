@@ -191,13 +191,13 @@ public class BasicRestTest {
       //Create User
       User user1 = new User(null, "Admin", bCryptPasswordEncoder.encode("test"), Role.ADMIN,
           LocalDateTime.now(),
-          LocalDateTime.now(), null, null, null, null);
+          LocalDateTime.now(), null, null, null, null, null);
       User user2 = new User(null, "User", bCryptPasswordEncoder.encode("test"), Role.USER,
           LocalDateTime.now(),
-          LocalDateTime.now(), null, null, null, null);
+          LocalDateTime.now(), null, null, null, null, null);
       User user3 = new User(null, "User2", bCryptPasswordEncoder.encode("test"), Role.USER,
           LocalDateTime.now(),
-          LocalDateTime.now(), null, null, null, null);
+          LocalDateTime.now(), null, null, null, null, null);
 
       user1 = userRepository.save(user1);
       user2 = userRepository.save(user2);
