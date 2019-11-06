@@ -84,7 +84,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     try {
       User user = userService.getUser(userName);
-      user.setNumLogins(user.getNumLogins() == null ? 0:user.getNumLogins()+1);
+      user.setNumLogins(user.getNumLogins() == null ? 1 :user.getNumLogins()+1);
       userService.update(user);
 
       String json = new ObjectMapper().writeValueAsString(userData);

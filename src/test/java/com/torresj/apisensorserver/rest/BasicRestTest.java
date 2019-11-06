@@ -279,6 +279,9 @@ public class BasicRestTest {
   @Test
   public void getAdminAuthorization() throws IOException {
 
+    Long numLogins  = userRepository.findByUsername("Admin").get().getNumLogins();
+    if(numLogins == null)
+      numLogins = 0L;
     CloseableHttpClient client = HttpClients.createDefault();
     HttpPost httpPost = new HttpPost(BASE_URL + port + PATH + LOGIN);
 
@@ -292,6 +295,8 @@ public class BasicRestTest {
     authorizationAdmin = response.getFirstHeader("Authorization").getValue();
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
     assertThat(authorizationAdmin, notNullValue());
+
+    assertThat(numLogins +1,equalTo(userRepository.findByUsername("Admin").get().getNumLogins()));
     client.close();
   }
 
