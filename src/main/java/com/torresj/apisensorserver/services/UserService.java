@@ -1,5 +1,7 @@
 package com.torresj.apisensorserver.services;
 
+import java.util.List;
+
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
@@ -20,7 +22,7 @@ public interface UserService extends UserDetailsService {
 
   User getLogginUser() throws EntityNotFoundException;
 
-  Page<House> getHouses(long id, int nPage, int elements) throws EntityNotFoundException;
+  List<House> getHouses(long id) throws EntityNotFoundException;
 
   House addHouse(long userId, long houseId) throws EntityNotFoundException;
 

@@ -96,17 +96,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Page<House> getHouses(long id, int nPage, int elements) throws EntityNotFoundException {
+  public List<House> getHouses(long id) throws EntityNotFoundException {
     logger.debug("[USER - SERVICES] Service for get user {} houses start", id);
     userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-    PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
     List<Long> ids = userHouseRelationRepository.findByUserId(id).stream()
         .map(UserHouseRelation::getHouseId).collect(
             Collectors.toList());
-    Page<House> page = houseRepository.findByIdIn(ids, pageRequest);
+    List<House> houses = houseRepository.findByIdIn(ids);
     logger.debug("[USER - SERVICES] Service for get user {} houses end. Houses: {}", id,
-        page.getContent());
-    return page;
+        houses);
+    return houses;
   }
 
   @Override

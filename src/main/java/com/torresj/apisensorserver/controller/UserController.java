@@ -9,6 +9,8 @@ import com.torresj.apisensorserver.services.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.security.Principal;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -131,9 +133,7 @@ public class UserController {
 
   @GetMapping(value = "/{id}/houses")
   @ApiOperation(value = "Retrieve user by id", response = User.class)
-  public ResponseEntity<Page<House>> getHouseSensorsByID(@PathVariable("id") long id,
-      @RequestParam(value = "page") int nPage,
-      @RequestParam(value = "elements") int elements, Principal principal) {
+  public ResponseEntity<List<House>> getHouseSensorsByID(@PathVariable("id") long id, Principal principal) {
     try {
       logger.info("[USER HOUSE - GET] Getting houses sensor {} list by user \"{}\"", id,
           principal.getName());
@@ -143,11 +143,11 @@ public class UserController {
             "User does not have permission for this endpoint");
       }
 
-      Page<House> page = userService.getHouses(id, nPage, elements);
+      List<House> houses = userService.getHouses(id);
 
       logger.info("[USER HOUSE - GET] Request for getting houses sensor {} list by user \"{}\"", id,
           principal.getName());
-      return new ResponseEntity<>(page, HttpStatus.OK);
+      return new ResponseEntity<>(houses, HttpStatus.OK);
     } catch (EntityNotFoundException e) {
       logger.error("[USER HOUSE - GET] User not found", e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found", e);

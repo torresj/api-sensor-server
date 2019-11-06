@@ -9,6 +9,7 @@ import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.User;
 import com.torresj.apisensorserver.models.entities.User.Role;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -313,8 +314,7 @@ public class UserTest extends BasicRestTest {
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses?page=" + nPage + "&elements="
-            + elements);
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses");
 
     httpGet.setHeader("Content-type", "application/json");
     httpGet.setHeader("Authorization", authorizationUser);
@@ -323,12 +323,12 @@ public class UserTest extends BasicRestTest {
 
     String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    Page<House> page = objectMapper
-        .readValue(jsonFromResponse, new TypeReference<RestPage<House>>() {
+    List<House> houses = objectMapper
+        .readValue(jsonFromResponse, new TypeReference<List<House>>() {
         });
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(page.getContent().size(), equalTo(1));
+    assertThat(houses.size(), equalTo(1));
 
     client.close();
   }
@@ -343,8 +343,7 @@ public class UserTest extends BasicRestTest {
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses?page=" + nPage + "&elements="
-            + elements);
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses");
 
     httpGet.setHeader("Content-type", "application/json");
     httpGet.setHeader("Authorization", authorizationAdmin);
@@ -353,12 +352,12 @@ public class UserTest extends BasicRestTest {
 
     String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    Page<House> page = objectMapper
-        .readValue(jsonFromResponse, new TypeReference<RestPage<House>>() {
+    List<House> houses = objectMapper
+        .readValue(jsonFromResponse, new TypeReference<List<House>>() {
         });
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(page.getContent().size(), equalTo(2));
+    assertThat(houses.size(), equalTo(2));
 
     client.close();
   }
@@ -373,8 +372,7 @@ public class UserTest extends BasicRestTest {
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses?page=" + nPage + "&elements="
-            + elements);
+        BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses");
 
     httpGet.setHeader("Content-type", "application/json");
     httpGet.setHeader("Authorization", authorizationUser);

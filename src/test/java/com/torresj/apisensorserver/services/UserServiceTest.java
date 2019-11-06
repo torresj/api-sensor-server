@@ -127,8 +127,8 @@ public class UserServiceTest {
     //When
     when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
     when(userHouseRelationRepository.findByUserId(anyLong())).thenReturn(relations);
-    when(houseRepository.findByIdIn(ids, pageRequest)).thenReturn(new PageImpl<>(houses));
-    List<House> listActual = userService.getHouses(1, 0, 20).getContent();
+    when(houseRepository.findByIdIn(ids)).thenReturn(houses);
+    List<House> listActual = userService.getHouses(1);
 
     //Then
     assertEquals(houses, listActual);
