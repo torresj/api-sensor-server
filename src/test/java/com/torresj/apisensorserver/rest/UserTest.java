@@ -238,7 +238,9 @@ public class UserTest extends BasicRestTest {
         .readValue(jsonFromResponse, User.class);
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(userResponse, equalTo(user));
+    assertThat(userResponse.getId(), equalTo(user.getId()));
+    assertThat(userResponse.getUsername(), equalTo(user.getUsername()));
+    assertThat(userResponse.getPassword(), equalTo(user.getPassword()));
 
     client.close();
   }
@@ -265,7 +267,9 @@ public class UserTest extends BasicRestTest {
         .readValue(jsonFromResponse, User.class);
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(userResponse, equalTo(user));
+    assertThat(userResponse.getId(), equalTo(user.getId()));
+    assertThat(userResponse.getUsername(), equalTo(user.getUsername()));
+    assertThat(userResponse.getPassword(), equalTo(user.getPassword()));
 
     client.close();
   }
@@ -292,7 +296,9 @@ public class UserTest extends BasicRestTest {
         .readValue(jsonFromResponse, User.class);
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(userResponse, equalTo(user));
+    assertThat(userResponse.getId(), equalTo(user.getId()));
+    assertThat(userResponse.getUsername(), equalTo(user.getUsername()));
+    assertThat(userResponse.getPassword(), equalTo(user.getPassword()));
 
     client.close();
   }
