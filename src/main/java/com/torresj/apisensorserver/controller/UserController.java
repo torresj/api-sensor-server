@@ -202,7 +202,9 @@ public class UserController {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "User does not have permission for this endpoint");
       }
-      user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+      if(user.getPassword()!= null)
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+
       User userRegister = userService.update(user);
 
       logger.info("[USER - UPDATE] Request for updating user {} finished by user \"{}\"", user,

@@ -130,6 +130,8 @@ public class UserServiceImpl implements UserService {
     User entity = userRepository.findByUsername(user.getUsername())
         .orElseThrow(EntityNotFoundException::new);
     user.setId(entity.getId());
+    if(user.getPassword() == null)
+      user.setPassword(entity.getPassword());
     User userUpdated = userRepository.save(user);
     logger.debug("[USER - SERVICE] Service for update user end. User: {}", userUpdated);
     return userUpdated;
