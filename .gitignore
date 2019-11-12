@@ -31,4 +31,5 @@ HELP.md
 .vscode
 
 .attach*
-,DS_Store
+.DS_Store
+**/.DS_Store
