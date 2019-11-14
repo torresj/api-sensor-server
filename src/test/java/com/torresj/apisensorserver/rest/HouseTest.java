@@ -10,6 +10,8 @@ import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -56,6 +58,34 @@ public class HouseTest extends BasicRestTest {
 
     assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
     assertThat(page.getContent().size(), equalTo(3
+    ));
+
+    client.close();
+  }
+
+  @Test
+  public void getAllHousesAsAdminWithoutPageable() throws IOException {
+    if (authorizationAdmin == null) {
+      getAdminAuthorization();
+    }
+
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(
+            BASE_URL + port + PATH + HOUSES + "/all");
+
+    httpGet.setHeader("Content-type", "application/json");
+    httpGet.setHeader("Authorization", authorizationAdmin);
+
+    CloseableHttpResponse response = client.execute(httpGet);
+
+    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+    List<House> houses = objectMapper
+            .readValue(jsonFromResponse, new TypeReference<List<House>>() {
+            });
+
+    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+    assertThat(houses.size(), equalTo(3
     ));
 
     client.close();

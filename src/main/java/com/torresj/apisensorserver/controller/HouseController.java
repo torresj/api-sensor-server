@@ -10,6 +10,8 @@ import com.torresj.apisensorserver.services.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.security.Principal;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -67,6 +69,33 @@ public class HouseController {
       logger.error("[HOUSE - GET ALL] User does not have permission for this endpoint");
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           e.getReason(), e);
+    } catch (Exception e) {
+      logger.error("[HOUSE - GET ALL] Error getting houses from DB", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+    }
+  }
+
+  @GetMapping(value = "/all")
+  @ApiOperation(value = "Retrieve Houses", response = House.class, responseContainer = "List")
+  public ResponseEntity<List<House>> getHousesAll(Principal principal) {
+    try {
+      logger.info(
+              "[HOUSE - GET ALL] Getting houses from DB by user \"{}\"",
+              principal.getName());
+      if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                "User does not have permission for this endpoint");
+      }
+
+      List<House> houses = houseService.getHouses();
+
+      logger.info("[HOUSE - GET ALL] Request for houses finished by user \"{}\"",
+              principal.getName());
+      return new ResponseEntity<>(houses, HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      logger.error("[HOUSE - GET ALL] User does not have permission for this endpoint");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              e.getReason(), e);
     } catch (Exception e) {
       logger.error("[HOUSE - GET ALL] Error getting houses from DB", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);

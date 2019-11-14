@@ -43,7 +43,7 @@ public class User implements Serializable {
   @Column(nullable = false)
   private Role role;
 
-  @Column(nullable = false, updatable = false)
+  @Column(updatable = false)
   @CreationTimestamp
   private LocalDateTime createAt;
 

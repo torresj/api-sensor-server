@@ -67,6 +67,19 @@ public class HouseServiceTest {
   }
 
   @Test
+  public void getHousesAll() {
+    //Given
+    List<House> houses = TestUtils.getExampleHouses(3);
+
+    //When
+    when(houseRepository.findAll()).thenReturn(houses);
+    List<House> houseActual = houseService.getHouses();
+
+    //then
+    assertEquals(houses, houseActual);
+  }
+
+  @Test
   public void getHouse() throws EntityNotFoundException {
     //Given
     House house = TestUtils.getExampleHouse(1);

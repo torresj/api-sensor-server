@@ -10,6 +10,8 @@ import com.torresj.apisensorserver.repositories.SensorRepository;
 import com.torresj.apisensorserver.repositories.UserHouseRelationRepository;
 import com.torresj.apisensorserver.repositories.UserRepository;
 import com.torresj.apisensorserver.services.HouseService;
+
+import java.util.List;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,6 +51,14 @@ public class HouseServiceImpl implements HouseService {
     Page<House> page = houseRepository.findAll(pageRequest);
     logger.debug("[HOUSE - SERVICE] Service for getting house end. Houses: {}", page.getContent());
     return page;
+  }
+
+  @Override
+  public List<House> getHouses() {
+    logger.debug("[HOUSE - SERVICE] Service for getting house start");
+    List<House> houses = houseRepository.findAll();
+    logger.debug("[HOUSE - SERVICE] Service for getting house end. Houses: {}", houses);
+    return houses;
   }
 
   @Override
