@@ -5,6 +5,12 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -23,11 +29,7 @@ import com.torresj.apisensorserver.repositories.SensorTypeRepository;
 import com.torresj.apisensorserver.repositories.UserRepository;
 import com.torresj.apisensorserver.repositories.VariableRepository;
 import com.torresj.apisensorserver.repositories.VariableSensorRelationRepository;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Random;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -64,474 +66,482 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = ApiSensorApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2, replace = Replace.ANY)
 @TestPropertySource(locations =
-    "classpath:application-test.properties")
+        "classpath:application-test.properties")
 @ActiveProfiles("test")
 public class StationTest {
 
-  private long variableId;
-  private long sensorId;
+    private long variableId;
 
-  @LocalServerPort
-  private int port;
+    private long sensorId;
 
-  @Autowired
-  private VariableRepository variableRepository;
+    @LocalServerPort
+    private int port;
 
-  @Autowired
-  private SensorRepository sensorRepository;
+    @Autowired
+    private VariableRepository variableRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+    @Autowired
+    private SensorRepository sensorRepository;
 
-  @Autowired
-  private SensorTypeRepository sensorTypeRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-  @Autowired
-  private VariableSensorRelationRepository variableSensorRelationRepository;
+    @Autowired
+    private SensorTypeRepository sensorTypeRepository;
 
-  @Autowired
-  private RecordRepository recordRepository;
+    @Autowired
+    private VariableSensorRelationRepository variableSensorRelationRepository;
 
-  @Autowired
-  private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    private RecordRepository recordRepository;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-  private static String AUTHORIZATION;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  private static final String SENSORS = "v1/sensors";
-  private static final String VARIABLES = "v1/variables";
-  private static final String TYPE = "v1/sensortypes";
+    private static String AUTHORIZATION;
 
-  private static final String RABBITMQ = "tcp://localhost:1883";
-  private static final String MQTT_TOPIC = "mqtt/topic";
-  private static final String MQTT_USER = "mqtt-user";
-  private static final String MQTT_PASSWORD = "mqtt-user";
+    private static final String SENSORS = "v1/sensors";
 
+    private static final String VARIABLES = "v1/variables";
 
-  private final String BASE_URL = "http://localhost:";
-  private final String PATH = "/services/api/";
-  private final String LOGIN = "login";
+    private static final String TYPE = "v1/sensortypes";
 
-  private final int nPage = 0;
-  private final int elements = 20;
+    private static final String RABBITMQ = "tcp://localhost:1883";
 
-  @Before
-  public void setDataBase() throws IOException {
-    clearDB();
+    private static final String MQTT_TOPIC = "mqtt/topic";
 
-    //Create variables
-    Variable variable1 = new Variable(null, "Variable1", "units", "Variable for testing",
-        LocalDateTime.now());
+    private static final String MQTT_USER = "mqtt-user";
 
-    variable1 = variableRepository.save(variable1);
+    private static final String MQTT_PASSWORD = "mqtt-user";
 
-    //Create Sensor type
-    SensorType type1 = new SensorType(null, "type1", "Type for testing",
-        "ACTION1:ACTION2,ACTION3",
-        LocalDateTime.now());
+    private final String BASE_URL = "http://localhost:";
 
-    type1 = sensorTypeRepository.save(type1);
+    private final String PATH = "/services/api/";
 
-    //Create Sensor
-    Sensor sensor1 = new Sensor(null, "Sensor1", type1.getId(), null, "MAC1",
-        "192.168.0.1", "192.168.0.1", LocalDateTime.now(),
-        LocalDateTime.now());
+    private final String LOGIN = "login";
 
-    sensor1 = sensorRepository.save(sensor1);
+    private final int nPage = 0;
 
-    //Create variable - sensor
-    VariableSensorRelation vsRelation1 = new VariableSensorRelation(null, sensor1.getId(),
-        variable1.getId());
+    private final int elements = 20;
 
-    variableSensorRelationRepository.save(vsRelation1);
+    @Before
+    public void setDataBase() throws IOException {
+        clearDB();
 
-    //Create User
-    User user = new User(null, "Station", bCryptPasswordEncoder.encode("test"), Role.STATION,
-        LocalDateTime.now(),
-        LocalDateTime.now(), null, null, null, null, null);
+        //Create variables
+        Variable variable1 = new Variable(null, "Variable1", "units", "Variable for testing",
+                LocalDateTime.now());
 
-    userRepository.save(user);
+        variable1 = variableRepository.save(variable1);
 
-    objectMapper.registerModule(new JavaTimeModule());
+        //Create Sensor type
+        SensorType type1 = new SensorType(null, "type1", "Type for testing",
+                "ACTION1:ACTION2,ACTION3",
+                LocalDateTime.now());
 
-    stationLogin();
+        type1 = sensorTypeRepository.save(type1);
 
-  }
+        //Create Sensor
+        Sensor sensor1 = new Sensor(null, "Sensor1", type1.getId(), null, "MAC1",
+                "192.168.0.1", "192.168.0.1", LocalDateTime.now(),
+                LocalDateTime.now());
 
-  private void clearDB() {
-    variableRepository.deleteAll();
-    sensorRepository.deleteAll();
-    userRepository.deleteAll();
-    sensorTypeRepository.deleteAll();
-    variableSensorRelationRepository.deleteAll();
-    recordRepository.deleteAll();
-  }
+        sensor1 = sensorRepository.save(sensor1);
 
-  private void stationLogin() throws IOException {
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPost httpPost = new HttpPost(BASE_URL + port + PATH + LOGIN);
+        //Create variable - sensor
+        VariableSensorRelation vsRelation1 = new VariableSensorRelation(null, sensor1.getId(),
+                variable1.getId());
 
-    String json = "{\"username\":\"Station\",\"password\":\"test\"}";
-    StringEntity entity = new StringEntity(json);
-    httpPost.setEntity(entity);
-    httpPost.setHeader("Accept", "application/json");
-    httpPost.setHeader("Content-type", "application/json");
+        variableSensorRelationRepository.save(vsRelation1);
 
-    CloseableHttpResponse response = client.execute(httpPost);
-    AUTHORIZATION = response.getFirstHeader("Authorization").getValue();
-  }
+        //Create User
+        User user = new User(null, "Station", bCryptPasswordEncoder.encode("test"), Role.STATION,
+                LocalDateTime.now(),
+                LocalDateTime.now(), null, null, null, null, null);
 
-  @Test
-  public void initStationTestSensorAndVariableExists() throws IOException {
-    //Init sensor with hardware values
-    Sensor sensor = new Sensor();
-    sensor.setPrivateIp("192.168.1.1");
-    sensor.setPublicIp("192.168.1.1");
-    sensor.setMac("MAC1");
-    sensor.setName("test");
+        userRepository.save(user);
 
-    Variable variable = new Variable();
-    variable.setName("Variable1");
+        objectMapper.registerModule(new JavaTimeModule());
 
-    SensorType type = getSensorType("type1");
-    sensor.setSensorTypeId(type.getId());
+        stationLogin();
 
-    Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
-    Variable variableRest = getVariableFromRest(variable.getName());
-
-    variableId = variableRest.getId();
-    sensorId = sensorRest.getId();
-
-    addVariable();
-
-    VariableSensorRelation relation = variableSensorRelationRepository
-        .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
-
-    assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
-    assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
-    assertThat(relation, notNullValue());
-
-  }
-
-  @Test
-  public void initStationTestSenorNotExistsAndVariableExists() throws IOException {
-    //Init sensor with hardware values
-    Sensor sensor = new Sensor();
-    sensor.setPrivateIp("192.168.1.1");
-    sensor.setPublicIp("192.168.1.1");
-    sensor.setMac("00:0a:95:9d:68:16");
-    sensor.setName("test");
-
-    Variable variable = new Variable();
-    variable.setName("Variable1");
-
-    SensorType type = getSensorType("type1");
-    sensor.setSensorTypeId(type.getId());
-
-    Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
-    Variable variableRest = getVariableFromRest(variable.getName());
-
-    variableId = variableRest.getId();
-    sensorId = sensorRest.getId();
-
-    addVariable();
-
-    VariableSensorRelation relation = variableSensorRelationRepository
-        .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
-
-    assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
-    assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
-    assertThat(relation, notNullValue());
-
-  }
-
-  @Test
-  public void initStationTestSenorExistsAndVariableNotExists() throws IOException {
-    //Init sensor with hardware values
-    Sensor sensor = new Sensor();
-    sensor.setPrivateIp("192.168.1.1");
-    sensor.setPublicIp("192.168.1.1");
-    sensor.setMac("MAC1");
-    sensor.setName("test");
-
-    Variable variable = new Variable();
-    variable.setName("VariableTest");
-
-    SensorType type = getSensorType("type1");
-    sensor.setSensorTypeId(type.getId());
-
-    Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
-    Variable variableRest = getVariableFromRest(variable.getName());
-
-    variableId = variableRest.getId();
-    sensorId = sensorRest.getId();
-
-    addVariable();
-
-    VariableSensorRelation relation = variableSensorRelationRepository
-        .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
-
-    assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
-    assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
-    assertThat(relation, notNullValue());
-  }
-
-  @Test
-  public void initStationTestSenorNotExistsAndVariableNotExists() throws IOException {
-    //Init sensor with hardware values
-    Sensor sensor = new Sensor();
-    sensor.setPrivateIp("192.168.1.1");
-    sensor.setPublicIp("192.168.1.1");
-    sensor.setMac("00:0a:95:9d:68:16");
-    sensor.setName("test");
-
-    Variable variable = new Variable();
-    variable.setName("VariableTest");
-
-    SensorType type = getSensorType("type1");
-    sensor.setSensorTypeId(type.getId());
-
-    Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
-    Variable variableRest = getVariableFromRest(variable.getName());
-
-    variableId = variableRest.getId();
-    sensorId = sensorRest.getId();
-
-    addVariable();
-
-    VariableSensorRelation relation = variableSensorRelationRepository
-        .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
-
-    assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
-    assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
-    assertThat(relation, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void sendValidRecord()
-      throws IOException, MqttException, JSONException, InterruptedException {
-    variableId = variableRepository.findByName("Variable1").get().getId();
-    sensorId = sensorRepository.findByMac("MAC1").get().getId();
-
-    Record record = new Record();
-    record.setSensorId(sensorId);
-    record.setVariableId(variableId);
-    record.setDate(LocalDateTime.now());
-    record.setValue(ThreadLocalRandom.current().nextLong(100));
-
-    String jsonString = objectMapper.writeValueAsString(record);
-    JSONObject json = new JSONObject(jsonString);
-    json.put("type", "record");
-    byte[] payload = json.toString().getBytes();
-
-    IMqttClient publisher = connectToRabbitMQ();
-
-    MqttMessage msg = new MqttMessage(payload);
-    msg.setQos(0);
-    msg.setRetained(true);
-    publisher.publish(MQTT_TOPIC, msg);
-
-    Thread.sleep(1000);
-
-    Record recordDB = recordRepository
-        .findBySensorIdAndVariableIdAndDate(sensorId, variableId, record.getDate()).orElse(null);
-    assertThat(recordDB, notNullValue());
-  }
-
-  @Test
-  @Ignore
-  public void sendInvalidRecord()
-      throws IOException, MqttException, JSONException, InterruptedException {
-
-    Record record = new Record();
-    record.setSensorId(new Random().nextLong());
-    record.setVariableId(new Random().nextLong());
-    record.setDate(LocalDateTime.now());
-    record.setValue(ThreadLocalRandom.current().nextLong(100));
-
-    String jsonString = objectMapper.writeValueAsString(record);
-    JSONObject json = new JSONObject(jsonString);
-    json.put("type", "record");
-    byte[] payload = json.toString().getBytes();
-
-    IMqttClient publisher = connectToRabbitMQ();
-
-    MqttMessage msg = new MqttMessage(payload);
-    msg.setQos(0);
-    msg.setRetained(true);
-    publisher.publish(MQTT_TOPIC, msg);
-
-    Thread.sleep(1000);
-
-    Record recordDB = recordRepository
-        .findBySensorIdAndVariableIdAndDate(record.getSensorId(), record.getVariableId(),
-            record.getDate()).orElse(null);
-    assertThat(recordDB, nullValue());
-  }
-
-  private SensorType getSensorType(String typeName) throws IOException {
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + TYPE + "?page=" + nPage + "&elements=" + elements
-            + "&name=" + typeName);
-
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", AUTHORIZATION);
-
-    CloseableHttpResponse response = client.execute(httpGet);
-
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
-
-    Page<SensorType> page = objectMapper
-        .readValue(jsonFromResponse, new TypeReference<RestPage<SensorType>>() {
-        });
-
-    client.close();
-    if (page.getContent().isEmpty()) {
-      return null;
-    } else {
-      return page.getContent().get(0);
     }
-  }
 
-  private Sensor RegisterOrUpdateSensorFromRest(Sensor sensor) throws IOException {
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPost httpPost = new HttpPost(
-        BASE_URL + port + PATH + SENSORS);
-
-    httpPost.setHeader("Content-type", "application/json");
-    httpPost.setHeader("Authorization", AUTHORIZATION);
-
-    String json = objectMapper.writeValueAsString(sensor);
-    StringEntity entity = new StringEntity(json);
-
-    httpPost.setEntity(entity);
-
-    CloseableHttpResponse response = client.execute(httpPost);
-
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
-
-    Sensor sensorRest = objectMapper
-        .readValue(jsonFromResponse, Sensor.class);
-
-    client.close();
-
-    if (response.getStatusLine().getStatusCode() == 201) {
-      return sensorRest;
-    } else if (response.getStatusLine().getStatusCode() == 202) {
-      sensorRest.setPublicIp(sensor.getPublicIp());
-      return updateSensor(sensorRest);
-    } else {
-      return null;
+    private void clearDB() {
+        variableRepository.deleteAll();
+        sensorRepository.deleteAll();
+        userRepository.deleteAll();
+        sensorTypeRepository.deleteAll();
+        variableSensorRelationRepository.deleteAll();
+        recordRepository.deleteAll();
     }
-  }
 
-  private Sensor updateSensor(Sensor sensor) throws IOException {
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPut httpPut = new HttpPut(
-        BASE_URL + port + PATH + SENSORS);
+    private void stationLogin() throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(BASE_URL + port + PATH + LOGIN);
 
-    httpPut.setHeader("Content-type", "application/json");
-    httpPut.setHeader("Authorization", AUTHORIZATION);
+        String json = "{\"username\":\"Station\",\"password\":\"test\"}";
+        StringEntity entity = new StringEntity(json);
+        httpPost.setEntity(entity);
+        httpPost.setHeader("Accept", "application/json");
+        httpPost.setHeader("Content-type", "application/json");
 
-    String json = objectMapper.writeValueAsString(sensor);
-    StringEntity entity = new StringEntity(json);
-
-    httpPut.setEntity(entity);
-
-    CloseableHttpResponse response = client.execute(httpPut);
-
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
-
-    Sensor sensorRest = objectMapper
-        .readValue(jsonFromResponse, Sensor.class);
-
-    client.close();
-
-    return sensorRest;
-  }
-
-  private Variable getVariableFromRest(String name) throws IOException {
-    Variable variableRest;
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + VARIABLES + "?page=" + nPage + "&elements=" + elements
-            + "&name=" + name);
-
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", AUTHORIZATION);
-
-    CloseableHttpResponse response = client.execute(httpGet);
-
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
-
-    Page<Variable> page = objectMapper
-        .readValue(jsonFromResponse, new TypeReference<RestPage<Variable>>() {
-        });
-
-    if (page.getContent().isEmpty()) {
-      variableRest = registerVariable(name);
-    } else {
-      variableRest = page.getContent().get(0);
+        CloseableHttpResponse response = client.execute(httpPost);
+        AUTHORIZATION = response.getFirstHeader("Authorization").getValue();
     }
-    client.close();
-    return variableRest;
-  }
 
-  private Variable registerVariable(String name)
-      throws IOException {
-    Variable variable = new Variable();
-    variable.setName(name);
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPost httpPost = new HttpPost(
-        BASE_URL + port + PATH + VARIABLES);
+    @Test
+    public void initStationTestSensorAndVariableExists() throws IOException {
+        //Init sensor with hardware values
+        Sensor sensor = new Sensor();
+        sensor.setPrivateIp("192.168.1.1");
+        sensor.setPublicIp("192.168.1.1");
+        sensor.setMac("MAC1");
+        sensor.setName("test");
 
-    httpPost.setHeader("Content-type", "application/json");
-    httpPost.setHeader("Authorization", AUTHORIZATION);
+        Variable variable = new Variable();
+        variable.setName("Variable1");
 
-    String json = objectMapper.writeValueAsString(variable);
-    StringEntity entity = new StringEntity(json);
+        SensorType type = getSensorType("type1");
+        sensor.setSensorTypeId(type.getId());
 
-    httpPost.setEntity(entity);
+        Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
+        Variable variableRest = getVariableFromRest(variable.getName());
 
-    CloseableHttpResponse response = client.execute(httpPost);
+        variableId = variableRest.getId();
+        sensorId = sensorRest.getId();
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        addVariable();
 
-    Variable variableRest = objectMapper
-        .readValue(jsonFromResponse, Variable.class);
+        VariableSensorRelation relation = variableSensorRelationRepository
+                .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
 
-    client.close();
+        assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
+        assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
+        assertThat(relation, notNullValue());
 
-    return variableRest;
-  }
+    }
 
-  private void addVariable() throws IOException {
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPut httpPut = new HttpPut(
-        BASE_URL + port + PATH + SENSORS + "/" + sensorId + "/variables/" + variableId);
+    @Test
+    public void initStationTestSenorNotExistsAndVariableExists() throws IOException {
+        //Init sensor with hardware values
+        Sensor sensor = new Sensor();
+        sensor.setPrivateIp("192.168.1.1");
+        sensor.setPublicIp("192.168.1.1");
+        sensor.setMac("00:0a:95:9d:68:16");
+        sensor.setName("test");
 
-    httpPut.setHeader("Content-type", "application/json");
-    httpPut.setHeader("Authorization", AUTHORIZATION);
+        Variable variable = new Variable();
+        variable.setName("Variable1");
 
-    client.execute(httpPut);
-  }
+        SensorType type = getSensorType("type1");
+        sensor.setSensorTypeId(type.getId());
 
-  private IMqttClient connectToRabbitMQ() throws MqttException {
-    String publisherId = UUID.randomUUID().toString();
-    IMqttClient publisher = new MqttClient(RABBITMQ, publisherId);
+        Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
+        Variable variableRest = getVariableFromRest(variable.getName());
 
-    MqttConnectOptions options = new MqttConnectOptions();
-    options.setAutomaticReconnect(true);
-    options.setCleanSession(true);
-    options.setConnectionTimeout(10);
-    options.setUserName(MQTT_USER);
-    options.setPassword(MQTT_PASSWORD.toCharArray());
-    publisher.connect(options);
+        variableId = variableRest.getId();
+        sensorId = sensorRest.getId();
 
-    return publisher;
-  }
+        addVariable();
+
+        VariableSensorRelation relation = variableSensorRelationRepository
+                .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
+
+        assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
+        assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
+        assertThat(relation, notNullValue());
+
+    }
+
+    @Test
+    public void initStationTestSenorExistsAndVariableNotExists() throws IOException {
+        //Init sensor with hardware values
+        Sensor sensor = new Sensor();
+        sensor.setPrivateIp("192.168.1.1");
+        sensor.setPublicIp("192.168.1.1");
+        sensor.setMac("MAC1");
+        sensor.setName("test");
+
+        Variable variable = new Variable();
+        variable.setName("VariableTest");
+
+        SensorType type = getSensorType("type1");
+        sensor.setSensorTypeId(type.getId());
+
+        Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
+        Variable variableRest = getVariableFromRest(variable.getName());
+
+        variableId = variableRest.getId();
+        sensorId = sensorRest.getId();
+
+        addVariable();
+
+        VariableSensorRelation relation = variableSensorRelationRepository
+                .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
+
+        assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
+        assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
+        assertThat(relation, notNullValue());
+    }
+
+    @Test
+    public void initStationTestSenorNotExistsAndVariableNotExists() throws IOException {
+        //Init sensor with hardware values
+        Sensor sensor = new Sensor();
+        sensor.setPrivateIp("192.168.1.1");
+        sensor.setPublicIp("192.168.1.1");
+        sensor.setMac("00:0a:95:9d:68:16");
+        sensor.setName("test");
+
+        Variable variable = new Variable();
+        variable.setName("VariableTest");
+
+        SensorType type = getSensorType("type1");
+        sensor.setSensorTypeId(type.getId());
+
+        Sensor sensorRest = RegisterOrUpdateSensorFromRest(sensor);
+        Variable variableRest = getVariableFromRest(variable.getName());
+
+        variableId = variableRest.getId();
+        sensorId = sensorRest.getId();
+
+        addVariable();
+
+        VariableSensorRelation relation = variableSensorRelationRepository
+                .findBySensorIdAndVariableId(sensorId, variableId).orElse(null);
+
+        assertThat(sensorRest, equalTo(sensorRepository.findByMac(sensor.getMac()).get()));
+        assertThat(variableRest, equalTo(variableRepository.findByName(variable.getName()).get()));
+        assertThat(relation, notNullValue());
+    }
+
+    @Test
+    @Ignore
+    public void sendValidRecord()
+            throws IOException, MqttException, JSONException, InterruptedException {
+        variableId = variableRepository.findByName("Variable1").get().getId();
+        sensorId = sensorRepository.findByMac("MAC1").get().getId();
+
+        Record record = new Record();
+        record.setSensorId(sensorId);
+        record.setVariableId(variableId);
+        record.setDate(LocalDateTime.now());
+        record.setValue(ThreadLocalRandom.current().nextLong(100));
+
+        String jsonString = objectMapper.writeValueAsString(record);
+        JSONObject json = new JSONObject(jsonString);
+        json.put("type", "record");
+        byte[] payload = json.toString().getBytes();
+
+        IMqttClient publisher = connectToRabbitMQ();
+
+        MqttMessage msg = new MqttMessage(payload);
+        msg.setQos(0);
+        msg.setRetained(true);
+        publisher.publish(MQTT_TOPIC, msg);
+
+        Thread.sleep(1000);
+
+        Record recordDB = recordRepository
+                .findBySensorIdAndVariableIdAndDate(sensorId, variableId, record.getDate()).orElse(null);
+        assertThat(recordDB, notNullValue());
+    }
+
+    @Test
+    @Ignore
+    public void sendInvalidRecord()
+            throws IOException, MqttException, JSONException, InterruptedException {
+
+        Record record = new Record();
+        record.setSensorId(new Random().nextLong());
+        record.setVariableId(new Random().nextLong());
+        record.setDate(LocalDateTime.now());
+        record.setValue(ThreadLocalRandom.current().nextLong(100));
+
+        String jsonString = objectMapper.writeValueAsString(record);
+        JSONObject json = new JSONObject(jsonString);
+        json.put("type", "record");
+        byte[] payload = json.toString().getBytes();
+
+        IMqttClient publisher = connectToRabbitMQ();
+
+        MqttMessage msg = new MqttMessage(payload);
+        msg.setQos(0);
+        msg.setRetained(true);
+        publisher.publish(MQTT_TOPIC, msg);
+
+        Thread.sleep(1000);
+
+        Record recordDB = recordRepository
+                .findBySensorIdAndVariableIdAndDate(record.getSensorId(), record.getVariableId(),
+                        record.getDate()).orElse(null);
+        assertThat(recordDB, nullValue());
+    }
+
+    private SensorType getSensorType(String typeName) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + TYPE + "?page=" + nPage + "&elements=" + elements
+                        + "&name=" + typeName);
+
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", AUTHORIZATION);
+
+        CloseableHttpResponse response = client.execute(httpGet);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        Page<SensorType> page = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<RestPage<SensorType>>() {
+                });
+
+        client.close();
+        if (page.getContent().isEmpty()) {
+            return null;
+        } else {
+            return page.getContent().get(0);
+        }
+    }
+
+    private Sensor RegisterOrUpdateSensorFromRest(Sensor sensor) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(
+                BASE_URL + port + PATH + SENSORS);
+
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", AUTHORIZATION);
+
+        String json = objectMapper.writeValueAsString(sensor);
+        StringEntity entity = new StringEntity(json);
+
+        httpPost.setEntity(entity);
+
+        CloseableHttpResponse response = client.execute(httpPost);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        Sensor sensorRest = objectMapper
+                .readValue(jsonFromResponse, Sensor.class);
+
+        client.close();
+
+        if (response.getStatusLine().getStatusCode() == 201) {
+            return sensorRest;
+        } else if (response.getStatusLine().getStatusCode() == 202) {
+            sensorRest.setPublicIp(sensor.getPublicIp());
+            return updateSensor(sensorRest);
+        } else {
+            return null;
+        }
+    }
+
+    private Sensor updateSensor(Sensor sensor) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(
+                BASE_URL + port + PATH + SENSORS);
+
+        httpPut.setHeader("Content-type", "application/json");
+        httpPut.setHeader("Authorization", AUTHORIZATION);
+
+        String json = objectMapper.writeValueAsString(sensor);
+        StringEntity entity = new StringEntity(json);
+
+        httpPut.setEntity(entity);
+
+        CloseableHttpResponse response = client.execute(httpPut);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        Sensor sensorRest = objectMapper
+                .readValue(jsonFromResponse, Sensor.class);
+
+        client.close();
+
+        return sensorRest;
+    }
+
+    private Variable getVariableFromRest(String name) throws IOException {
+        Variable variableRest;
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + VARIABLES + "?page=" + nPage + "&elements=" + elements
+                        + "&name=" + name);
+
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", AUTHORIZATION);
+
+        CloseableHttpResponse response = client.execute(httpGet);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        Page<Variable> page = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<RestPage<Variable>>() {
+                });
+
+        if (page.getContent().isEmpty()) {
+            variableRest = registerVariable(name);
+        } else {
+            variableRest = page.getContent().get(0);
+        }
+        client.close();
+        return variableRest;
+    }
+
+    private Variable registerVariable(String name)
+            throws IOException {
+        Variable variable = new Variable();
+        variable.setName(name);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(
+                BASE_URL + port + PATH + VARIABLES);
+
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", AUTHORIZATION);
+
+        String json = objectMapper.writeValueAsString(variable);
+        StringEntity entity = new StringEntity(json);
+
+        httpPost.setEntity(entity);
+
+        CloseableHttpResponse response = client.execute(httpPost);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        Variable variableRest = objectMapper
+                .readValue(jsonFromResponse, Variable.class);
+
+        client.close();
+
+        return variableRest;
+    }
+
+    private void addVariable() throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(
+                BASE_URL + port + PATH + SENSORS + "/" + sensorId + "/variables/" + variableId);
+
+        httpPut.setHeader("Content-type", "application/json");
+        httpPut.setHeader("Authorization", AUTHORIZATION);
+
+        client.execute(httpPut);
+    }
+
+    private IMqttClient connectToRabbitMQ() throws MqttException {
+        String publisherId = UUID.randomUUID().toString();
+        IMqttClient publisher = new MqttClient(RABBITMQ, publisherId);
+
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setAutomaticReconnect(true);
+        options.setCleanSession(true);
+        options.setConnectionTimeout(10);
+        options.setUserName(MQTT_USER);
+        options.setPassword(MQTT_PASSWORD.toCharArray());
+        publisher.connect(options);
+
+        return publisher;
+    }
 }

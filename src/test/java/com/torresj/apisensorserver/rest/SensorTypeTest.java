@@ -4,11 +4,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.torresj.apisensorserver.jackson.RestPage;
 import com.torresj.apisensorserver.models.entities.SensorType;
-import java.io.IOException;
-import java.time.LocalDateTime;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -24,323 +26,323 @@ import org.springframework.data.domain.Page;
 
 public class SensorTypeTest extends BasicRestTest {
 
-  //SensorType Controller
-  private final String TYPE = "v1/sensortypes";
+    //SensorType Controller
+    private final String TYPE = "v1/sensortypes";
 
-  @AfterClass
-  public static void ChangeSetUp() {
-    SetUpFalse();
-  }
-
-  @Test
-  public void getAllSensorTypesAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+    @AfterClass
+    public static void ChangeSetUp() {
+        SetUpFalse();
     }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + TYPE + "?page=" + nPage + "&elements=" + elements);
+    @Test
+    public void getAllSensorTypesAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + TYPE + "?page=" + nPage + "&elements=" + elements);
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    Page<SensorType> page = objectMapper
-        .readValue(jsonFromResponse, new TypeReference<RestPage<SensorType>>() {
-        });
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(page.getContent().size(), equalTo(2));
+        Page<SensorType> page = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<RestPage<SensorType>>() {
+                });
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(page.getContent().size(), equalTo(2));
 
-  @Test
-  public void getAllSensorTypesAsUser() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + TYPE + "?page=" + nPage + "&elements=" + elements);
+    @Test
+    public void getAllSensorTypesAsUser() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + TYPE + "?page=" + nPage + "&elements=" + elements);
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    Page<SensorType> page = objectMapper
-        .readValue(jsonFromResponse, new TypeReference<RestPage<SensorType>>() {
-        });
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(page.getContent().size(), equalTo(3));
+        Page<SensorType> page = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<RestPage<SensorType>>() {
+                });
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(page.getContent().size(), equalTo(3));
 
-  @Test
-  public void getSensorTypeByIdAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    SensorType type = sensorTypeRepository.findByName("type1").get();
+    @Test
+    public void getSensorTypeByIdAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + TYPE + "/" + type.getId());
+        SensorType type = sensorTypeRepository.findByName("type1").get();
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + TYPE + "/" + type.getId());
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    SensorType responseType = objectMapper
-        .readValue(jsonFromResponse, SensorType.class);
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(responseType, equalTo(type));
+        SensorType responseType = objectMapper
+                .readValue(jsonFromResponse, SensorType.class);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(responseType, equalTo(type));
 
-  @Test
-  public void getSensorTypeByIdAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    SensorType type = sensorTypeRepository.findByName("type1").get();
+    @Test
+    public void getSensorTypeByIdAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + TYPE + "/" + type.getId());
+        SensorType type = sensorTypeRepository.findByName("type1").get();
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + TYPE + "/" + type.getId());
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationUser);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    SensorType responseType = objectMapper
-        .readValue(jsonFromResponse, SensorType.class);
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(responseType, equalTo(type));
+        SensorType responseType = objectMapper
+                .readValue(jsonFromResponse, SensorType.class);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(responseType, equalTo(type));
 
-  @Test
-  public void createSensorTypeAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    SensorType type = new SensorType(null, "type3", "Type for testing",
-        "ACTION1:ACTION2,ACTION3",
-        LocalDateTime.now());
+    @Test
+    public void createSensorTypeAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPost httpPost = new HttpPost(
-        BASE_URL + port + PATH + TYPE);
+        SensorType type = new SensorType(null, "type3", "Type for testing",
+                "ACTION1:ACTION2,ACTION3",
+                LocalDateTime.now());
 
-    httpPost.setHeader("Content-type", "application/json");
-    httpPost.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(
+                BASE_URL + port + PATH + TYPE);
 
-    String json = objectMapper.writeValueAsString(type);
-    StringEntity entity = new StringEntity(json);
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", authorizationAdmin);
 
-    httpPost.setEntity(entity);
+        String json = objectMapper.writeValueAsString(type);
+        StringEntity entity = new StringEntity(json);
 
-    CloseableHttpResponse response = client.execute(httpPost);
+        httpPost.setEntity(entity);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpPost);
 
-    SensorType responseType = objectMapper
-        .readValue(jsonFromResponse, SensorType.class);
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(201));
-    assertThat(responseType, notNullValue());
-    assertThat(sensorTypeRepository.findByName("type3"), notNullValue());
+        SensorType responseType = objectMapper
+                .readValue(jsonFromResponse, SensorType.class);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(201));
+        assertThat(responseType, notNullValue());
+        assertThat(sensorTypeRepository.findByName("type3"), notNullValue());
 
-  @Test
-  public void createSensorTypeAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    SensorType type = new SensorType(null, "type3", "Type for testing",
-        "ACTION1:ACTION2,ACTION3",
-        LocalDateTime.now());
+    @Test
+    public void createSensorTypeAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPost httpPost = new HttpPost(
-        BASE_URL + port + PATH + TYPE);
+        SensorType type = new SensorType(null, "type3", "Type for testing",
+                "ACTION1:ACTION2,ACTION3",
+                LocalDateTime.now());
 
-    httpPost.setHeader("Content-type", "application/json");
-    httpPost.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(
+                BASE_URL + port + PATH + TYPE);
 
-    String json = objectMapper.writeValueAsString(type);
-    StringEntity entity = new StringEntity(json);
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", authorizationUser);
 
-    httpPost.setEntity(entity);
+        String json = objectMapper.writeValueAsString(type);
+        StringEntity entity = new StringEntity(json);
 
-    CloseableHttpResponse response = client.execute(httpPost);
+        httpPost.setEntity(entity);
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+        CloseableHttpResponse response = client.execute(httpPost);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
 
-  @Test
-  public void updateSensorTypeByIdAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    SensorType type = sensorTypeRepository.findByName("type1").get();
-    type.setDescription("Description modified");
+    @Test
+    public void updateSensorTypeByIdAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPut httpPut = new HttpPut(
-        BASE_URL + port + PATH + TYPE);
+        SensorType type = sensorTypeRepository.findByName("type1").get();
+        type.setDescription("Description modified");
 
-    httpPut.setHeader("Content-type", "application/json");
-    httpPut.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(
+                BASE_URL + port + PATH + TYPE);
 
-    String json = objectMapper.writeValueAsString(type);
-    StringEntity entity = new StringEntity(json);
+        httpPut.setHeader("Content-type", "application/json");
+        httpPut.setHeader("Authorization", authorizationAdmin);
 
-    httpPut.setEntity(entity);
+        String json = objectMapper.writeValueAsString(type);
+        StringEntity entity = new StringEntity(json);
 
-    CloseableHttpResponse response = client.execute(httpPut);
+        httpPut.setEntity(entity);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpPut);
 
-    SensorType responseType = objectMapper
-        .readValue(jsonFromResponse, SensorType.class);
-    SensorType typeModified = sensorTypeRepository.findByName("type1").get();
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(responseType, equalTo(typeModified));
-    assertThat(responseType.getDescription(), equalTo("Description modified"));
+        SensorType responseType = objectMapper
+                .readValue(jsonFromResponse, SensorType.class);
+        SensorType typeModified = sensorTypeRepository.findByName("type1").get();
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(responseType, equalTo(typeModified));
+        assertThat(responseType.getDescription(), equalTo("Description modified"));
 
-  @Test
-  public void updateSensorTypeByIdAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    SensorType type = sensorTypeRepository.findByName("type1").get();
+    @Test
+    public void updateSensorTypeByIdAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPut httpPut = new HttpPut(
-        BASE_URL + port + PATH + TYPE);
+        SensorType type = sensorTypeRepository.findByName("type1").get();
 
-    httpPut.setHeader("Content-type", "application/json");
-    httpPut.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(
+                BASE_URL + port + PATH + TYPE);
 
-    String json = objectMapper.writeValueAsString(type);
-    StringEntity entity = new StringEntity(json);
+        httpPut.setHeader("Content-type", "application/json");
+        httpPut.setHeader("Authorization", authorizationUser);
 
-    httpPut.setEntity(entity);
+        String json = objectMapper.writeValueAsString(type);
+        StringEntity entity = new StringEntity(json);
 
-    CloseableHttpResponse response = client.execute(httpPut);
+        httpPut.setEntity(entity);
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+        CloseableHttpResponse response = client.execute(httpPut);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
 
-  @Test
-  public void deleteSensorTypeByIdAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    SensorType type = sensorTypeRepository.findByName("type3").get();
+    @Test
+    public void deleteSensorTypeByIdAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpDelete httpDelete = new HttpDelete(
-        BASE_URL + port + PATH + TYPE + "/" + type.getId());
+        SensorType type = sensorTypeRepository.findByName("type3").get();
 
-    httpDelete.setHeader("Content-type", "application/json");
-    httpDelete.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpDelete httpDelete = new HttpDelete(
+                BASE_URL + port + PATH + TYPE + "/" + type.getId());
 
-    CloseableHttpResponse response = client.execute(httpDelete);
+        httpDelete.setHeader("Content-type", "application/json");
+        httpDelete.setHeader("Authorization", authorizationAdmin);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpDelete);
 
-    SensorType responseType = objectMapper
-        .readValue(jsonFromResponse, SensorType.class);
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(responseType, equalTo(type));
-    assertThat(sensorTypeRepository.findById(type.getId()).isPresent(), equalTo(false));
+        SensorType responseType = objectMapper
+                .readValue(jsonFromResponse, SensorType.class);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(responseType, equalTo(type));
+        assertThat(sensorTypeRepository.findById(type.getId()).isPresent(), equalTo(false));
 
-  @Test
-  public void deleteSensorTypeByIdAsAdminWithSensorRelation() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    SensorType type = sensorTypeRepository.findByName("type1").get();
+    @Test
+    public void deleteSensorTypeByIdAsAdminWithSensorRelation() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpDelete httpDelete = new HttpDelete(
-        BASE_URL + port + PATH + TYPE + "/" + type.getId());
+        SensorType type = sensorTypeRepository.findByName("type1").get();
 
-    httpDelete.setHeader("Content-type", "application/json");
-    httpDelete.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpDelete httpDelete = new HttpDelete(
+                BASE_URL + port + PATH + TYPE + "/" + type.getId());
 
-    CloseableHttpResponse response = client.execute(httpDelete);
+        httpDelete.setHeader("Content-type", "application/json");
+        httpDelete.setHeader("Authorization", authorizationAdmin);
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(404));
+        CloseableHttpResponse response = client.execute(httpDelete);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(404));
 
-  @Test
-  public void deleteSensorTypeByIdAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    SensorType type = sensorTypeRepository.findByName("type2").get();
+    @Test
+    public void deleteSensorTypeByIdAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpDelete httpDelete = new HttpDelete(
-        BASE_URL + port + PATH + TYPE + "/" + type.getId());
+        SensorType type = sensorTypeRepository.findByName("type2").get();
 
-    httpDelete.setHeader("Content-type", "application/json");
-    httpDelete.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpDelete httpDelete = new HttpDelete(
+                BASE_URL + port + PATH + TYPE + "/" + type.getId());
 
-    CloseableHttpResponse response = client.execute(httpDelete);
+        httpDelete.setHeader("Content-type", "application/json");
+        httpDelete.setHeader("Authorization", authorizationUser);
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
-    client.close();
-  }
+        CloseableHttpResponse response = client.execute(httpDelete);
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+        client.close();
+    }
 }
 
 

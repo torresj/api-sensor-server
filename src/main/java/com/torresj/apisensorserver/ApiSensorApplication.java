@@ -10,9 +10,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan("com.torresj.apisensorserver.models.entities")
 public class ApiSensorApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(ApiSensorApplication.class, args);
+    public static void main(String[] args) {
+        SpringApplication.run(ApiSensorApplication.class, args);
 
-  }
+    }
 
 }

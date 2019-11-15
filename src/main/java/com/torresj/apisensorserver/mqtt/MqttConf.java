@@ -15,52 +15,52 @@ import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 @Configuration
 public class MqttConf {
 
-  private MqttConsumer mqttConsumer;
+    private MqttConsumer mqttConsumer;
 
-  @Value("${spring.rabbitmq.host}")
-  private String host;
+    @Value("${spring.rabbitmq.host}")
+    private String host;
 
-  @Value("${spring.rabbitmq.mqtt.port}")
-  private String port;
+    @Value("${spring.rabbitmq.mqtt.port}")
+    private String port;
 
-  @Value("${spring.rabbitmq.mqtt.topic}")
-  private String topic;
+    @Value("${spring.rabbitmq.mqtt.topic}")
+    private String topic;
 
-  @Value("${spring.rabbitmq.username}")
-  private String user;
+    @Value("${spring.rabbitmq.username}")
+    private String user;
 
-  @Value("${spring.rabbitmq.password}")
-  private String pass;
+    @Value("${spring.rabbitmq.password}")
+    private String pass;
 
-  public MqttConf(MqttConsumer mqttConsumer) {
-    this.mqttConsumer = mqttConsumer;
-  }
+    public MqttConf(MqttConsumer mqttConsumer) {
+        this.mqttConsumer = mqttConsumer;
+    }
 
-  @Bean
-  public MqttPahoClientFactory mqttClientFactory() {
-    DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
-    MqttConnectOptions options = new MqttConnectOptions();
-    options.setServerURIs(new String[]{"tcp://" + host + ":" + port});
-    options.setUserName(user);
-    options.setPassword(pass.toCharArray());
-    factory.setConnectionOptions(options);
-    return factory;
-  }
+    @Bean
+    public MqttPahoClientFactory mqttClientFactory() {
+        DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setServerURIs(new String[] { "tcp://" + host + ":" + port });
+        options.setUserName(user);
+        options.setPassword(pass.toCharArray());
+        factory.setConnectionOptions(options);
+        return factory;
+    }
 
-  @Bean
-  public IntegrationFlow mqttInFlow() {
-    return IntegrationFlows.from(mqttInbound()).transform(p -> p)
-        .handle(mqttConsumer, "messageHandler").get();
-  }
+    @Bean
+    public IntegrationFlow mqttInFlow() {
+        return IntegrationFlows.from(mqttInbound()).transform(p -> p)
+                .handle(mqttConsumer, "messageHandler").get();
+    }
 
-  @Bean
-  public MessageProducerSupport mqttInbound() {
-    MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-        "mqttServer",
-        mqttClientFactory(), topic);
-    adapter.setCompletionTimeout(5000);
-    adapter.setConverter(new DefaultPahoMessageConverter());
-    adapter.setQos(1);
-    return adapter;
-  }
+    @Bean
+    public MessageProducerSupport mqttInbound() {
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
+                "mqttServer",
+                mqttClientFactory(), topic);
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        return adapter;
+    }
 }

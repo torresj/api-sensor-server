@@ -7,16 +7,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Component
 public class InterceptorAppConfig implements WebMvcConfigurer {
 
-  private LogHandlerInterceptor logHandlerInterceptor;
+    private LogHandlerInterceptor logHandlerInterceptor;
 
-  public InterceptorAppConfig(
-      LogHandlerInterceptor logHandlerInterceptor) {
-    this.logHandlerInterceptor = logHandlerInterceptor;
-  }
+    public InterceptorAppConfig(
+            LogHandlerInterceptor logHandlerInterceptor) {
+        this.logHandlerInterceptor = logHandlerInterceptor;
+    }
 
-  @Override
-  public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(logHandlerInterceptor);
-  }
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(logHandlerInterceptor);
+    }
 
 }

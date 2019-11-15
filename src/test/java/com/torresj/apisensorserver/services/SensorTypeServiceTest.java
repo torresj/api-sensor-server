@@ -5,6 +5,11 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
@@ -14,10 +19,7 @@ import com.torresj.apisensorserver.repositories.SensorRepository;
 import com.torresj.apisensorserver.repositories.SensorTypeRepository;
 import com.torresj.apisensorserver.services.impl.SensorTypeServiceImpl;
 import com.torresj.apisensorserver.utils.TestUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -31,170 +33,172 @@ import org.springframework.data.domain.Sort;
 @RunWith(MockitoJUnitRunner.class)
 public class SensorTypeServiceTest {
 
-  @Mock
-  private SensorTypeRepository sensorTypeRepository;
+    @Mock
+    private SensorTypeRepository sensorTypeRepository;
 
-  @Mock
-  private SensorRepository sensorRepository;
+    @Mock
+    private SensorRepository sensorRepository;
 
-  private static final int nPage = 0;
-  private static final int elements = 20;
-  private static final PageRequest pageRequest = PageRequest
-      .of(nPage, elements, Sort.by("createAt").descending());
+    private static final int nPage = 0;
 
-  @InjectMocks
-  private SensorTypeService sensorTypeService = new SensorTypeServiceImpl(sensorTypeRepository,
-      sensorRepository);
+    private static final int elements = 20;
 
-  @Test
-  public void getSensorTypes() {
-    //Given
-    List<SensorType> sensorsType = new ArrayList<>(Arrays
-        .asList(TestUtils.getExampleSensorType(1), TestUtils.getExampleSensorType(2),
-            TestUtils.getExampleSensorType(3)));
+    private static final PageRequest pageRequest = PageRequest
+            .of(nPage, elements, Sort.by("createAt").descending());
 
-    //When
-    when(sensorTypeRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(sensorsType));
-    List<SensorType> variableActual = new ArrayList<>(
-        sensorTypeService.getSensorTypes(nPage, elements).getContent());
+    @InjectMocks
+    private SensorTypeService sensorTypeService = new SensorTypeServiceImpl(sensorTypeRepository,
+            sensorRepository);
 
-    //then
-    assertEquals(sensorsType, variableActual);
-  }
+    @Test
+    public void getSensorTypes() {
+        //Given
+        List<SensorType> sensorsType = new ArrayList<>(Arrays
+                .asList(TestUtils.getExampleSensorType(1), TestUtils.getExampleSensorType(2),
+                        TestUtils.getExampleSensorType(3)));
 
-  @Test
-  public void getSensorTypeEmptyList() {
-    //When
-    when(sensorTypeRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(new ArrayList<>()));
-    Page<SensorType> page = sensorTypeService.getSensorTypes(nPage, elements);
+        //When
+        when(sensorTypeRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(sensorsType));
+        List<SensorType> variableActual = new ArrayList<>(
+                sensorTypeService.getSensorTypes(nPage, elements).getContent());
 
-    //then
-    assertEquals(true, page.getContent().isEmpty());
-  }
+        //then
+        assertEquals(sensorsType, variableActual);
+    }
 
-  @Test
-  public void getSensorType() throws EntityNotFoundException {
-    //Given
-    SensorType sensorType = TestUtils.getExampleSensorType(1);
-    SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
+    @Test
+    public void getSensorTypeEmptyList() {
+        //When
+        when(sensorTypeRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(new ArrayList<>()));
+        Page<SensorType> page = sensorTypeService.getSensorTypes(nPage, elements);
 
-    //When
-    when(sensorTypeRepository.findById(anyLong())).thenReturn(Optional.of(sensorType));
-    SensorType sensorTypeActual = sensorTypeService.getSensorType(1);
+        //then
+        assertEquals(true, page.getContent().isEmpty());
+    }
 
-    //Then
-    assertEquals(sensorTypeExpected.getName(), sensorTypeActual.getName());
-    assertEquals(sensorTypeExpected.getId(), sensorTypeActual.getId());
-    assertEquals(sensorTypeExpected.getDescription(), sensorTypeActual.getDescription());
-    assertEquals(sensorTypeExpected.getActions(), sensorTypeActual.getActions());
-  }
+    @Test
+    public void getSensorType() throws EntityNotFoundException {
+        //Given
+        SensorType sensorType = TestUtils.getExampleSensorType(1);
+        SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
 
-  @Test(expected = EntityNotFoundException.class)
-  public void getSensorTypeEntityNotFound() throws EntityNotFoundException {
-    //When
-    sensorTypeService.getSensorType(1);
-  }
+        //When
+        when(sensorTypeRepository.findById(anyLong())).thenReturn(Optional.of(sensorType));
+        SensorType sensorTypeActual = sensorTypeService.getSensorType(1);
 
-  @Test
-  public void register() throws EntityAlreadyExistsException {
-    //Given
-    SensorType sensorType = TestUtils.getExampleSensorType(1);
-    SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
+        //Then
+        assertEquals(sensorTypeExpected.getName(), sensorTypeActual.getName());
+        assertEquals(sensorTypeExpected.getId(), sensorTypeActual.getId());
+        assertEquals(sensorTypeExpected.getDescription(), sensorTypeActual.getDescription());
+        assertEquals(sensorTypeExpected.getActions(), sensorTypeActual.getActions());
+    }
 
-    //When
-    when(sensorTypeRepository.save(sensorType)).thenReturn(sensorType);
-    SensorType sensorTypeActual = sensorTypeService.register(sensorType);
+    @Test(expected = EntityNotFoundException.class)
+    public void getSensorTypeEntityNotFound() throws EntityNotFoundException {
+        //When
+        sensorTypeService.getSensorType(1);
+    }
 
-    //Then
-    assertEquals(sensorTypeExpected.getName(), sensorTypeActual.getName());
-    assertEquals(sensorTypeExpected.getId(), sensorTypeActual.getId());
-    assertEquals(sensorTypeExpected.getDescription(), sensorTypeActual.getDescription());
-    assertEquals(sensorTypeExpected.getActions(), sensorTypeActual.getActions());
-  }
+    @Test
+    public void register() throws EntityAlreadyExistsException {
+        //Given
+        SensorType sensorType = TestUtils.getExampleSensorType(1);
+        SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
 
-  @Test(expected = EntityAlreadyExistsException.class)
-  public void registerEntityAlreadyExists() throws EntityAlreadyExistsException {
-    //Given
-    SensorType sensorType = TestUtils.getExampleSensorType(1);
-    SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
+        //When
+        when(sensorTypeRepository.save(sensorType)).thenReturn(sensorType);
+        SensorType sensorTypeActual = sensorTypeService.register(sensorType);
 
-    //When
-    when(sensorTypeRepository.findByName(anyString())).thenReturn(Optional.of(sensorType));
-    sensorTypeService.register(sensorType);
+        //Then
+        assertEquals(sensorTypeExpected.getName(), sensorTypeActual.getName());
+        assertEquals(sensorTypeExpected.getId(), sensorTypeActual.getId());
+        assertEquals(sensorTypeExpected.getDescription(), sensorTypeActual.getDescription());
+        assertEquals(sensorTypeExpected.getActions(), sensorTypeActual.getActions());
+    }
 
-  }
+    @Test(expected = EntityAlreadyExistsException.class)
+    public void registerEntityAlreadyExists() throws EntityAlreadyExistsException {
+        //Given
+        SensorType sensorType = TestUtils.getExampleSensorType(1);
+        SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
 
-  @Test
-  public void update() throws EntityNotFoundException {
-    //Given
-    SensorType sensorType = TestUtils.getExampleSensorType(1);
-    SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
+        //When
+        when(sensorTypeRepository.findByName(anyString())).thenReturn(Optional.of(sensorType));
+        sensorTypeService.register(sensorType);
 
-    //When
-    when(sensorTypeRepository.findByName(anyString())).thenReturn(Optional.of(sensorType));
-    when(sensorTypeRepository.save(sensorType)).thenReturn(sensorType);
-    SensorType sensorTypeActual = sensorTypeService.update(sensorType);
+    }
 
-    //Then
-    assertEquals(sensorTypeExpected.getName(), sensorTypeActual.getName());
-    assertEquals(sensorTypeExpected.getId(), sensorTypeActual.getId());
-    assertEquals(sensorTypeExpected.getDescription(), sensorTypeActual.getDescription());
-    assertEquals(sensorTypeExpected.getActions(), sensorTypeActual.getActions());
-  }
+    @Test
+    public void update() throws EntityNotFoundException {
+        //Given
+        SensorType sensorType = TestUtils.getExampleSensorType(1);
+        SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
 
-  @Test(expected = EntityNotFoundException.class)
-  public void updateEntityNotFound() throws EntityNotFoundException {
-    //Given
-    SensorType sensorType = TestUtils.getExampleSensorType(1);
-    TestUtils.getExampleSensorType(1);
+        //When
+        when(sensorTypeRepository.findByName(anyString())).thenReturn(Optional.of(sensorType));
+        when(sensorTypeRepository.save(sensorType)).thenReturn(sensorType);
+        SensorType sensorTypeActual = sensorTypeService.update(sensorType);
 
-    //When
-    sensorTypeService.update(sensorType);
-  }
+        //Then
+        assertEquals(sensorTypeExpected.getName(), sensorTypeActual.getName());
+        assertEquals(sensorTypeExpected.getId(), sensorTypeActual.getId());
+        assertEquals(sensorTypeExpected.getDescription(), sensorTypeActual.getDescription());
+        assertEquals(sensorTypeExpected.getActions(), sensorTypeActual.getActions());
+    }
 
-  @Test
-  public void remove() throws EntityHasRelationsException, EntityNotFoundException {
-    //Given
-    SensorType sensorType = TestUtils.getExampleSensorType(1);
-    SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
-    List<Sensor> sensors = new ArrayList<>();
-    sensors.add(TestUtils.getExampleSensor(1, 1, 1));
-    sensors.add(TestUtils.getExampleSensor(2, 1, 1));
-    sensors.add(TestUtils.getExampleSensor(3, 1, 1));
+    @Test(expected = EntityNotFoundException.class)
+    public void updateEntityNotFound() throws EntityNotFoundException {
+        //Given
+        SensorType sensorType = TestUtils.getExampleSensorType(1);
+        TestUtils.getExampleSensorType(1);
 
-    //When
-    when(sensorTypeRepository.findById(1l)).thenReturn(Optional.of(sensorType));
-    SensorType sensorTypeActual = sensorTypeService.remove(1);
+        //When
+        sensorTypeService.update(sensorType);
+    }
 
-    //Then
-    assertEquals(sensorTypeExpected.getName(), sensorTypeActual.getName());
-    assertEquals(sensorTypeExpected.getId(), sensorTypeActual.getId());
-    assertEquals(sensorTypeExpected.getDescription(), sensorTypeActual.getDescription());
-    assertEquals(sensorTypeExpected.getActions(), sensorTypeActual.getActions());
-  }
+    @Test
+    public void remove() throws EntityHasRelationsException, EntityNotFoundException {
+        //Given
+        SensorType sensorType = TestUtils.getExampleSensorType(1);
+        SensorType sensorTypeExpected = TestUtils.getExampleSensorType(1);
+        List<Sensor> sensors = new ArrayList<>();
+        sensors.add(TestUtils.getExampleSensor(1, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(2, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(3, 1, 1));
 
-  @Test(expected = EntityNotFoundException.class)
-  public void removeEntityNotFound() throws EntityHasRelationsException, EntityNotFoundException {
+        //When
+        when(sensorTypeRepository.findById(1l)).thenReturn(Optional.of(sensorType));
+        SensorType sensorTypeActual = sensorTypeService.remove(1);
 
-    //When
-    sensorTypeService.remove(1);
-  }
+        //Then
+        assertEquals(sensorTypeExpected.getName(), sensorTypeActual.getName());
+        assertEquals(sensorTypeExpected.getId(), sensorTypeActual.getId());
+        assertEquals(sensorTypeExpected.getDescription(), sensorTypeActual.getDescription());
+        assertEquals(sensorTypeExpected.getActions(), sensorTypeActual.getActions());
+    }
 
-  @Test(expected = EntityHasRelationsException.class)
-  public void removeEntityHasRelation()
-      throws EntityHasRelationsException, EntityNotFoundException {
-    //Given
-    SensorType sensorType = TestUtils.getExampleSensorType(1);
-    List<Sensor> sensors = new ArrayList<>();
-    sensors.add(TestUtils.getExampleSensor(1, 1, 1));
-    sensors.add(TestUtils.getExampleSensor(2, 1, 1));
-    sensors.add(TestUtils.getExampleSensor(3, 1, 1));
+    @Test(expected = EntityNotFoundException.class)
+    public void removeEntityNotFound() throws EntityHasRelationsException, EntityNotFoundException {
 
-    //When
-    when(sensorTypeRepository.findById(1l)).thenReturn(Optional.of(sensorType));
-    when(sensorRepository.findBySensorTypeId(1l, PageRequest.of(0, 1)))
-        .thenReturn(new PageImpl<>(sensors));
-    sensorTypeService.remove(1);
+        //When
+        sensorTypeService.remove(1);
+    }
 
-  }
+    @Test(expected = EntityHasRelationsException.class)
+    public void removeEntityHasRelation()
+            throws EntityHasRelationsException, EntityNotFoundException {
+        //Given
+        SensorType sensorType = TestUtils.getExampleSensorType(1);
+        List<Sensor> sensors = new ArrayList<>();
+        sensors.add(TestUtils.getExampleSensor(1, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(2, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(3, 1, 1));
+
+        //When
+        when(sensorTypeRepository.findById(1l)).thenReturn(Optional.of(sensorType));
+        when(sensorRepository.findBySensorTypeId(1l, PageRequest.of(0, 1)))
+                .thenReturn(new PageImpl<>(sensors));
+        sensorTypeService.remove(1);
+
+    }
 }

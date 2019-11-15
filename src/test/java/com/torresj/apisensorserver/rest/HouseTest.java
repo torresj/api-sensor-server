@@ -3,14 +3,15 @@ package com.torresj.apisensorserver.rest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.torresj.apisensorserver.jackson.RestPage;
 import com.torresj.apisensorserver.models.entities.GPSPosition;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.List;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -27,404 +28,404 @@ import org.springframework.data.domain.Page;
 
 public class HouseTest extends BasicRestTest {
 
-  //Record Controller
-  private final String HOUSES = "v1/houses";
+    //Record Controller
+    private final String HOUSES = "v1/houses";
 
-  @AfterClass
-  public static void ChangeSetUp() {
-    SetUpFalse();
-  }
-
-  @Test
-  public void getAllHousesAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+    @AfterClass
+    public static void ChangeSetUp() {
+        SetUpFalse();
     }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + HOUSES + "?page=" + nPage + "&elements=" + elements);
+    @Test
+    public void getAllHousesAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "?page=" + nPage + "&elements=" + elements);
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    Page<House> page = objectMapper
-        .readValue(jsonFromResponse, new TypeReference<RestPage<House>>() {
-        });
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(page.getContent().size(), equalTo(3
-    ));
+        Page<House> page = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<RestPage<House>>() {
+                });
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(page.getContent().size(), equalTo(3
+        ));
 
-  @Test
-  public void getAllHousesAsAdminWithoutPageable() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-            BASE_URL + port + PATH + HOUSES + "/all");
+    @Test
+    public void getAllHousesAsAdminWithoutPageable() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "/all");
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    List<House> houses = objectMapper
-            .readValue(jsonFromResponse, new TypeReference<List<House>>() {
-            });
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(houses.size(), equalTo(3
-    ));
+        List<House> houses = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<House>>() {
+                });
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(houses.size(), equalTo(3
+        ));
 
-  @Test
-  public void getAllHousesAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + HOUSES + "?page=" + nPage + "&elements=" + elements);
+    @Test
+    public void getAllHousesAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "?page=" + nPage + "&elements=" + elements);
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationUser);
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
 
-  @Test
-  public void getHouseByIdAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    House house = houseRepository.findByName("House1").get();
+    @Test
+    public void getHouseByIdAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + HOUSES + "/" + house.getId());
+        House house = houseRepository.findByName("House1").get();
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId());
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    House responseHouse = objectMapper
-        .readValue(jsonFromResponse, House.class);
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(responseHouse, equalTo(house));
+        House responseHouse = objectMapper
+                .readValue(jsonFromResponse, House.class);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(responseHouse, equalTo(house));
 
-  @Test
-  public void getHouseByIdAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    House house = houseRepository.findByName("House2").get();
+    @Test
+    public void getHouseByIdAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + HOUSES + "/" + house.getId());
+        House house = houseRepository.findByName("House2").get();
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId());
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationUser);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    House responseHouse = objectMapper
-        .readValue(jsonFromResponse, House.class);
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(responseHouse, equalTo(house));
+        House responseHouse = objectMapper
+                .readValue(jsonFromResponse, House.class);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(responseHouse, equalTo(house));
 
-  @Test
-  public void getHouseByIdAsUserToNotAllowedHouse() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    House house = houseRepository.findByName("House1").get();
+    @Test
+    public void getHouseByIdAsUserToNotAllowedHouse() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + HOUSES + "/" + house.getId());
+        House house = houseRepository.findByName("House1").get();
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId());
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationUser);
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
 
-  @Test
-  public void getSensorsByHouseIdAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    House house = houseRepository.findByName("House2").get();
+    @Test
+    public void getSensorsByHouseIdAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors?page=" + nPage
-            + "&elements="
-            + elements);
+        House house = houseRepository.findByName("House2").get();
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors?page=" + nPage
+                        + "&elements="
+                        + elements);
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    Page<Sensor> page = objectMapper
-        .readValue(jsonFromResponse, new TypeReference<RestPage<Sensor>>() {
-        });
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(page.getContent().size(), equalTo(2));
+        Page<Sensor> page = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<RestPage<Sensor>>() {
+                });
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(page.getContent().size(), equalTo(2));
 
-  @Test
-  public void getSensorsByHouseIdAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    House house = houseRepository.findByName("House2").get();
+    @Test
+    public void getSensorsByHouseIdAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors?page=" + nPage
-            + "&elements="
-            + elements);
+        House house = houseRepository.findByName("House2").get();
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors?page=" + nPage
+                        + "&elements="
+                        + elements);
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationUser);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    Page<Sensor> page = objectMapper
-        .readValue(jsonFromResponse, new TypeReference<RestPage<Sensor>>() {
-        });
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(page.getContent().size(), equalTo(2));
+        Page<Sensor> page = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<RestPage<Sensor>>() {
+                });
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(page.getContent().size(), equalTo(2));
 
-  @Test
-  public void getSensorsByHouseIdAsUserToNotAllowedHouse() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    House house = houseRepository.findByName("House1").get();
+    @Test
+    public void getSensorsByHouseIdAsUserToNotAllowedHouse() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(
-        BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors?page=" + nPage
-            + "&elements="
-            + elements);
+        House house = houseRepository.findByName("House1").get();
 
-    httpGet.setHeader("Content-type", "application/json");
-    httpGet.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors?page=" + nPage
+                        + "&elements="
+                        + elements);
 
-    CloseableHttpResponse response = client.execute(httpGet);
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationUser);
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+        CloseableHttpResponse response = client.execute(httpGet);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
 
-  @Test
-  public void updateHouseAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPut httpPut = new HttpPut(
-        BASE_URL + port + PATH + HOUSES);
+    @Test
+    public void updateHouseAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    httpPut.setHeader("Content-type", "application/json");
-    httpPut.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(
+                BASE_URL + port + PATH + HOUSES);
 
-    House house = houseRepository.findByName("House2").get();
-    GPSPosition position = new GPSPosition();
-    position.setLatitude(1L);
-    position.setLongitude(2L);
-    house.setPosition(position);
+        httpPut.setHeader("Content-type", "application/json");
+        httpPut.setHeader("Authorization", authorizationAdmin);
 
-    StringEntity entity = new StringEntity(objectMapper.writeValueAsString(house));
+        House house = houseRepository.findByName("House2").get();
+        GPSPosition position = new GPSPosition();
+        position.setLatitude(1L);
+        position.setLongitude(2L);
+        house.setPosition(position);
 
-    httpPut.setEntity(entity);
+        StringEntity entity = new StringEntity(objectMapper.writeValueAsString(house));
 
-    CloseableHttpResponse response = client.execute(httpPut);
+        httpPut.setEntity(entity);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpPut);
 
-    House responseHouse = objectMapper
-        .readValue(jsonFromResponse, House.class);
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(201));
-    assertThat(responseHouse, equalTo(house));
+        House responseHouse = objectMapper
+                .readValue(jsonFromResponse, House.class);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(201));
+        assertThat(responseHouse, equalTo(house));
 
-  @Test
-  public void updateHouseAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPut httpPut = new HttpPut(
-        BASE_URL + port + PATH + HOUSES);
+    @Test
+    public void updateHouseAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    httpPut.setHeader("Content-type", "application/json");
-    httpPut.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(
+                BASE_URL + port + PATH + HOUSES);
 
-    House house = houseRepository.findByName("House2").get();
+        httpPut.setHeader("Content-type", "application/json");
+        httpPut.setHeader("Authorization", authorizationUser);
 
-    StringEntity entity = new StringEntity(objectMapper.writeValueAsString(house));
+        House house = houseRepository.findByName("House2").get();
 
-    httpPut.setEntity(entity);
+        StringEntity entity = new StringEntity(objectMapper.writeValueAsString(house));
 
-    CloseableHttpResponse response = client.execute(httpPut);
+        httpPut.setEntity(entity);
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+        CloseableHttpResponse response = client.execute(httpPut);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
 
-  @Test
-  public void removeHouseAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        client.close();
     }
 
-    House house = houseRepository.findByName("House3").get();
+    @Test
+    public void removeHouseAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpDelete httpDelete = new HttpDelete(
-        BASE_URL + port + PATH + HOUSES + "/" + house.getId());
+        House house = houseRepository.findByName("House3").get();
 
-    httpDelete.setHeader("Content-type", "application/json");
-    httpDelete.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpDelete httpDelete = new HttpDelete(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId());
 
-    CloseableHttpResponse response = client.execute(httpDelete);
+        httpDelete.setHeader("Content-type", "application/json");
+        httpDelete.setHeader("Authorization", authorizationAdmin);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpDelete);
 
-    House responseHouse = objectMapper
-        .readValue(jsonFromResponse, House.class);
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-    assertThat(responseHouse, equalTo(house));
-    assertThat(houseRepository.findByName("House3").isPresent(), equalTo(false));
-    assertThat(userHouseRelationRepository.findByHouseId(house.getId()).isEmpty(), equalTo(true));
+        House responseHouse = objectMapper
+                .readValue(jsonFromResponse, House.class);
 
-    houseRepository.save(house);
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(responseHouse, equalTo(house));
+        assertThat(houseRepository.findByName("House3").isPresent(), equalTo(false));
+        assertThat(userHouseRelationRepository.findByHouseId(house.getId()).isEmpty(), equalTo(true));
 
-  @Test
-  public void registerHouseByIdAsAdmin() throws IOException {
-    if (authorizationAdmin == null) {
-      getAdminAuthorization();
+        houseRepository.save(house);
+        client.close();
     }
 
-    House house = new House(null, "House4", LocalDateTime.now(), null, null, null);
+    @Test
+    public void registerHouseByIdAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPost httpPost = new HttpPost(
-        BASE_URL + port + PATH + HOUSES);
+        House house = new House(null, "House4", LocalDateTime.now(), null, null, null);
 
-    httpPost.setHeader("Content-type", "application/json");
-    httpPost.setHeader("Authorization", authorizationAdmin);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(
+                BASE_URL + port + PATH + HOUSES);
 
-    String json = objectMapper.writeValueAsString(house);
-    StringEntity entity = new StringEntity(json);
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", authorizationAdmin);
 
-    httpPost.setEntity(entity);
+        String json = objectMapper.writeValueAsString(house);
+        StringEntity entity = new StringEntity(json);
 
-    CloseableHttpResponse response = client.execute(httpPost);
+        httpPost.setEntity(entity);
 
-    String jsonFromResponse = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = client.execute(httpPost);
 
-    House respondeHouse = objectMapper
-        .readValue(jsonFromResponse, House.class);
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(201));
-    assertThat(respondeHouse, equalTo(houseRepository.findByName("House4").get()));
+        House respondeHouse = objectMapper
+                .readValue(jsonFromResponse, House.class);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(201));
+        assertThat(respondeHouse, equalTo(houseRepository.findByName("House4").get()));
 
-  @Test
-  public void registerHouseByIdAsUser() throws IOException {
-    if (authorizationUser == null) {
-      getUserAuthorization();
+        client.close();
     }
 
-    House house = new House(null, "House4", LocalDateTime.now(), null, null, null);
+    @Test
+    public void registerHouseByIdAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getUserAuthorization();
+        }
 
-    CloseableHttpClient client = HttpClients.createDefault();
-    HttpPost httpPost = new HttpPost(
-        BASE_URL + port + PATH + HOUSES);
+        House house = new House(null, "House4", LocalDateTime.now(), null, null, null);
 
-    httpPost.setHeader("Content-type", "application/json");
-    httpPost.setHeader("Authorization", authorizationUser);
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(
+                BASE_URL + port + PATH + HOUSES);
 
-    String json = objectMapper.writeValueAsString(house);
-    StringEntity entity = new StringEntity(json);
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", authorizationUser);
 
-    httpPost.setEntity(entity);
+        String json = objectMapper.writeValueAsString(house);
+        StringEntity entity = new StringEntity(json);
 
-    CloseableHttpResponse response = client.execute(httpPost);
+        httpPost.setEntity(entity);
 
-    assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+        CloseableHttpResponse response = client.execute(httpPost);
 
-    client.close();
-  }
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+
+        client.close();
+    }
 }

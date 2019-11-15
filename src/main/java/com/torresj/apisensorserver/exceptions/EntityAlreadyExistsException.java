@@ -5,14 +5,15 @@ import lombok.Getter;
 @Getter
 public class EntityAlreadyExistsException extends Exception {
 
-  private static final long serialVersionUID = -7306413635068340585L;
-  private Object object;
+    private static final long serialVersionUID = -7306413635068340585L;
 
-  public EntityAlreadyExistsException() {
-  }
+    private Object object;
 
-  public EntityAlreadyExistsException(Object object) {
-    this.object = object;
-  }
+    public EntityAlreadyExistsException() {
+    }
+
+    public EntityAlreadyExistsException(Object object) {
+        this.object = object;
+    }
 
 }

@@ -7,34 +7,35 @@ import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.User;
 import com.torresj.apisensorserver.models.entities.User.Role;
+
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
 
-  Page<User> getUsers(String filter, Role role, int nPage, int elements);
+    Page<User> getUsers(String filter, Role role, int nPage, int elements);
 
-  User getUser(long id) throws EntityNotFoundException;
+    User getUser(long id) throws EntityNotFoundException;
 
-  User getUser(String name) throws EntityNotFoundException;
+    User getUser(String name) throws EntityNotFoundException;
 
-  User register(User user) throws EntityAlreadyExistsException;
+    User register(User user) throws EntityAlreadyExistsException;
 
-  User getLogginUser() throws EntityNotFoundException;
+    User getLogginUser() throws EntityNotFoundException;
 
-  List<House> getHouses(long id) throws EntityNotFoundException;
+    List<House> getHouses(long id) throws EntityNotFoundException;
 
-  House addHouse(long userId, long houseId) throws EntityNotFoundException;
+    House addHouse(long userId, long houseId) throws EntityNotFoundException;
 
-  User update(User user) throws EntityNotFoundException;
+    User update(User user) throws EntityNotFoundException;
 
-  House removeHouse(long id, long houseId) throws EntityNotFoundException;
+    House removeHouse(long id, long houseId) throws EntityNotFoundException;
 
-  boolean isUserAllowed(String userName, Role... roles) throws EntityNotFoundException;
+    boolean isUserAllowed(String userName, Role... roles) throws EntityNotFoundException;
 
-  boolean isSameUser(String userName, long userId) throws EntityNotFoundException;
+    boolean isSameUser(String userName, long userId) throws EntityNotFoundException;
 
-  boolean isSameUser(String userName, String userNAme) throws EntityNotFoundException;
+    boolean isSameUser(String userName, String userNAme) throws EntityNotFoundException;
 
-  User remove(long id) throws EntityNotFoundException;
+    User remove(long id) throws EntityNotFoundException;
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class SocketMessage {
 
-  private String privateIp;
-  private String action;
+    private String privateIp;
+
+    private String action;
 }

@@ -5,6 +5,11 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.Sensor;
@@ -18,10 +23,7 @@ import com.torresj.apisensorserver.repositories.VariableRepository;
 import com.torresj.apisensorserver.repositories.VariableSensorRelationRepository;
 import com.torresj.apisensorserver.services.impl.VariableServiceImpl;
 import com.torresj.apisensorserver.utils.TestUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -35,176 +37,182 @@ import org.springframework.data.domain.Sort;
 @RunWith(MockitoJUnitRunner.class)
 public class VariableServiceTest {
 
-  @Mock
-  private VariableRepository variableRepository;
-  @Mock
-  private SensorRepository sensorRepository;
-  @Mock
-  private VariableSensorRelationRepository variableSensorRelationRepository;
-  @Mock
-  private UserRepository userRepository;
-  @Mock
-  private HouseRepository houseRepository;
-  @Mock
-  private UserHouseRelationRepository userHouseRelationRepository;
+    @Mock
+    private VariableRepository variableRepository;
 
-  private static final int nPage = 0;
-  private static final int elements = 20;
-  private static final PageRequest pageRequest = PageRequest
-      .of(nPage, elements, Sort.by("createAt").descending());
+    @Mock
+    private SensorRepository sensorRepository;
 
-  @InjectMocks
-  private VariableService variableService = new VariableServiceImpl(variableRepository,
-      sensorRepository, userRepository, variableSensorRelationRepository, houseRepository,
-      userHouseRelationRepository);
+    @Mock
+    private VariableSensorRelationRepository variableSensorRelationRepository;
 
+    @Mock
+    private UserRepository userRepository;
 
-  @Test
-  public void getVariables() {
-    //Given
-    List<Variable> variables = TestUtils.getExampleVariables(3);
+    @Mock
+    private HouseRepository houseRepository;
 
-    //When
-    when(variableRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(variables));
-    List<Variable> variableActual = new ArrayList<>(
-        variableService.getVariables(nPage, elements).getContent());
+    @Mock
+    private UserHouseRelationRepository userHouseRelationRepository;
 
-    //then
-    assertEquals(variables, variableActual);
-  }
+    private static final int nPage = 0;
 
-  @Test
-  public void getVariablesEmptyList() {
-    //When
-    when(variableRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(new ArrayList<>()));
-    Page<Variable> page = variableService.getVariables(nPage, elements);
+    private static final int elements = 20;
 
-    //then
-    assertEquals(true, page.getContent().isEmpty());
-  }
+    private static final PageRequest pageRequest = PageRequest
+            .of(nPage, elements, Sort.by("createAt").descending());
 
-  @Test
-  public void getVariable() throws EntityNotFoundException {
-    //Given
-    Variable variable = TestUtils.getExampleVariable(1);
-    Variable variableExpected = TestUtils.getExampleVariable(1);
+    @InjectMocks
+    private VariableService variableService = new VariableServiceImpl(variableRepository,
+            sensorRepository, userRepository, variableSensorRelationRepository, houseRepository,
+            userHouseRelationRepository);
 
-    //When
-    when(variableRepository.findById(anyLong())).thenReturn(Optional.of(variable));
-    Variable variableActual = variableService.getVariable(1);
+    @Test
+    public void getVariables() {
+        //Given
+        List<Variable> variables = TestUtils.getExampleVariables(3);
 
-    //Then
-    assertEquals(variableExpected.getName(), variableActual.getName());
-    assertEquals(variableExpected.getId(), variableActual.getId());
-    assertEquals(variableExpected.getDescription(), variableActual.getDescription());
-    assertEquals(variableExpected.getUnits(), variableActual.getUnits());
-  }
+        //When
+        when(variableRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(variables));
+        List<Variable> variableActual = new ArrayList<>(
+                variableService.getVariables(nPage, elements).getContent());
 
-  @Test(expected = EntityNotFoundException.class)
-  public void getVariableEntityNotFound() throws EntityNotFoundException {
-    //When
-    variableService.getVariable(1);
-  }
+        //then
+        assertEquals(variables, variableActual);
+    }
 
-  @Test
-  public void update() throws EntityNotFoundException {
-    //Given
-    Variable variable = TestUtils.getExampleVariable(1);
-    Variable variableExpected = TestUtils.getExampleVariable(1);
+    @Test
+    public void getVariablesEmptyList() {
+        //When
+        when(variableRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(new ArrayList<>()));
+        Page<Variable> page = variableService.getVariables(nPage, elements);
 
-    //When
-    when(variableRepository.findByName(variable.getName())).thenReturn(Optional.of(variable));
-    when(variableRepository.save(variable)).thenReturn(variable);
-    Variable variableActual = variableService.update(variable);
+        //then
+        assertEquals(true, page.getContent().isEmpty());
+    }
 
-    //Then
-    assertEquals(variableExpected.getName(), variableActual.getName());
-    assertEquals(variableExpected.getId(), variableActual.getId());
-    assertEquals(variableExpected.getDescription(), variableActual.getDescription());
-    assertEquals(variableExpected.getUnits(), variableActual.getUnits());
-  }
+    @Test
+    public void getVariable() throws EntityNotFoundException {
+        //Given
+        Variable variable = TestUtils.getExampleVariable(1);
+        Variable variableExpected = TestUtils.getExampleVariable(1);
 
-  @Test(expected = EntityNotFoundException.class)
-  public void updateEntityNotFound() throws EntityNotFoundException {
-    //Given
-    Variable variable = TestUtils.getExampleVariable(1);
+        //When
+        when(variableRepository.findById(anyLong())).thenReturn(Optional.of(variable));
+        Variable variableActual = variableService.getVariable(1);
 
-    //When
-    variableService.update(variable);
-  }
+        //Then
+        assertEquals(variableExpected.getName(), variableActual.getName());
+        assertEquals(variableExpected.getId(), variableActual.getId());
+        assertEquals(variableExpected.getDescription(), variableActual.getDescription());
+        assertEquals(variableExpected.getUnits(), variableActual.getUnits());
+    }
 
-  @Test
-  public void register() throws EntityAlreadyExistsException {
-    //Given
-    Variable variable = TestUtils.getExampleVariable(1);
-    Variable variableExpected = TestUtils.getExampleVariable(1);
+    @Test(expected = EntityNotFoundException.class)
+    public void getVariableEntityNotFound() throws EntityNotFoundException {
+        //When
+        variableService.getVariable(1);
+    }
 
-    //When
-    when(variableRepository.save(variable)).thenReturn(variable);
-    Variable variableActual = variableService.register(variable);
+    @Test
+    public void update() throws EntityNotFoundException {
+        //Given
+        Variable variable = TestUtils.getExampleVariable(1);
+        Variable variableExpected = TestUtils.getExampleVariable(1);
 
-    //Then
-    assertEquals(variableExpected.getName(), variableActual.getName());
-    assertEquals(variableExpected.getId(), variableActual.getId());
-    assertEquals(variableExpected.getDescription(), variableActual.getDescription());
-    assertEquals(variableExpected.getUnits(), variableActual.getUnits());
-  }
+        //When
+        when(variableRepository.findByName(variable.getName())).thenReturn(Optional.of(variable));
+        when(variableRepository.save(variable)).thenReturn(variable);
+        Variable variableActual = variableService.update(variable);
 
-  @Test(expected = EntityAlreadyExistsException.class)
-  public void registerEntityAlreadyExists() throws EntityAlreadyExistsException {
-    //Given
-    Variable variable = TestUtils.getExampleVariable(1);
+        //Then
+        assertEquals(variableExpected.getName(), variableActual.getName());
+        assertEquals(variableExpected.getId(), variableActual.getId());
+        assertEquals(variableExpected.getDescription(), variableActual.getDescription());
+        assertEquals(variableExpected.getUnits(), variableActual.getUnits());
+    }
 
-    //When
-    when(variableRepository.findByName(anyString())).thenReturn(Optional.of(variable));
-    variableService.register(variable);
+    @Test(expected = EntityNotFoundException.class)
+    public void updateEntityNotFound() throws EntityNotFoundException {
+        //Given
+        Variable variable = TestUtils.getExampleVariable(1);
 
-  }
+        //When
+        variableService.update(variable);
+    }
 
-  @Test
-  public void deleteVariable() throws EntityNotFoundException {
-    //Given
-    Variable variable = TestUtils.getExampleVariable(1);
-    Variable variableExpected = TestUtils.getExampleVariable(1);
+    @Test
+    public void register() throws EntityAlreadyExistsException {
+        //Given
+        Variable variable = TestUtils.getExampleVariable(1);
+        Variable variableExpected = TestUtils.getExampleVariable(1);
 
-    //When
-    when(variableRepository.findById(anyLong())).thenReturn(Optional.of(variable));
-    Variable variableActual = variableService.deleteVariable(1);
+        //When
+        when(variableRepository.save(variable)).thenReturn(variable);
+        Variable variableActual = variableService.register(variable);
 
-    //Then
-    assertEquals(variableExpected.getName(), variableActual.getName());
-    assertEquals(variableExpected.getId(), variableActual.getId());
-    assertEquals(variableExpected.getDescription(), variableActual.getDescription());
-    assertEquals(variableExpected.getUnits(), variableActual.getUnits());
+        //Then
+        assertEquals(variableExpected.getName(), variableActual.getName());
+        assertEquals(variableExpected.getId(), variableActual.getId());
+        assertEquals(variableExpected.getDescription(), variableActual.getDescription());
+        assertEquals(variableExpected.getUnits(), variableActual.getUnits());
+    }
 
-  }
+    @Test(expected = EntityAlreadyExistsException.class)
+    public void registerEntityAlreadyExists() throws EntityAlreadyExistsException {
+        //Given
+        Variable variable = TestUtils.getExampleVariable(1);
 
-  @Test(expected = EntityNotFoundException.class)
-  public void deleteVariableEntityNotFound() throws EntityNotFoundException {
-    //When
-    variableService.deleteVariable(1);
-  }
+        //When
+        when(variableRepository.findByName(anyString())).thenReturn(Optional.of(variable));
+        variableService.register(variable);
 
-  @Test
-  public void getSensors() {
-    //Given
-    List<VariableSensorRelation> relations = new ArrayList<>();
-    relations.add(TestUtils.getExampleVariableRelation(1, 1));
-    relations.add(TestUtils.getExampleVariableRelation(1, 2));
-    relations.add(TestUtils.getExampleVariableRelation(1, 3));
-    List<Sensor> sensors = new ArrayList<>();
-    sensors.add(TestUtils.getExampleSensor(1, 1, 1));
-    sensors.add(TestUtils.getExampleSensor(2, 1, 1));
-    sensors.add(TestUtils.getExampleSensor(3, 1, 1));
+    }
 
-    //When
-    when(variableSensorRelationRepository.findByVariableId(1l)).thenReturn(relations);
-    when(sensorRepository.findByIdIn(new ArrayList<>(Arrays.asList(1l, 2l, 3l)), pageRequest))
-        .thenReturn(new PageImpl<>(sensors));
-    List<Sensor> result = new ArrayList<>(
-        variableService.getSensors(1, nPage, elements).getContent());
+    @Test
+    public void deleteVariable() throws EntityNotFoundException {
+        //Given
+        Variable variable = TestUtils.getExampleVariable(1);
+        Variable variableExpected = TestUtils.getExampleVariable(1);
 
-    //Then
-    assertEquals(3, result.size());
-  }
+        //When
+        when(variableRepository.findById(anyLong())).thenReturn(Optional.of(variable));
+        Variable variableActual = variableService.deleteVariable(1);
+
+        //Then
+        assertEquals(variableExpected.getName(), variableActual.getName());
+        assertEquals(variableExpected.getId(), variableActual.getId());
+        assertEquals(variableExpected.getDescription(), variableActual.getDescription());
+        assertEquals(variableExpected.getUnits(), variableActual.getUnits());
+
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void deleteVariableEntityNotFound() throws EntityNotFoundException {
+        //When
+        variableService.deleteVariable(1);
+    }
+
+    @Test
+    public void getSensors() {
+        //Given
+        List<VariableSensorRelation> relations = new ArrayList<>();
+        relations.add(TestUtils.getExampleVariableRelation(1, 1));
+        relations.add(TestUtils.getExampleVariableRelation(1, 2));
+        relations.add(TestUtils.getExampleVariableRelation(1, 3));
+        List<Sensor> sensors = new ArrayList<>();
+        sensors.add(TestUtils.getExampleSensor(1, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(2, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(3, 1, 1));
+
+        //When
+        when(variableSensorRelationRepository.findByVariableId(1l)).thenReturn(relations);
+        when(sensorRepository.findByIdIn(new ArrayList<>(Arrays.asList(1l, 2l, 3l)), pageRequest))
+                .thenReturn(new PageImpl<>(sensors));
+        List<Sensor> result = new ArrayList<>(
+                variableService.getSensors(1, nPage, elements).getContent());
+
+        //Then
+        assertEquals(3, result.size());
+    }
 }

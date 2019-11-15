@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class WSResponse {
 
-  String text;
-  boolean success;
+    String text;
+
+    boolean success;
 }
