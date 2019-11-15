@@ -132,6 +132,7 @@ public class UserServiceImpl implements UserService {
     user.setId(entity.getId());
     if(user.getPassword() == null)
       user.setPassword(entity.getPassword());
+    user.setLastConnection(entity.getLastConnection());
     User userUpdated = userRepository.save(user);
     logger.debug("[USER - SERVICE] Service for update user end. User: {}", userUpdated);
     return userUpdated;
