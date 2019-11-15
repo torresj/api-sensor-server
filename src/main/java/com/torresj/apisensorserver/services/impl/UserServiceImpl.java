@@ -119,7 +119,9 @@ public class UserServiceImpl implements UserService {
         UserHouseRelation relation = new UserHouseRelation();
         relation.setUserId(userId);
         relation.setHouseId(houseId);
-        userHouseRelationRepository.save(relation);
+        if(!userHouseRelationRepository.findByUserIdAndHouseId(userId,houseId).isPresent()){
+            userHouseRelationRepository.save(relation);
+        }
         logger.debug(
                 "[USER - SERVICE] Service for adding house {} to user {} end", houseId, userId);
         return house;
@@ -133,7 +135,13 @@ public class UserServiceImpl implements UserService {
         user.setId(entity.getId());
         if (user.getPassword() == null)
             user.setPassword(entity.getPassword());
-        user.setLastConnection(entity.getLastConnection());
+        if(user.getLastConnection()==null){
+            if(entity.getLastConnection()!=null){
+                user.setLastConnection(entity.getLastConnection());
+            }else{
+                user.setLastConnection(entity.getCreateAt());
+            }
+        }
         User userUpdated = userRepository.save(user);
         logger.debug("[USER - SERVICE] Service for update user end. User: {}", userUpdated);
         return userUpdated;
