@@ -289,6 +289,37 @@ public class UserController {
         }
     }
 
+    @PostMapping("/{id}/houses")
+    @ApiOperation(value = "Set houses", response = House.class, notes = "House must exist", responseContainer = "List")
+    public ResponseEntity<List<House>> setUserHousesById(@PathVariable("id") long id,
+            @RequestBody() List<Long> ids, Principal principal) {
+        try {
+            logger.info("[USER HOUSE - SET] Set houses {} to user {} by user \"{}\"", ids, id,
+                    principal.getName());
+            if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "User does not have permission for this endpoint");
+            }
+
+            List<House> houses = userService.setHouses(id,ids);
+
+            logger.info("[USER HOUSE - SET] Request add houses {} to user {} finished by user \"{}\"",
+                    ids, id,
+                    principal.getName());
+            return new ResponseEntity<>(houses, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            logger.error("[USER HOUSE - SET] User not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "User or house not found", e);
+        } catch (ResponseStatusException e) {
+            logger.error("[USER HOUSE - SET] User does not have permission for this endpoint");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    e.getReason(), e);
+        } catch (Exception e) {
+            logger.error("[USER HOUSE - SET] Error adding houses {} to user {}", ids, id, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
+
     @DeleteMapping("/{id}/houses/{houseId}")
     @ApiOperation(value = "Delete relation house-user", response = House.class, notes = "House must exist")
     public ResponseEntity<House> removeUserHouseById(@PathVariable("id") long id,

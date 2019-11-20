@@ -4,8 +4,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.torresj.apisensorserver.jackson.RestPage;
@@ -116,7 +118,7 @@ public class UserTest extends BasicRestTest {
                 });
 
         assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-        assertThat(page.getContent().size(), equalTo(3));
+        assertThat(page.getContent().size(), equalTo(4));
 
         client.close();
     }
@@ -593,7 +595,7 @@ public class UserTest extends BasicRestTest {
             getAdminAuthorization();
         }
 
-        User user = userRepository.findByUsername("User2").get();
+        User user = userRepository.findByUsername("User3").get();
 
         CloseableHttpClient client = HttpClients.createDefault();
         HttpDelete httpDelete = new HttpDelete(
@@ -611,7 +613,7 @@ public class UserTest extends BasicRestTest {
 
         assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
         assertThat(responseUser, equalTo(user));
-        assertThat(userRepository.findByUsername("User2").isPresent(), equalTo(false));
+        assertThat(userRepository.findByUsername("User3").isPresent(), equalTo(false));
         assertThat(userHouseRelationRepository.findByUserId(user.getId()).isEmpty(), equalTo(true));
 
         client.close();
@@ -623,7 +625,7 @@ public class UserTest extends BasicRestTest {
             getUserAuthorization();
         }
 
-        User user = userRepository.findByUsername("User").get();
+        User user = userRepository.findByUsername("User2").get();
 
         CloseableHttpClient client = HttpClients.createDefault();
         HttpDelete httpDelete = new HttpDelete(
@@ -637,5 +639,45 @@ public class UserTest extends BasicRestTest {
         assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
 
         client.close();
+    }
+
+    @Test
+    public void setHousesUserAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
+
+        User user = userRepository.findByUsername("User2").get();
+        House house1 = houseRepository.findByName("House1").get();
+        House house2 = houseRepository.findByName("House2").get();
+        House house3 = houseRepository.findByName("House3").get();
+        List<House> housesExpected = new ArrayList<>();
+        housesExpected.add(house1);
+        housesExpected.add(house2);
+        housesExpected.add(house3);
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(
+                BASE_URL + port + PATH + USERS + "/" + user.getId() + "/houses");
+
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", authorizationAdmin);
+
+        StringEntity entity =
+                new StringEntity(housesExpected.stream().map(house -> house.getId()).collect(Collectors.toList()).toString());
+
+        httpPost.setEntity(entity);
+
+        CloseableHttpResponse response = client.execute(httpPost);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        List<House> houses = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<House>>() {
+                });
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(houses, equalTo(housesExpected));
+
     }
 }

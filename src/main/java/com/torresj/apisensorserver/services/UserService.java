@@ -27,6 +27,8 @@ public interface UserService extends UserDetailsService {
 
     House addHouse(long userId, long houseId) throws EntityNotFoundException;
 
+    List<House> setHouses(long userId, List<Long> houses) throws EntityNotFoundException;
+
     User update(User user) throws EntityNotFoundException;
 
     House removeHouse(long id, long houseId) throws EntityNotFoundException;

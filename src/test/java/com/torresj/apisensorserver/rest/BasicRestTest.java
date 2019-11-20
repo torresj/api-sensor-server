@@ -203,9 +203,13 @@ public class BasicRestTest {
             User user3 = new User(null, "User2", bCryptPasswordEncoder.encode("test"), Role.USER,
                     LocalDateTime.now(),
                     LocalDateTime.now(), null, null, null, null, null);
+            User user4 = new User(null, "User3", bCryptPasswordEncoder.encode("test"), Role.USER,
+                    LocalDateTime.now(),
+                    LocalDateTime.now(), null, null, null, null, null);
 
             user1 = userRepository.save(user1);
             user2 = userRepository.save(user2);
+            user4 = userRepository.save(user4);
             userRepository.save(user3);
 
             //Create User - House
@@ -215,6 +219,7 @@ public class BasicRestTest {
             UserHouseRelation uhRelation4 = new UserHouseRelation(null, user2.getId(), house2.getId());
             UserHouseRelation uhRelation5 = new UserHouseRelation(null, user3.getId(), house1.getId());
             UserHouseRelation uhRelation6 = new UserHouseRelation(null, user3.getId(), house2.getId());
+            UserHouseRelation uhRelation7 = new UserHouseRelation(null, user4.getId(), house1.getId());
 
             userHouseRelationRepository.save(uhRelation1);
             userHouseRelationRepository.save(uhRelation2);
@@ -222,6 +227,7 @@ public class BasicRestTest {
             userHouseRelationRepository.save(uhRelation4);
             userHouseRelationRepository.save(uhRelation5);
             userHouseRelationRepository.save(uhRelation6);
+            userHouseRelationRepository.save(uhRelation7);
 
             //Create records
             Record record1 = new Record(null, sensor1.getId(), variable1.getId(),

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
@@ -168,5 +169,26 @@ public class UserServiceTest {
 
         //Then
         assertEquals(user, userActual);
+    }
+
+    @Test
+    public void setHouses() throws EntityNotFoundException {
+        //Given
+        List<Long> ids = Arrays.asList(1l,2l,3l);
+        House house1 = TestUtils.getExampleHouse(1l);
+        House house2 = TestUtils.getExampleHouse(2l);
+        House house3 = TestUtils.getExampleHouse(3l);
+        User user = TestUtils.getExampleUser("test1", "test1", Role.USER);
+
+        //when
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(houseRepository.findById(1l)).thenReturn(Optional.of(house1));
+        when(houseRepository.findById(2l)).thenReturn(Optional.of(house2));
+        when(houseRepository.findById(3l)).thenReturn(Optional.of(house3));
+
+        List<House> houses = userService.setHouses(user.getId(),ids);
+        List<Long> idsActuals = houses.stream().map(house -> house.getId()).collect(Collectors.toList());
+
+        assertEquals(idsActuals,ids);
     }
 }

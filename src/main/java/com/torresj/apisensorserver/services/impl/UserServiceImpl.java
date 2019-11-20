@@ -1,6 +1,7 @@
 package com.torresj.apisensorserver.services.impl;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import com.torresj.apisensorserver.services.UserService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -119,12 +121,27 @@ public class UserServiceImpl implements UserService {
         UserHouseRelation relation = new UserHouseRelation();
         relation.setUserId(userId);
         relation.setHouseId(houseId);
-        if(!userHouseRelationRepository.findByUserIdAndHouseId(userId,houseId).isPresent()){
+        if (!userHouseRelationRepository.findByUserIdAndHouseId(userId, houseId).isPresent()) {
             userHouseRelationRepository.save(relation);
         }
         logger.debug(
                 "[USER - SERVICE] Service for adding house {} to user {} end", houseId, userId);
         return house;
+    }
+
+    @Override
+    public List<House> setHouses(long userId, List<Long> houseIds) throws EntityNotFoundException {
+        logger.debug(
+                "[USER - SERVICE] Service for setting houses {} to user {} start", houseIds, userId);
+        for(long id: houseIds){
+            houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        }
+        clearUserHouses(userId);
+        List<House> houses = addListHouses(houseIds,userId);
+
+        logger.debug(
+                "[USER - SERVICE] Service for setting houses {} to user {} end", houseIds, userId);
+        return houses;
     }
 
     @Override
@@ -135,10 +152,10 @@ public class UserServiceImpl implements UserService {
         user.setId(entity.getId());
         if (user.getPassword() == null)
             user.setPassword(entity.getPassword());
-        if(user.getLastConnection()==null){
-            if(entity.getLastConnection()!=null){
+        if (user.getLastConnection() == null) {
+            if (entity.getLastConnection() != null) {
                 user.setLastConnection(entity.getLastConnection());
-            }else{
+            } else {
                 user.setLastConnection(entity.getCreateAt());
             }
         }
@@ -219,5 +236,23 @@ public class UserServiceImpl implements UserService {
         logger.debug(
                 "[USER - SERVICE] Service for remove user {} end");
         return entity;
+    }
+
+    private void clearUserHouses(long userId) throws EntityNotFoundException {
+        userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        userHouseRelationRepository.findByUserId(
+                userId
+        ).forEach(userHouseRelationRepository::delete);
+    }
+
+    private List<House> addListHouses(List<Long> ids, long userId) throws EntityNotFoundException {
+        List<House> houses = new ArrayList<>();
+        for(long houseId: ids){
+            House house = houseRepository.findById(houseId).orElseThrow(EntityNotFoundException::new);
+            UserHouseRelation userHouseRelation = new UserHouseRelation(null,userId,houseId);
+            userHouseRelationRepository.save(userHouseRelation);
+            houses.add(house);
+        }
+        return houses;
     }
 }
