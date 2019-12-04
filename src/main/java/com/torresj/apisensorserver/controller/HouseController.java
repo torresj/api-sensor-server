@@ -168,9 +168,8 @@ public class HouseController {
     }
 
     @GetMapping(value = "/{houseId}/sensors")
-    @ApiOperation(value = "Retrieve Sensors from house", notes = "Pageable data are required and de maximum records per page are 100", response = Sensor.class, responseContainer = "List")
-    public ResponseEntity<Page<Sensor>> getSensorsByHouseID(@PathVariable("houseId") long id,
-            @RequestParam(value = "page") int nPage, @RequestParam(value = "elements") int elements,
+    @ApiOperation(value = "Retrieve Sensors from house", response = Sensor.class, responseContainer = "List")
+    public ResponseEntity<List<Sensor>> getSensorsByHouseID(@PathVariable("houseId") long id,
             Principal principal) {
         try {
             logger.info("[HOUSE - SENSORS] Getting house {} sensors by user \"{}\"", id,
@@ -182,7 +181,7 @@ public class HouseController {
                         "User does not have permission for this endpoint");
             }
 
-            Page<Sensor> sensors = houseService.getSensors(id, nPage, elements);
+            List<Sensor> sensors = houseService.getSensors(id);
 
             logger.info("[HOUSE - SENSORS] Request for house {} sensors finished by user \"{}\"", id,
                     principal.getName());

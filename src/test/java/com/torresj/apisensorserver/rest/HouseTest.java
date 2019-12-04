@@ -229,9 +229,7 @@ public class HouseTest extends BasicRestTest {
 
         CloseableHttpClient client = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(
-                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors?page=" + nPage
-                        + "&elements="
-                        + elements);
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors");
 
         httpGet.setHeader("Content-type", "application/json");
         httpGet.setHeader("Authorization", authorizationAdmin);
@@ -240,12 +238,12 @@ public class HouseTest extends BasicRestTest {
 
         String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-        Page<Sensor> page = objectMapper
-                .readValue(jsonFromResponse, new TypeReference<RestPage<Sensor>>() {
+        List<Sensor> sensors = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<Sensor>>() {
                 });
 
         assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-        assertThat(page.getContent().size(), equalTo(2));
+        assertThat(sensors.size(), equalTo(2));
 
         client.close();
     }
@@ -260,9 +258,7 @@ public class HouseTest extends BasicRestTest {
 
         CloseableHttpClient client = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(
-                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors?page=" + nPage
-                        + "&elements="
-                        + elements);
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors");
 
         httpGet.setHeader("Content-type", "application/json");
         httpGet.setHeader("Authorization", authorizationUser);
@@ -271,12 +267,12 @@ public class HouseTest extends BasicRestTest {
 
         String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-        Page<Sensor> page = objectMapper
-                .readValue(jsonFromResponse, new TypeReference<RestPage<Sensor>>() {
+        List<Sensor> sensors = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<Sensor>>() {
                 });
 
         assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-        assertThat(page.getContent().size(), equalTo(2));
+        assertThat(sensors.size(), equalTo(2));
 
         client.close();
     }

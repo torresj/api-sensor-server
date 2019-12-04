@@ -78,14 +78,13 @@ public class HouseServiceImpl implements HouseService {
     }
 
     @Override
-    public Page<Sensor> getSensors(long id, int nPage, int elements) throws EntityNotFoundException {
+    public List<Sensor> getSensors(long id) throws EntityNotFoundException {
         logger.debug("[HOUSE - SERVICE] Service for get house {} sensors start", id);
         houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-        Page<Sensor> page = sensorRepository.findByHouseId(id, pageRequest);
+        List<Sensor> sensors = sensorRepository.findByHouseId(id);
         logger.debug("[HOUSE - SERVICE] Service for get house {} sensors end. Sensors: ", id,
-                page.getContent());
-        return page;
+                sensors);
+        return sensors;
     }
 
     @Override

@@ -109,9 +109,9 @@ public class HouseServiceTest {
 
         //When
         when(houseRepository.findById(anyLong())).thenReturn(Optional.of(house));
-        when(sensorRepository.findByHouseId(1L, pageRequest))
-                .thenReturn(new PageImpl<>(sensors));
-        List<Sensor> sensorsactual = houseService.getSensors(1, 0, 20).getContent();
+        when(sensorRepository.findByHouseId(1L))
+                .thenReturn(sensors);
+        List<Sensor> sensorsactual = houseService.getSensors(1);
 
         //Then
         assertEquals(sensors, sensorsactual);

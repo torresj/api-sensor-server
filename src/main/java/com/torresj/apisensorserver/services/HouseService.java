@@ -18,7 +18,7 @@ public interface HouseService {
 
     House getHouse(long id) throws EntityNotFoundException;
 
-    Page<Sensor> getSensors(long id, int nPage, int elements) throws EntityNotFoundException;
+    List<Sensor> getSensors(long id) throws EntityNotFoundException;
 
     House update(House house) throws EntityNotFoundException;
 
