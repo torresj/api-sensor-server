@@ -151,7 +151,7 @@ public class HouseServiceImpl implements HouseService {
     public List<User> getHouseUsers(long id) throws EntityNotFoundException {
         logger.debug("[HOUSE - SERVICE] Service for getting users with visibility for house {} start", id);
         houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        List<User> users = userHouseRelationRepository.findByHouseId(id).stream().map(userHouseRelation -> userRepository.findById(id).orElse(null)).collect(
+        List<User> users = userHouseRelationRepository.findByHouseId(id).stream().map(userHouseRelation -> userRepository.findById(userHouseRelation.getUserId()).orElse(null)).collect(
                 Collectors.toList());
         logger.debug("[HOUSE - SERVICE] Service for getting users with visibility for house {} end", id);
         return users;
