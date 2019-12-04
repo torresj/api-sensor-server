@@ -6,12 +6,13 @@ import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.User;
 
 import org.springframework.data.domain.Page;
 
 public interface HouseService {
 
-    Page<House> getHouses(int nPage, int elements);
+    Page<House> getHouses(String filter, int nPage, int elements);
 
     List<House> getHouses();
 
@@ -26,4 +27,6 @@ public interface HouseService {
     House removeHouse(long id) throws EntityNotFoundException;
 
     boolean hasUserVisibilityHouse(String name, long id) throws EntityNotFoundException;
+
+    List<User> getHouseUsers(long id) throws EntityNotFoundException;
 }

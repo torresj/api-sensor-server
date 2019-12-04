@@ -13,7 +13,7 @@
     <groupId>com.torresj</groupId>
     <artifactId>api-sensor-server</artifactId>
 
-    <version>1.2.6</version>
+    <version>1.2.8</version>
 
     <name>Api Sensor Server</name>
     <description>Api Sensor Server project for connect sensor and frontend</description>

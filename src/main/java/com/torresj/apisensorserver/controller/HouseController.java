@@ -7,6 +7,7 @@ import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.User;
 import com.torresj.apisensorserver.models.entities.User.Role;
 import com.torresj.apisensorserver.services.HouseService;
 import com.torresj.apisensorserver.services.UserService;
@@ -52,17 +53,19 @@ public class HouseController {
     @GetMapping
     @ApiOperation(value = "Retrieve Houses", notes = "Pageable data are required and de maximum records per page are 100", response = House.class, responseContainer = "List")
     public ResponseEntity<Page<House>> getHouses(@RequestParam(value = "page") int nPage,
-            @RequestParam(value = "elements") int elements, Principal principal) {
+            @RequestParam(value = "elements") int elements,
+            @RequestParam(value = "filter", required = false) String filter,
+            Principal principal) {
         try {
             logger.info(
-                    "[HOUSE - GET ALL] Getting houses from DB with page {}, elements {} by user \"{}\"",
-                    nPage, elements, principal.getName());
+                    "[HOUSE - GET ALL] Getting houses from DB with filter {}, page {}, elements {} by user \"{}\"",
+                    filter,nPage, elements, principal.getName());
             if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "User does not have permission for this endpoint");
             }
 
-            Page<House> page = houseService.getHouses(nPage, elements);
+            Page<House> page = houseService.getHouses(filter,nPage, elements);
 
             logger.info("[HOUSE - GET ALL] Request for houses finished by user \"{}\"",
                     principal.getName());
@@ -131,6 +134,35 @@ public class HouseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
         } catch (Exception e) {
             logger.error("[HOUSE - GET] Error getting house {}", id, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
+
+    @GetMapping(value = "/{id}/users")
+    @ApiOperation(value = "Retrieve Users who have visibility of house by id", response = User.class, responseContainer = "List")
+    public ResponseEntity<List<User>> getHouseUsersByID(@PathVariable("id") long id, Principal principal) {
+        try {
+            logger.info("[HOUSE - GET USERS] Getting users of house {} by user \"{}\"", id,
+                    principal.getName());
+            if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "User does not have permission for this endpoint");
+            }
+
+            List<User> users = houseService.getHouseUsers(id);
+
+            logger.info("[HOUSE - GET USERS] Request for getting users of house {} finished by user \"{}\"", id,
+                    principal.getName());
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            logger.error("[HOUSE - GET USERS] User does not have permission for this endpoint");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    e.getReason(), e);
+        } catch (EntityNotFoundException e) {
+            logger.error("[HOUSE - GET USERS] House not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "House not found", e);
+        } catch (Exception e) {
+            logger.error("[HOUSE - GET USERS] Error getting users of house {}", id, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
         }
     }

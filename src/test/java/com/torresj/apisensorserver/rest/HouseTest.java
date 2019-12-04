@@ -12,6 +12,7 @@ import com.torresj.apisensorserver.jackson.RestPage;
 import com.torresj.apisensorserver.models.entities.GPSPosition;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
+import com.torresj.apisensorserver.models.entities.User;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -64,6 +65,34 @@ public class HouseTest extends BasicRestTest {
         client.close();
     }
 
+    @Test
+    public void getAllHousesWithFilterAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "?filter=2" + "&page=" + nPage + "&elements=" + elements);
+
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
+
+        CloseableHttpResponse response = client.execute(httpGet);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        Page<House> page = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<RestPage<House>>() {
+                });
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(page.getContent().size(), equalTo(1
+        ));
+        assertThat(page.getContent().get(0).getName(),equalTo("House2"));
+
+        client.close();
+    }
     @Test
     public void getAllHousesAsAdminWithoutPageable() throws IOException {
         if (authorizationAdmin == null) {
@@ -248,6 +277,35 @@ public class HouseTest extends BasicRestTest {
 
         assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
         assertThat(page.getContent().size(), equalTo(2));
+
+        client.close();
+    }
+
+    @Test
+    public void getUsersByHouseIdAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
+
+        House house = houseRepository.findByName("House2").get();
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/users");
+
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
+
+        CloseableHttpResponse response = client.execute(httpGet);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        List<User> users = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<User>>() {
+                });
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(users.size(), equalTo(3));
 
         client.close();
     }

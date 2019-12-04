@@ -64,7 +64,7 @@ public class HouseServiceTest {
         //When
         when(houseRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(houses));
         List<House> houseActual = new ArrayList<>(
-                houseService.getHouses(nPage, elements).getContent());
+                houseService.getHouses(null,nPage, elements).getContent());
 
         //then
         assertEquals(houses, houseActual);

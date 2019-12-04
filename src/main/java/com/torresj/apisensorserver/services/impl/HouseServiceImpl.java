@@ -2,12 +2,14 @@ package com.torresj.apisensorserver.services.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
 import com.torresj.apisensorserver.models.entities.House;
 import com.torresj.apisensorserver.models.entities.Sensor;
 import com.torresj.apisensorserver.models.entities.User;
+import com.torresj.apisensorserver.models.entities.UserHouseRelation;
 import com.torresj.apisensorserver.repositories.HouseRepository;
 import com.torresj.apisensorserver.repositories.SensorRepository;
 import com.torresj.apisensorserver.repositories.UserHouseRelationRepository;
@@ -46,10 +48,15 @@ public class HouseServiceImpl implements HouseService {
     }
 
     @Override
-    public Page<House> getHouses(int nPage, int elements) {
+    public Page<House> getHouses(String filter, int nPage, int elements) {
         logger.debug("[HOUSE - SERVICE] Service for getting house start");
         PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-        Page<House> page = houseRepository.findAll(pageRequest);
+        Page<House> page = null;
+        if(filter !=null){
+            page = houseRepository.findByNameContaining(filter,pageRequest);
+        }else{
+            page = houseRepository.findAll(pageRequest);
+        }
         logger.debug("[HOUSE - SERVICE] Service for getting house end. Houses: {}", page.getContent());
         return page;
     }
@@ -138,5 +145,15 @@ public class HouseServiceImpl implements HouseService {
                 "[HOUSE - SERVICE] Service for check if user {} has visibility for house {} end. Result: {}",
                 name, id, hasVisibility);
         return hasVisibility;
+    }
+
+    @Override
+    public List<User> getHouseUsers(long id) throws EntityNotFoundException {
+        logger.debug("[HOUSE - SERVICE] Service for getting users with visibility for house {} start", id);
+        houseRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        List<User> users = userHouseRelationRepository.findByHouseId(id).stream().map(userHouseRelation -> userRepository.findById(id).orElse(null)).collect(
+                Collectors.toList());
+        logger.debug("[HOUSE - SERVICE] Service for getting users with visibility for house {} end", id);
+        return users;
     }
 }
