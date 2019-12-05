@@ -29,8 +29,8 @@ public class GPSPosition implements Serializable {
     private Long id;
 
     @Column(nullable = false)
-    private long latitude;
+    private double latitude;
 
     @Column(nullable = false)
-    private long longitude;
+    private double longitude;
 }
