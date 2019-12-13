@@ -1,6 +1,7 @@
 package com.torresj.apisensorserver.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import com.torresj.apisensorserver.exceptions.ActionException;
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
@@ -75,6 +76,33 @@ public class SensorController {
                     "[SENSOR - GET ALL] Request for getting sensors with page {}, elements {}, sensorTypeId {} finished by user \"{}\"",
                     nPage, elements, sensorTypeId, principal.getName());
             return new ResponseEntity<>(page, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            logger.error("[SENSOR - GET ALL] User does not have permission for this endpoint");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    e.getReason(), e);
+        } catch (Exception e) {
+            logger.error("[SENSOR - GET ALL] Error getting sensors from DB", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
+
+    @GetMapping(value = "/all")
+    @ApiOperation(value = "Retrieve sensors without pagination", response = Sensor.class, responseContainer = "List")
+    public ResponseEntity<List<Sensor>> getSensors(Principal principal
+    ) {
+        try {
+            logger.info(
+                    "[SENSOR - GET ALL] Getting sensors by user \"{}\"", principal.getName());
+            if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "User does not have permission for this endpoint");
+            }
+
+            List<Sensor> sensors = sensorService.getSensors();
+
+            logger.info(
+                    "[SENSOR - GET ALL] Request for getting sensors finished by user \"{}\"", principal.getName());
+            return new ResponseEntity<>(sensors, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             logger.error("[SENSOR - GET ALL] User does not have permission for this endpoint");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,

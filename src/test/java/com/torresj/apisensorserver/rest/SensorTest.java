@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.torresj.apisensorserver.jackson.RestPage;
@@ -59,6 +60,54 @@ public class SensorTest extends BasicRestTest {
 
         assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
         assertThat(page.getContent().size(), equalTo(5));
+
+        client.close();
+    }
+
+    @Test
+    public void getAllSensorsWithoutPaginationAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + SENSORS + "/all");
+
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
+
+        CloseableHttpResponse response = client.execute(httpGet);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        List<Sensor> sensors = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<Sensor>>() {
+                });
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(sensors.size(), equalTo(5));
+
+        client.close();
+    }
+
+    @Test
+    public void getAllSensorsWithoutPaginationAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getAllSensorsAsUser();
+        }
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + SENSORS + "/all");
+
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationUser);
+
+        CloseableHttpResponse response = client.execute(httpGet);
+
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
 
         client.close();
     }

@@ -92,6 +92,22 @@ public class SensorServiceTest {
     }
 
     @Test
+    public void getSensorsAll() {
+        //Given
+        List<Sensor> sensors = new ArrayList<>();
+        sensors.add(TestUtils.getExampleSensor(1, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(2, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(3, 1, 1));
+
+        //When
+        when(sensorRepository.findAll()).thenReturn(sensors);
+        List<Sensor> sensorsActual = sensorService.getSensors();
+
+        //then
+        assertEquals(sensors, sensorsActual);
+    }
+
+    @Test
     public void getSensorsEmptyList() {
         //When
         when(sensorRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(new ArrayList<>()));

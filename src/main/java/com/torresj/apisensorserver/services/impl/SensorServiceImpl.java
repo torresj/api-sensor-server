@@ -93,6 +93,15 @@ public class SensorServiceImpl implements SensorService {
     }
 
     @Override
+    public List<Sensor> getSensors() {
+        logger.debug("[SENSOR - SERVICE] Service for getting sensors start");
+        List<Sensor> sensors = sensorRepository.findAll();
+        logger.debug("[SENSOR - SERVICE] Service for getting sensors end. Sensors: {}",
+                sensors);
+        return sensors;
+    }
+
+    @Override
     public Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId, String name)
             throws EntityNotFoundException {
         logger.debug(

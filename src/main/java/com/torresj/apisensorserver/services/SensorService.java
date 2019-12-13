@@ -1,5 +1,7 @@
 package com.torresj.apisensorserver.services;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.torresj.apisensorserver.exceptions.ActionException;
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
@@ -15,6 +17,8 @@ public interface SensorService {
 
     Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId, String name)
             throws EntityNotFoundException;
+
+    List<Sensor> getSensors();
 
     Sensor getSensor(long id) throws EntityNotFoundException;
 

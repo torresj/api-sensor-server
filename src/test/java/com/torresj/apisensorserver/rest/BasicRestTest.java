@@ -138,10 +138,12 @@ public class BasicRestTest {
             type2 = sensorTypeRepository.save(type2);
 
             //Create House
-            House house1 = new House(null, "House1", LocalDateTime.now(), null, null, null);
-            House house2 = new House(null, "House2", LocalDateTime.now(), null, null, null);
-            House house3 = new House(null, "House3", LocalDateTime.now(), null, null,
-                    new GPSPosition(null, 1, 2));
+            GPSPosition position = new GPSPosition();
+            position.setLatitude(36.7647499);
+            position.setLongitude(-4.5642737);
+            House house1 = new House(null, "House1", LocalDateTime.now(), null, null, position);
+            House house2 = new House(null, "House2", LocalDateTime.now(), null, null, position);
+            House house3 = new House(null, "House3", LocalDateTime.now(), null, null, position);
 
             house1 = houseRepository.save(house1);
             house2 = houseRepository.save(house2);
