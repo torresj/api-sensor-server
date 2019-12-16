@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,13 @@ import org.springframework.data.domain.Sort;
 @RunWith(MockitoJUnitRunner.class)
 public class HouseServiceTest {
 
+    private static final int nPage = 0;
+
+    private static final int elements = 20;
+
+    private static final PageRequest pageRequest = PageRequest
+            .of(nPage, elements, Sort.by("createAt").descending());
+
     @Mock
     private SensorRepository sensorRepository;
 
@@ -44,13 +52,6 @@ public class HouseServiceTest {
 
     @Mock
     private UserHouseRelationRepository userHouseRelationRepository;
-
-    private static final int nPage = 0;
-
-    private static final int elements = 20;
-
-    private static final PageRequest pageRequest = PageRequest
-            .of(nPage, elements, Sort.by("createAt").descending());
 
     @InjectMocks
     private HouseService houseService = new HouseServiceImpl(houseRepository, sensorRepository,
@@ -64,7 +65,7 @@ public class HouseServiceTest {
         //When
         when(houseRepository.findAll(pageRequest)).thenReturn(new PageImpl<>(houses));
         List<House> houseActual = new ArrayList<>(
-                houseService.getHouses(null,nPage, elements).getContent());
+                houseService.getHouses(null, nPage, elements).getContent());
 
         //then
         assertEquals(houses, houseActual);
@@ -160,6 +161,30 @@ public class HouseServiceTest {
 
         //Then
         sensors.stream().forEach(sensor -> assertEquals(null, sensor.getHouseId()));
+
+    }
+
+    @Test
+    public void updateSensors() throws EntityNotFoundException {
+        //Given
+        House house = TestUtils.getExampleHouse(1);
+        List<Sensor> sensors = new ArrayList<>();
+        sensors.add(TestUtils.getExampleSensor(1, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(2, 1, 1));
+        sensors.add(TestUtils.getExampleSensor(3, 1, 1));
+        Sensor sensor = TestUtils.getExampleSensor(4, 3, 1);
+
+        //When
+        when(houseRepository.findById(anyLong())).thenReturn(Optional.of(house));
+        when(sensorRepository.findById(2l)).thenReturn(Optional.of(sensors.get(1)));
+        when(sensorRepository.findById(3l)).thenReturn(Optional.of(sensors.get(2)));
+        when(sensorRepository.findById(4l)).thenReturn(Optional.of(sensor));
+        List<Sensor> finalSensors = houseService.updateSensors(1, Arrays.asList(2l,3l,4l));
+
+        //Then
+        assertEquals(3, finalSensors.size());
+        assertEquals(true, finalSensors.contains(sensor));
+        assertEquals(false, finalSensors.contains(sensors.get(0)));
 
     }
 }

@@ -59,13 +59,13 @@ public class HouseController {
         try {
             logger.info(
                     "[HOUSE - GET ALL] Getting houses from DB with filter {}, page {}, elements {} by user \"{}\"",
-                    filter,nPage, elements, principal.getName());
+                    filter, nPage, elements, principal.getName());
             if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "User does not have permission for this endpoint");
             }
 
-            Page<House> page = houseService.getHouses(filter,nPage, elements);
+            Page<House> page = houseService.getHouses(filter, nPage, elements);
 
             logger.info("[HOUSE - GET ALL] Request for houses finished by user \"{}\"",
                     principal.getName());
@@ -220,6 +220,32 @@ public class HouseController {
                     e.getReason(), e);
         } catch (Exception e) {
             logger.error("[HOUSE - UPDATE] Error updating house {}", house, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
+
+    @PutMapping(value = "/{houseId}/sensors")
+    @ApiOperation(value = "Update house", response = Sensor.class, responseContainer = "List")
+    public ResponseEntity<List<Sensor>> updateSensorsHouse(@PathVariable("houseId") long houseId,
+            @RequestBody() List<Long> sensorIds, Principal principal) {
+        try {
+            logger.info("[HOUSE - UPDATE SENSORS] Updating house {} with sensors {} by user \"{}\"", houseId, sensorIds,
+                    principal.getName());
+            if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "User does not have permission for this endpoint");
+            }
+
+            List<Sensor> sensors = houseService.updateSensors(houseId, sensorIds);
+            logger.info("[HOUSE - UPDATE SENSORS] Request for updating house {} with sensors {} finished by user \"{}\"",
+                    houseId, sensorIds, principal.getName());
+            return new ResponseEntity<>(sensors, HttpStatus.CREATED);
+        } catch (ResponseStatusException e) {
+            logger.error("[HOUSE - UPDATE SENSORS] User does not have permission for this endpoint");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    e.getReason(), e);
+        } catch (Exception e) {
+            logger.error("[HOUSE - UPDATE SENSORS] Error updating sensors {} for house {}", sensorIds,houseId, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
         }
     }

@@ -29,4 +29,6 @@ public interface HouseService {
     boolean hasUserVisibilityHouse(String name, long id) throws EntityNotFoundException;
 
     List<User> getHouseUsers(long id) throws EntityNotFoundException;
+
+    List<Sensor> updateSensors(long houseId, List<Long> sensorIds) throws EntityNotFoundException;
 }

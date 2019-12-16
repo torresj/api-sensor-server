@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -382,6 +383,72 @@ public class HouseTest extends BasicRestTest {
         House house = houseRepository.findByName("House2").get();
 
         StringEntity entity = new StringEntity(objectMapper.writeValueAsString(house));
+
+        httpPut.setEntity(entity);
+
+        CloseableHttpResponse response = client.execute(httpPut);
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(403));
+
+        client.close();
+    }
+
+    @Test
+    public void updateHouseSensorsAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
+
+        House house = houseRepository.findByName("House2").get();
+        Sensor sensor2 = sensorRepository.findByMac("MAC2").get();
+        Sensor sensor3 = sensorRepository.findByMac("MAC3").get();
+        List<Long> ids = Arrays.asList(sensor2.getId(),sensor3.getId());
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors");
+
+        httpPut.setHeader("Content-type", "application/json");
+        httpPut.setHeader("Authorization", authorizationAdmin);
+
+        StringEntity entity = new StringEntity(objectMapper.writeValueAsString(ids));
+
+        httpPut.setEntity(entity);
+
+        CloseableHttpResponse response = client.execute(httpPut);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        List<Sensor> sensors = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<Sensor>>() {
+                });
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(201));
+        assertThat(sensors.size(), equalTo(2));
+        assertThat(sensorRepository.findByMac("MAC2").get().getHouseId(),equalTo(house.getId()));
+        assertThat(sensorRepository.findByMac("MAC3").get().getHouseId(),equalTo(house.getId()));
+        assertThat(sensorRepository.findByMac("MAC4").get().getHouseId(),equalTo(null));
+
+        client.close();
+    }
+
+    @Test
+    public void updateHouseSensorsAsUser() throws IOException {
+        if (authorizationUser == null) {
+            getAllHousesAsUser();
+        }
+
+        House house = houseRepository.findByName("House2").get();
+        Sensor sensor2 = sensorRepository.findByMac("MAC2").get();
+        Sensor sensor3 = sensorRepository.findByMac("MAC3").get();
+        List<Long> ids = Arrays.asList(sensor2.getId(),sensor3.getId());
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(
+                BASE_URL + port + PATH + HOUSES + "/" + house.getId() + "/sensors");
+
+        httpPut.setHeader("Content-type", "application/json");
+        httpPut.setHeader("Authorization", authorizationUser);
+
+        StringEntity entity = new StringEntity(objectMapper.writeValueAsString(ids));
 
         httpPut.setEntity(entity);
 

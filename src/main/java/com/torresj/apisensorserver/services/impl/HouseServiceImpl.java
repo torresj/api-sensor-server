@@ -1,5 +1,6 @@
 package com.torresj.apisensorserver.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -154,5 +155,31 @@ public class HouseServiceImpl implements HouseService {
                 Collectors.toList());
         logger.debug("[HOUSE - SERVICE] Service for getting users with visibility for house {} end", id);
         return users;
+    }
+
+    @Override
+    public List<Sensor> updateSensors(long houseId, List<Long> sensorIds) throws EntityNotFoundException {
+        List<Sensor> currentSensors = getSensors(houseId);
+        List<Sensor> finalSensors = new ArrayList<>();
+        for(long id:sensorIds){
+            Optional<Sensor> sensor = sensorRepository.findById(id);
+            if(sensor.isPresent()){
+                finalSensors.add(sensor.get());
+            }else{
+                logger.warn("[HOUSE - SERVICE] Sensor {} not found. Ignored for update sensors in house {}", id, houseId);
+            }
+        }
+
+        currentSensors.stream().filter(sensor -> !finalSensors.contains(sensor)).forEach(sensor -> {
+            sensor.setHouseId(null);
+            sensorRepository.save(sensor);
+        });
+
+        finalSensors.stream().filter(sensor -> !currentSensors.contains(sensor)).forEach(sensor -> {
+            sensor.setHouseId(houseId);
+            sensorRepository.save(sensor);
+        });
+
+        return finalSensors;
     }
 }
