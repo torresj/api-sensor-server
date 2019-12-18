@@ -46,14 +46,12 @@ public class SensorTypeServiceImpl implements SensorTypeService {
     }
 
     @Override
-    public Page<SensorType> getSensorTypes(int nPage, int elements, String name) {
-        logger
-                .debug("[SENSOR TYPES - SERVICE] Service for get type service by name \"{}\" start", name);
+    public Page<SensorType> getSensorTypes(int nPage, int elements, String filter) {
+        logger.debug("[SENSOR TYPES - SERVICE] Service for getting types with filter start");
         PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-        Page<SensorType> page = sensorTypeRepository.findByName(name, pageRequest);
+        Page<SensorType> page = sensorTypeRepository.findByNameContaining(filter,pageRequest);
         logger
-                .debug("[SENSOR TYPES - SERVICE] Service for get type service by name \"{}\" end. Type: {}",
-                        name,
+                .debug("[SENSOR TYPES - SERVICE] Service for getting types with filter end. Types: {} ",
                         page.getContent());
         return page;
     }

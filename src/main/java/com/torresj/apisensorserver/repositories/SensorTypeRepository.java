@@ -13,4 +13,6 @@ public interface SensorTypeRepository extends JpaRepository<SensorType, Long> {
     Optional<SensorType> findByName(String name);
 
     Page<SensorType> findByName(String name, Pageable pageable);
+
+    Page<SensorType> findByNameContaining(String name, Pageable pageable);
 }

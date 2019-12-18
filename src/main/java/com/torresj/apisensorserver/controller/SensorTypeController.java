@@ -51,17 +51,17 @@ public class SensorTypeController {
     @ApiOperation(value = "Retrieve sensor types", notes = "Pageable data are required and de maximum records per page are 100", response = SensorType.class, responseContainer = "List")
     public ResponseEntity<Page<SensorType>> getSensorTypes(@RequestParam(value = "page") int nPage,
             @RequestParam(value = "elements") int elements,
-            @RequestParam(value = "name", required = false) String name, Principal principal) {
+            @RequestParam(value = "filter", required = false) String filter, Principal principal) {
         try {
             logger.info(
-                    "[SENSOR TYPES - GET ALL] Getting sensor types with page {} , elements {}, name {} by user \"{}\"",
-                    nPage, elements, name, principal.getName());
-            Page<SensorType> page = name == null ? service.getSensorTypes(nPage, elements)
-                    : service.getSensorTypes(nPage, elements, name);
+                    "[SENSOR TYPES - GET ALL] Getting sensor types with page {} , elements {}, filter {} by user \"{}\"",
+                    nPage, elements, filter, principal.getName());
+            Page<SensorType> page = filter == null ? service.getSensorTypes(nPage, elements)
+                    : service.getSensorTypes(nPage, elements, filter);
 
             logger.info(
-                    "[SENSOR TYPES - GET ALL] Request for getting sensor types with page {} , elements {}, name {} finished by user \"{}\"",
-                    nPage, elements, name, principal.getName());
+                    "[SENSOR TYPES - GET ALL] Request for getting sensor types with page {} , elements {}, filter {} finished by user \"{}\"",
+                    nPage, elements, filter, principal.getName());
             return new ResponseEntity<>(page, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("[SENSOR TYPES - GET ALL] Error getting sensor types from DB", e);
