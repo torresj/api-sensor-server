@@ -88,7 +88,8 @@ public class SensorController {
 
     @GetMapping(value = "/all")
     @ApiOperation(value = "Retrieve sensors without pagination", response = Sensor.class, responseContainer = "List")
-    public ResponseEntity<List<Sensor>> getSensors(Principal principal
+    public ResponseEntity<List<Sensor>> getSensors(@RequestParam(value = "sensorTypeId", required = false) Long sensorTypeId,
+            Principal principal
     ) {
         try {
             logger.info(
@@ -98,7 +99,8 @@ public class SensorController {
                         "User does not have permission for this endpoint");
             }
 
-            List<Sensor> sensors = sensorService.getSensors();
+            List<Sensor> sensors =
+                    sensorTypeId == null ? sensorService.getSensors() : sensorService.getSensors(sensorTypeId);
 
             logger.info(
                     "[SENSOR - GET ALL] Request for getting sensors finished by user \"{}\"", principal.getName());

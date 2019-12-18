@@ -40,4 +40,6 @@ public interface SensorService {
 
     void sendAction(long id, String action)
             throws EntityNotFoundException, JsonProcessingException, ActionException;
+
+    List<Sensor> getSensors(long sensorTypeId);
 }

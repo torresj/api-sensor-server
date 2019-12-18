@@ -92,6 +92,35 @@ public class SensorTest extends BasicRestTest {
     }
 
     @Test
+    public void getAllSensorsWithoutPaginationAndSensorTypeIdAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
+
+        SensorType type = sensorTypeRepository.findByName("type1").get();
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + SENSORS + "/all?sensorTypeId="+type.getId());
+
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
+
+        CloseableHttpResponse response = client.execute(httpGet);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        List<Sensor> sensors = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<Sensor>>() {
+                });
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(sensors.size(), equalTo(2));
+
+        client.close();
+    }
+
+    @Test
     public void getAllSensorsWithoutPaginationAsUser() throws IOException {
         if (authorizationUser == null) {
             getAllSensorsAsUser();

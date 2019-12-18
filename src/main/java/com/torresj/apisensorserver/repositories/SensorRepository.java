@@ -17,6 +17,8 @@ public interface SensorRepository extends JpaRepository<Sensor, Long> {
 
     Page<Sensor> findBySensorTypeId(Long sensorTypeId, Pageable pageable);
 
+    List<Sensor> findBySensorTypeId(Long sensorTypeId);
+
     Page<Sensor> findBySensorTypeIdAndName(Long sensorTypeId, String name, Pageable pageable);
 
     Page<Sensor> findByName(String name, Pageable pageable);
