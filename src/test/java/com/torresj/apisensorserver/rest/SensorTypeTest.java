@@ -318,7 +318,7 @@ public class SensorTypeTest extends BasicRestTest {
 
         CloseableHttpResponse response = client.execute(httpDelete);
 
-        assertThat(response.getStatusLine().getStatusCode(), equalTo(404));
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(409));
 
         client.close();
     }
