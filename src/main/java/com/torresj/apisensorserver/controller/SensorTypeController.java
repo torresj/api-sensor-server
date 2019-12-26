@@ -111,7 +111,7 @@ public class SensorTypeController {
             return new ResponseEntity<>(sensorType, HttpStatus.CREATED);
         } catch (EntityAlreadyExistsException e) {
             logger.error("[SENSOR TYPE - REGISTER] Sensor type already exists", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+            throw new ResponseStatusException(HttpStatus.NOT_MODIFIED, "Internal error", e);
         } catch (ResponseStatusException e) {
             logger.error("[SENSOR TYPE - REGISTER] User does not have permission for this endpoint");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
