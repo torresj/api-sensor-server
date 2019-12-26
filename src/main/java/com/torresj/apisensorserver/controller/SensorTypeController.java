@@ -174,7 +174,7 @@ public class SensorTypeController {
             logger.error(
                     "[SENSOR TYPE - REMOVE] Sensor type has relation with existing sensors. You need to change each sensor with sensor type {} before remove sensor type",
                     id, e);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Sensor type has relation with existing sensors", e);
         } catch (ResponseStatusException e) {
             logger.error("[SENSOR TYPE - UPDATE] User does not have permission for this endpoint");
