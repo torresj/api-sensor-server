@@ -175,7 +175,7 @@ public class SensorTest extends BasicRestTest {
     }
 
     @Test
-    public void getAllSensorsAsAdminByName() throws IOException {
+    public void getAllSensorsAsAdminByFilter() throws IOException {
         if (authorizationAdmin == null) {
             getAdminAuthorization();
         }
@@ -185,7 +185,7 @@ public class SensorTest extends BasicRestTest {
         CloseableHttpClient client = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(
                 BASE_URL + port + PATH + SENSORS + "?page=" + nPage + "&elements=" + elements
-                        + "&name=" + sensor.getName());
+                        + "&filter=" + sensor.getMac());
 
         httpGet.setHeader("Content-type", "application/json");
         httpGet.setHeader("Authorization", authorizationAdmin);

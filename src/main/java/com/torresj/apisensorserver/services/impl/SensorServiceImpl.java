@@ -93,6 +93,47 @@ public class SensorServiceImpl implements SensorService {
     }
 
     @Override
+    public Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId, String filter)
+            throws EntityNotFoundException {
+        logger.debug(
+                "[SENSOR - SERVICE] Service for getting sensors filtered by type {} and filter {} start",
+                sensorTypeId, filter);
+        PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
+        Page<Sensor> page = sensorRepository.findBySensorTypeIdAndNameContainingOrMacContaining(sensorTypeId,filter,filter,pageRequest);
+        logger.debug(
+                "[SENSOR - SERVICE] Service for getting sensors filtered by type {} and filter {} end. Sensors: {}",
+                sensorTypeId, filter, page != null ? page.getContent() : page);
+        return page;
+    }
+
+    @Override
+    public Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId)
+            throws EntityNotFoundException {
+        logger.debug(
+                "[SENSOR - SERVICE] Service for getting sensors filtered by type {}  start",
+                sensorTypeId);
+        PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
+        Page<Sensor> page = sensorRepository.findBySensorTypeId(sensorTypeId,pageRequest);
+        logger.debug(
+                "[SENSOR - SERVICE] Service for getting sensors filtered by type {} end. Sensors: {}",
+                sensorTypeId, page != null ? page.getContent() : page);
+        return page;
+    }
+
+    @Override
+    public Page<Sensor> getSensors(int nPage, int elements, String filter) {
+        logger.debug(
+                "[SENSOR - SERVICE] Service for getting sensors filtered with {} start",
+                filter);
+        PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
+        Page<Sensor> page = sensorRepository.findByNameContainingOrMacContaining(filter,filter,pageRequest);
+        logger.debug(
+                "[SENSOR - SERVICE] Service for getting sensors filtered with {} end. Sensors: {}",
+                filter, page != null ? page.getContent() : page);
+        return page;
+    }
+
+    @Override
     public List<Sensor> getSensors() {
         logger.debug("[SENSOR - SERVICE] Service for getting sensors start");
         List<Sensor> sensors = sensorRepository.findAll();
@@ -108,37 +149,6 @@ public class SensorServiceImpl implements SensorService {
         logger.debug("[SENSOR - SERVICE] Service for getting sensors end. Sensors: {}",
                 sensors);
         return sensors;
-    }
-
-    @Override
-    public Page<Sensor> getSensors(int nPage, int elements, Long sensorTypeId, String name)
-            throws EntityNotFoundException {
-        logger.debug(
-                "[SENSOR - SERVICE] Service for getting sensors filtered by type {} and/or name {} start",
-                sensorTypeId, name);
-        Page<Sensor> page;
-        PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
-        if (sensorTypeId != null && name != null) {
-            logger.debug(
-                    "[SENSOR - SERVICE] filtering by type {} and name {}",
-                    sensorTypeId, name);
-            sensorTypeRepository.findById(sensorTypeId).orElseThrow(EntityNotFoundException::new);
-            page = sensorRepository.findBySensorTypeIdAndName(sensorTypeId, name, pageRequest);
-        } else if (sensorTypeId != null) {
-            logger.debug(
-                    "[SENSOR - SERVICE] filtering by type {}",
-                    sensorTypeId);
-            page = sensorRepository.findBySensorTypeId(sensorTypeId, pageRequest);
-        } else {
-            logger.debug(
-                    "[SENSOR - SERVICE] filtering by name {}", name);
-            page = sensorRepository.findByName(name, pageRequest);
-        }
-
-        logger.debug(
-                "[SENSOR - SERVICE] Service for getting sensors filtered by type {} and/or name {} end. Sensors: {}",
-                sensorTypeId, name, page != null ? page.getContent() : page);
-        return page;
     }
 
     @Override

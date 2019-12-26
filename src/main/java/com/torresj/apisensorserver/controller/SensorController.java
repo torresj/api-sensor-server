@@ -56,25 +56,34 @@ public class SensorController {
             @RequestParam(value = "page") int nPage,
             @RequestParam(value = "elements") int elements,
             @RequestParam(value = "sensorTypeId", required = false) Long sensorTypeId,
-            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "filter", required = false) String filter,
             Principal principal
     ) {
         try {
             logger.info(
-                    "[SENSOR - GET ALL] Getting sensors with page {}, elements {}, sensorTypeId {} by user \"{}\"",
-                    nPage, elements, sensorTypeId, principal.getName());
+                    "[SENSOR - GET ALL] Getting sensors with page {}, elements {}, sensorTypeId {}, filter {} by user \"{}\"",
+                    nPage, elements, sensorTypeId, filter, principal.getName());
             if (!userService.isUserAllowed(principal.getName(), Role.ADMIN, Role.STATION)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "User does not have permission for this endpoint");
             }
 
-            Page<Sensor> page =
-                    sensorTypeId == null && name == null ? sensorService.getSensors(nPage, elements)
-                            : sensorService.getSensors(nPage, elements, sensorTypeId, name);
+            Page<Sensor> page;
+            if (sensorTypeId == null && filter == null) {
+                page = sensorService.getSensors(nPage, elements);
+            } else if (sensorTypeId != null && filter != null) {
+                page = sensorService.getSensors(nPage, elements, sensorTypeId, filter);
+            } else {
+                if (sensorTypeId != null) {
+                    page = sensorService.getSensors(nPage, elements, sensorTypeId);
+                } else {
+                    page = sensorService.getSensors(nPage, elements, filter);
+                }
+            }
 
             logger.info(
-                    "[SENSOR - GET ALL] Request for getting sensors with page {}, elements {}, sensorTypeId {} finished by user \"{}\"",
-                    nPage, elements, sensorTypeId, principal.getName());
+                    "[SENSOR - GET ALL] Request for getting sensors with page {}, elements {}, sensorTypeId {}, filter {} finished by user \"{}\"",
+                    nPage, elements, sensorTypeId, filter, principal.getName());
             return new ResponseEntity<>(page, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             logger.error("[SENSOR - GET ALL] User does not have permission for this endpoint");

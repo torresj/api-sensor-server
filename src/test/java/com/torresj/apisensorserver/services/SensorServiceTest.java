@@ -118,7 +118,7 @@ public class SensorServiceTest {
     }
 
     @Test
-    public void getSensorsFilterByType() throws EntityNotFoundException {
+    public void getSensorsFilterByFilter() throws EntityNotFoundException {
         //Given
         List<Sensor> sensors = new ArrayList<>();
         SensorType type = TestUtils.getExampleSensorType(1);
@@ -127,17 +127,17 @@ public class SensorServiceTest {
         sensors.add(TestUtils.getExampleSensor(3, 1, 1));
 
         //When
-        when(sensorRepository.findByName("Sensor1", pageRequest))
+        when(sensorRepository.findByNameContainingOrMacContaining("Sensor1","Sensor1", pageRequest))
                 .thenReturn(new PageImpl<>(sensors));
         List<Sensor> sensorsActual = new ArrayList<>(
-                sensorService.getSensors(nPage, elements, null, "Sensor1").getContent());
+                sensorService.getSensors(nPage, elements, "Sensor1").getContent());
 
         //then
         assertEquals(sensors, sensorsActual);
     }
 
     @Test
-    public void getSensorsFilterByName() throws EntityNotFoundException {
+    public void getSensorsFilterByType() throws EntityNotFoundException {
         //Given
         List<Sensor> sensors = new ArrayList<>();
         SensorType type = TestUtils.getExampleSensorType(1);
@@ -149,7 +149,7 @@ public class SensorServiceTest {
         when(sensorRepository.findBySensorTypeId(1L, pageRequest))
                 .thenReturn(new PageImpl<>(sensors));
         List<Sensor> sensorsActual = new ArrayList<>(
-                sensorService.getSensors(nPage, elements, 1L, null).getContent());
+                sensorService.getSensors(nPage, elements, 1L).getContent());
 
         //then
         assertEquals(sensors, sensorsActual);
