@@ -156,14 +156,12 @@ public class SensorController {
 
     @GetMapping(value = "/{id}/variables")
     @ApiOperation(value = "Retrieve variables sensor by id", response = Variable.class, responseContainer = "List")
-    public ResponseEntity<Page<Variable>> getVariablesSensorByID(@PathVariable("id") long id,
-            @RequestParam(value = "page") int nPage,
-            @RequestParam(value = "elements") int elements,
+    public ResponseEntity<List<Variable>> getVariablesSensorByID(@PathVariable("id") long id,
             Principal principal) {
         try {
             logger.info(
-                    "[SENSOR VARIABLES - GET] Getting sensor {} variables with page {}, elements {} by user \"{}\"",
-                    id, nPage, elements, principal.getName());
+                    "[SENSOR VARIABLES - GET] Getting sensor {} variables  by user \"{}\"",
+                    id, principal.getName());
             ;
             if (!userService.isUserAllowed(principal.getName(), Role.ADMIN)
                     && !sensorService.hasUserVisibilitySensor(principal.getName(), id)) {
@@ -171,12 +169,12 @@ public class SensorController {
                         "User does not have permission for this endpoint");
             }
 
-            Page<Variable> page = sensorService.getVariables(id, nPage, elements);
+            List<Variable> variables = sensorService.getVariables(id);
 
             logger.info(
-                    "[SENSOR VARIABLES - GET] Request for getting sensor {} variables with page {}, elements {} finished by user \"{}\"",
-                    id, nPage, elements, principal.getName());
-            return new ResponseEntity<>(page, HttpStatus.OK);
+                    "[SENSOR VARIABLES - GET] Request for getting sensor {} variables finished by user \"{}\"",
+                    id, principal.getName());
+            return new ResponseEntity<>(variables, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             logger.error("[SENSOR VARIABLES - GET] User does not have permission for this endpoint");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,

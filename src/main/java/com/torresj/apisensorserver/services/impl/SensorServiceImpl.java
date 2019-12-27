@@ -160,19 +160,18 @@ public class SensorServiceImpl implements SensorService {
     }
 
     @Override
-    public Page<Variable> getVariables(long id, int nPage, int elements)
+    public List<Variable> getVariables(long id)
             throws EntityNotFoundException {
         logger.debug("[SENSOR - SERVICE] Service for getting sensor {} variables start", id);
         sensorRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        PageRequest pageRequest = PageRequest.of(nPage, elements, Sort.by("createAt").descending());
         List<Long> ids = variableSensorRelationRepository.findBySensorId(id).stream()
                 .map(VariableSensorRelation::getVariableId).collect(
                         Collectors.toList());
-        Page<Variable> page = variableRepository.findByIdIn(ids, pageRequest);
+        List<Variable> variables = variableRepository.findByIdIn(ids);
         logger
                 .debug("[SENSOR - SERVICE] Service for getting sensor {} variables end. Variables: {}", id,
-                        page.getContent());
-        return page;
+                        variables);
+        return variables;
     }
 
     @Override

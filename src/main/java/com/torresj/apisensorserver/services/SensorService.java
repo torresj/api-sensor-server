@@ -27,7 +27,7 @@ public interface SensorService {
 
     Sensor getSensor(long id) throws EntityNotFoundException;
 
-    Page<Variable> getVariables(long id, int nPage, int elements) throws EntityNotFoundException;
+    List<Variable> getVariables(long id) throws EntityNotFoundException;
 
     Variable addVariable(long id, long variableId) throws EntityNotFoundException;
 

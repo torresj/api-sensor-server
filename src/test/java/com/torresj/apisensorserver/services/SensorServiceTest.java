@@ -194,8 +194,8 @@ public class SensorServiceTest {
         //When
         when(sensorRepository.findById(anyLong())).thenReturn(Optional.of(sensor));
         when(variableSensorRelationRepository.findBySensorId(anyLong())).thenReturn(relations);
-        when(variableRepository.findByIdIn(ids, pageRequest)).thenReturn(new PageImpl<>(variables));
-        List<Variable> listActual = sensorService.getVariables(1, 0, 20).getContent();
+        when(variableRepository.findByIdIn(ids)).thenReturn(variables);
+        List<Variable> listActual = sensorService.getVariables(1);
 
         //Then
         assertEquals(variables, listActual);

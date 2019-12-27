@@ -313,8 +313,7 @@ public class SensorTest extends BasicRestTest {
 
         CloseableHttpClient client = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(
-                BASE_URL + port + PATH + SENSORS + "/" + sensor.getId() + "/variables?page=" + nPage
-                        + "&elements=" + elements);
+                BASE_URL + port + PATH + SENSORS + "/" + sensor.getId() + "/variables");
 
         httpGet.setHeader("Content-type", "application/json");
         httpGet.setHeader("Authorization", authorizationAdmin);
@@ -323,12 +322,12 @@ public class SensorTest extends BasicRestTest {
 
         String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-        Page<Variable> page = objectMapper
-                .readValue(jsonFromResponse, new TypeReference<RestPage<Variable>>() {
+        List<Variable> variables = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<Variable>>() {
                 });
 
         assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-        assertThat(page.getContent().size(),
+        assertThat(variables.size(),
                 equalTo(variableSensorRelationRepository.findBySensorId(sensor.getId()).size()));
 
         client.close();
@@ -344,8 +343,7 @@ public class SensorTest extends BasicRestTest {
 
         CloseableHttpClient client = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(
-                BASE_URL + port + PATH + SENSORS + "/" + sensor.getId() + "/variables?page=" + nPage
-                        + "&elements=" + elements);
+                BASE_URL + port + PATH + SENSORS + "/" + sensor.getId() + "/variables");
 
         httpGet.setHeader("Content-type", "application/json");
         httpGet.setHeader("Authorization", authorizationUser);
@@ -354,12 +352,12 @@ public class SensorTest extends BasicRestTest {
 
         String jsonFromResponse = EntityUtils.toString(response.getEntity());
 
-        Page<Variable> page = objectMapper
-                .readValue(jsonFromResponse, new TypeReference<RestPage<Variable>>() {
+        List<Variable> variables = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<Variable>>() {
                 });
 
         assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
-        assertThat(page.getContent().size(),
+        assertThat(variables.size(),
                 equalTo(variableSensorRelationRepository.findBySensorId(sensor.getId()).size()));
 
         client.close();
