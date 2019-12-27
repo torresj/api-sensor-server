@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.torresj.apisensorserver.jackson.RestPage;
@@ -57,6 +58,33 @@ public class SensorTypeTest extends BasicRestTest {
 
         assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
         assertThat(page.getContent().size(), equalTo(2));
+
+        client.close();
+    }
+
+    @Test
+    public void getAllSensorTypesWithoutPaginationAsAdmin() throws IOException {
+        if (authorizationAdmin == null) {
+            getAdminAuthorization();
+        }
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(
+                BASE_URL + port + PATH + TYPE + "/all");
+
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorizationAdmin);
+
+        CloseableHttpResponse response = client.execute(httpGet);
+
+        String jsonFromResponse = EntityUtils.toString(response.getEntity());
+
+        List<SensorType> types = objectMapper
+                .readValue(jsonFromResponse, new TypeReference<List<SensorType>>() {
+                });
+
+        assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
+        assertThat(types.size(), equalTo(3));
 
         client.close();
     }

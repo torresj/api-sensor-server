@@ -1,5 +1,7 @@
 package com.torresj.apisensorserver.services;
 
+import java.util.List;
+
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
@@ -20,4 +22,6 @@ public interface SensorTypeService {
     SensorType remove(long id) throws EntityNotFoundException, EntityHasRelationsException;
 
     Page<SensorType> getSensorTypes(int nPage, int elements, String filter);
+
+    List<SensorType> getSensorTypes();
 }

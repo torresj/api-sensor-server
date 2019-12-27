@@ -1,10 +1,12 @@
 package com.torresj.apisensorserver.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
 import com.torresj.apisensorserver.exceptions.EntityHasRelationsException;
 import com.torresj.apisensorserver.exceptions.EntityNotFoundException;
+import com.torresj.apisensorserver.models.entities.Sensor;
 import com.torresj.apisensorserver.models.entities.SensorType;
 import com.torresj.apisensorserver.models.entities.User.Role;
 import com.torresj.apisensorserver.services.SensorTypeService;
@@ -63,6 +65,26 @@ public class SensorTypeController {
                     "[SENSOR TYPES - GET ALL] Request for getting sensor types with page {} , elements {}, filter {} finished by user \"{}\"",
                     nPage, elements, filter, principal.getName());
             return new ResponseEntity<>(page, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("[SENSOR TYPES - GET ALL] Error getting sensor types from DB", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);
+        }
+    }
+
+    @GetMapping(value = "/all")
+    @ApiOperation(value = "Retrieve sensor types", response = SensorType.class, responseContainer = "List")
+    public ResponseEntity<List<SensorType>> getSensorTypes(Principal principal) {
+        try {
+            logger.info(
+                    "[SENSOR TYPES - GET ALL] Getting sensor types by user \"{}\"",
+                    principal.getName());
+
+            List<SensorType> types = service.getSensorTypes();
+
+            logger.info(
+                    "[SENSOR TYPES - GET ALL] Request for getting sensor types  finished by user \"{}\"",
+                    principal.getName());
+            return new ResponseEntity<>(types, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("[SENSOR TYPES - GET ALL] Error getting sensor types from DB", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e);

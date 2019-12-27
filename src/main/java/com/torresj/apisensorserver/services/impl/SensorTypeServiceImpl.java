@@ -1,5 +1,6 @@
 package com.torresj.apisensorserver.services.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.torresj.apisensorserver.exceptions.EntityAlreadyExistsException;
@@ -43,6 +44,16 @@ public class SensorTypeServiceImpl implements SensorTypeService {
                 .debug("[SENSOR TYPES - SERVICE] Service for getting types end. Types: {} ",
                         page.getContent());
         return page;
+    }
+
+    @Override
+    public List<SensorType> getSensorTypes() {
+        logger.debug("[SENSOR TYPES - SERVICE] Service for getting types start");
+        List<SensorType> types = sensorTypeRepository.findAll();
+        logger
+                .debug("[SENSOR TYPES - SERVICE] Service for getting types end. Types: {} ",
+                        types);
+        return types;
     }
 
     @Override
